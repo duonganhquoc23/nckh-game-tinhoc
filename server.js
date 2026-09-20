@@ -8,8 +8,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// API 1: Tạo bảng CSDL (Chỉ chạy 1 lần lúc setup)
-app.get('/api/setup', async (req, res) => {
+// TỰ ĐỘNG KHỞI TẠO CSDL KHI SERVER CHẠY (Khắc phục lỗi mất dữ liệu)
+const initDB = async () => {
     try {
         const createTableQuery = `
             CREATE TABLE IF NOT EXISTS users (
@@ -23,13 +23,25 @@ app.get('/api/setup', async (req, res) => {
             )
         `;
         await db.query(createTableQuery);
+        console.log("✅ CSDL: Bảng 'users' đã kiểm tra và sẵn sàng!");
+    } catch (error) {
+        console.error("❌ Lỗi khởi tạo CSDL:", error.message);
+    }
+};
+// Gọi hàm chạy ngay lập tức
+initDB();
+
+// API 1: Tạo bảng CSDL thủ công (Giữ lại để dự phòng)
+app.get('/api/setup', async (req, res) => {
+    try {
+        await initDB();
         res.status(200).send("🎉 TUYỆT VỜI! Đã tạo bảng users thành công.");
     } catch (error) {
         res.status(500).send("Lỗi tạo bảng: " + error.message);
     }
 });
 
-// API 2: Nhận dữ liệu từ Người chơi lưu vào MySQL (ĐÃ FIX LỖI ID TỰ TĂNG)
+// API 2: Nhận dữ liệu từ Người chơi lưu vào MySQL
 app.post('/api/sync', async (req, res) => {
     const { name, class_name, avatar, level, xp } = req.body;
     try {
