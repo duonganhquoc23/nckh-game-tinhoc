@@ -28,7 +28,7 @@
         .lily-pad:hover { transform: scale(1.05); }
         .lily-pad.disabled { pointer-events: none; opacity: 0.6; }
         
-        .frog { font-size: 4.5rem; position: absolute; z-index: 10; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 10px 5px rgba(0,0,0,0.4)); transform-origin: bottom center;}
+        .frog { font-size: 4.5rem; position: absolute; z-index: 10; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 10px 5px rgba(0,0,0,0.4)); }
         
         .splash-anim { animation: splash 0.6s forwards; }
         @keyframes splash {
@@ -118,17 +118,14 @@ const qs = [
         function buildRiver() {
             river.innerHTML = ''; river.style.transform = `translateY(0px)`;
             
-            // Tạo sẵn 10 hàng lá sen nhưng không gán chữ để chờ loadQ xử lý
             for(let i = playQueue.length - 1; i >= 0; i--) {
                 let row = document.createElement('div');
                 row.className = 'row-pads';
                 row.id = `row-${i}`;
-                
-                // Mỗi hàng tạo sẵn 2 lá sen rỗng
                 for(let j = 0; j < 2; j++) {
                     let pad = document.createElement('div');
                     pad.className = 'lily-pad disabled';
-                    pad.innerText = ''; // Lá sen trống
+                    pad.innerText = ''; 
                     row.appendChild(pad);
                 }
                 river.appendChild(row);
@@ -136,12 +133,14 @@ const qs = [
 
             let bank = document.createElement('div');
             bank.style.height = '100px'; bank.style.position = 'relative';
+            river.appendChild(bank); 
             
             frog = document.createElement('div');
             frog.className = 'frog'; frog.innerText = '🐸';
-            frog.style.bottom = '10px'; frog.style.left = 'calc(50% - 35px)'; 
-            bank.appendChild(frog);
-            river.appendChild(bank); 
+            river.appendChild(frog);
+            
+            frog.style.left = `calc(50% - 35px)`;
+            frog.style.top = `${playQueue.length * 160 + 20}px`; 
         }
         
         function loadQ(){
@@ -152,10 +151,7 @@ const qs = [
             document.getElementById('ui-prog').innerText=`${currRow+1}/${playQueue.length}`; 
             document.getElementById('ui-score').innerText=score; 
             
-            // Xóa tương tác của tất cả lá sen cũ
             document.querySelectorAll('.lily-pad').forEach(p => p.classList.add('disabled'));
-            
-            // CHỈ gán chữ và mở khóa tương tác cho hàng lá sen hiện tại
             let currentRowEl = document.getElementById(`row-${currRow}`);
             let currentPads = currentRowEl.querySelectorAll('.lily-pad');
             
@@ -173,12 +169,15 @@ const qs = [
             isAnimating = true;
             
             let padRect = pad.getBoundingClientRect();
-            let frogRect = frog.getBoundingClientRect();
-            let dx = padRect.left + (padRect.width / 2) - (frogRect.left + frogRect.width / 2);
-            let dy = padRect.top + (padRect.height / 2) - (frogRect.top + frogRect.height / 2);
+            let riverRect = river.getBoundingClientRect();
+            let newLeft = padRect.left - riverRect.left + (padRect.width / 2) - 35;
+            let newTop = padRect.top - riverRect.top + (padRect.height / 2) - 40; 
             
-            let currentTransform = frog.style.transform;
-            frog.style.transform = `${currentTransform} translate(${dx}px, ${dy}px) scale(1.1)`;
+            frog.style.left = `${newLeft}px`;
+            frog.style.top = `${newTop}px`;
+            
+            frog.style.transform = 'scale(1.2)';
+            setTimeout(() => { frog.style.transform = 'scale(1)'; }, 200);
 
             setTimeout(() => {
                 if(isC){ 
@@ -194,8 +193,6 @@ const qs = [
                     setTimeout(() => {
                         showModal(userAnsTxt, cTxt, playQueue[currRow].exp, () => { 
                             frog.classList.remove('splash-anim');
-                            frog.style.transform = frog.style.transform.replace(' scale(1.1)', '');
-                            
                             scrollOffset += 160;
                             river.style.transform = `translateY(${scrollOffset}px)`;
                             currRow++; 
