@@ -79,7 +79,7 @@ async function syncToAdmin(userObj) {
     try {
         localStorage.setItem('edtech_user_kid', JSON.stringify(userObj));
         // Đã cập nhật link API mới từ Render
-        await fetch('https://edtech-backend-api-1.onrender.com/api/sync', {
+        await fetch('https://nckh-game-tinhoc.onrender.com/api/sync', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userObj)
