@@ -55,7 +55,6 @@ header {
     display: flex; 
     align-items: center; 
     gap: 10px; 
-    /* Đã thay đổi font để không bị lỗi dấu tiếng Việt */
     font-family: 'Baloo 2', cursive;
 }
 
@@ -125,7 +124,6 @@ section.active {
     display: block; 
 }
 
-/* Các nút bấm bo tròn to, thân thiện */
 .btn { 
     padding: 12px 25px; 
     border-radius: 25px; 
@@ -175,7 +173,6 @@ section.active {
     transition: 0.3s; 
 }
 
-/* Lưới 3 cột và 4 cột */
 .grid-3 { 
     display: grid; 
     grid-template-columns: repeat(3, 1fr); 
@@ -204,9 +201,6 @@ section.active {
     to { opacity: 1; transform: translateY(0); } 
 }
 
-/* ==========================================================================
-   MASCOT BANNER (DÀNH CHO TRẺ EM)
-   ========================================================================== */
 .mascot-banner { 
     display: flex; 
     align-items: center; 
@@ -242,9 +236,6 @@ section.active {
     50% { transform: translateY(-15px); } 
 }
 
-/* ==========================================================================
-   GAME CARDS (CÓ HÌNH ẢNH NỀN)
-   ========================================================================== */
 .game-card-v2 { 
     background: var(--bg-card); 
     border-radius: var(--radius-md); 
@@ -263,7 +254,6 @@ section.active {
     border-color: var(--primary); 
 }
 
-/* Nửa trên: Hình ảnh */
 .game-img-box { 
     height: 160px; 
     width: 100%; 
@@ -286,18 +276,16 @@ section.active {
     transform: scale(1.15); 
 }
 
-/* Backgrounds bằng hình ảnh riêng cho từng game */
 .img-shooter { background: url('banmuctieu.png') center/cover no-repeat; }
 .img-matching { background: url('ghepkienthuc.png') center/cover no-repeat; }
 .img-debug { background: url('thosanloi.png') center/cover no-repeat; }
 .img-miner { background: url('thodao.png') center/cover no-repeat; }
 .img-obstacle { background: url('vuotkhonggian.png') center/cover no-repeat; }
 .img-arena { background: url('AI.png') center/cover no-repeat; }
-/* Ảnh nền cho 3 game mới */
 .img-sort { background: url('thuvien.png') center/cover no-repeat; }
 .img-submarine { background: url('taungam.png') center/cover no-repeat; }
 .img-frog { background: url('echquasong.jpg') center/cover no-repeat; }
-/* Lớp phủ làm tối ảnh nền để nổi bật Icon */
+
 .game-img-box::before {
     content: '';
     position: absolute;
@@ -311,7 +299,6 @@ section.active {
     background: rgba(0, 0, 0, 0.1); 
 }
 
-/* Nửa dưới: Thông tin */
 .game-info-box { 
     flex: 1; 
     padding: 1.25rem; 
@@ -343,9 +330,6 @@ section.active {
     margin-top: auto; 
 }
 
-/* ==========================================================================
-   HỒ SƠ THÀNH TÍCH (GÓC CỦA BÉ)
-   ========================================================================== */
 .profile-card { 
     display: flex; 
     gap: 25px; 
@@ -383,7 +367,6 @@ section.active {
     border-radius: 10px; 
 }
 
-/* RESPONSIVE */
 @media (max-width: 1024px) {
     .grid-3 { grid-template-columns: repeat(2, 1fr); }
 }
@@ -394,12 +377,26 @@ section.active {
 
 @media (max-width: 600px) { 
     .grid-3 { grid-template-columns: 1fr; } 
-    nav ul { display: none; } 
+    
+    nav ul { 
+        display: flex;
+        flex-wrap: wrap; 
+        justify-content: center; 
+        margin-top: 10px;
+    } 
+    
+    header {
+        height: auto;
+        padding: 15px 5%;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    main { margin-top: 130px; }
+
     .mascot-banner { flex-direction: column; text-align: center; } 
 }
-/* ==========================================
-   HỆ THỐNG HUY HIỆU (LOCK / UNLOCK)
-   ========================================== */
+
 .locked-badge {
     filter: grayscale(100%);
     opacity: 0.75;
