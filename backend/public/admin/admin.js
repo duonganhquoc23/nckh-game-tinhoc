@@ -7,13 +7,19 @@ async function loadData() {
 
     try {
         const response = await fetch(`${API_BASE_URL}/api/leaderboard`);
-        allStudents = await response.json();
+        const data = await response.json();
         
-        updateClassFilterDropdown(); 
-        applyFilter(); 
+        // Kiểm tra an toàn: Đảm bảo dữ liệu là mảng trước khi gán
+        if (Array.isArray(data)) {
+            allStudents = data;
+            updateClassFilterDropdown(); 
+            applyFilter(); 
+        } else {
+            throw new Error(data.error || "Dữ liệu trả về không hợp lệ (Không phải danh sách)");
+        }
     } catch (error) {
         console.error("Lỗi tải dữ liệu:", error);
-        tb.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">❌ Không thể kết nối. Hãy đảm bảo Server Node.js đang chạy.</td></tr>`;
+        tb.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">❌ Không thể kết nối hoặc lỗi CSDL: ${error.message}</td></tr>`;
     }
 }
 
