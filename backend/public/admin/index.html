@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thế Giới Game Tin Học</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .avatar-section {
+            background: #f8fafc; border-radius: 20px; padding: 20px;
+            margin: 20px auto 30px; max-width: 600px; border: 3px dashed #93c5fd; text-align: center;
+        }
+        .avatar-section h2 { font-family: 'Baloo 2', cursive; color: #0284c7; font-size: 1.5rem; margin-bottom: 15px; }
+        .avatar-container { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .avatar-btn { 
+            font-size: 2.2rem; background: #ffffff; border: 3px solid #cbd5e1; border-radius: 15px; cursor: pointer; 
+            transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; width: 55px; height: 55px; 
+            display: flex; justify-content: center; align-items: center; position: relative;
+        }
+        .avatar-btn:hover { transform: translateY(-4px); border-color: #94a3b8; box-shadow: 0 8px 0 #94a3b8; }
+        .avatar-btn:active { transform: translateY(0); box-shadow: 0 0 0 transparent; }
+        .avatar-btn.selected { border-color: #22c55e; background: #d1fae5; box-shadow: 0 4px 0 #16a34a; transform: translateY(-3px); }
+        .avatar-btn.selected::after {
+            content: '⭐'; position: absolute; top: -8px; right: -8px; font-size: 1.2rem; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+        }
+        
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); z-index: 9999; 
+            display: none; /* FIX: Chuyển thành none để không bị nháy hình */
+            justify-content: center; align-items: center;
+        }
+        .login-box {
+            background: white; padding: 30px; border-radius: 20px; text-align: center; 
+            max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 5px solid #3b82f6;
+        }
+        .login-input {
+            width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 10px; 
+            border: 2px solid #cbd5e1; font-size: 1.1rem; font-family: 'Nunito', sans-serif; box-sizing: border-box;
+        }
+        select.login-input { cursor: pointer; appearance: auto; color: #334155; }
+        
+        .site-footer {
+            text-align: center; padding: 25px 20px; margin-top: 40px; color: #64748b; 
+            font-size: 1rem; font-family: 'Nunito', sans-serif; border-top: 1px solid #e2e8f0; background: transparent;
+        }
+        .site-footer strong { color: #0284c7; font-weight: 800; }
+        .site-footer .sub-text { display: block; font-size: 0.9rem; color: #94a3b8; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="font-family: 'Baloo 2', cursive; color: #1e3a8a; font-size: 2rem; margin-bottom: 20px;">🚀 SẴN SÀNG KHÁM PHÁ!</h2>
+            <input type="text" id="login-name" class="login-input" placeholder="Tên của con là gì? (VD: Quốc)">
+            <select id="login-class" class="login-input">
+                <option value="" disabled selected>-- Con học lớp mấy? --</option>
+                <option value="4A1">Lớp 4A1</option><option value="4A2">Lớp 4A2</option>
+                <option value="4A3">Lớp 4A3</option><option value="4A4">Lớp 4A4</option><option value="4A5">Lớp 4A5</option>
+            </select>
+            <p style="font-weight: bold; margin-bottom: 10px; color: #475569;">Chọn nhân vật của con:</p>
+            <div class="avatar-container" style="margin-bottom: 25px;">
+                <button class="avatar-btn selected" onclick="selectLoginAvatar('👦', this)">👦</button>
+                <button class="avatar-btn" onclick="selectLoginAvatar('👧', this)">👧</button>
+                <button class="avatar-btn" onclick="selectLoginAvatar('🐶', this)">🐶</button>
+                <button class="avatar-btn" onclick="selectLoginAvatar('🐱', this)">🐱</button>
+            </div>
+            <button onclick="startGame()" style="background: #22c55e; color: white; padding: 15px 30px; border: none; border-radius: 15px; font-size: 1.3rem; font-weight: bold; font-family: 'Baloo 2', cursive; cursor: pointer; width: 100%; box-shadow: 0 5px 0 #16a34a; transition: 0.2s;">BẮT ĐẦU CHƠI! 🎮</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo"><i class="fa-solid fa-rocket"></i> THẾ GIỚI TIN HỌC</div>
+        <nav>
+            <ul id="nav-menu">
+                <li><a onclick="navigate('home')" class="active" data-target="home">🗺️ Bản đồ Khám phá</a></li>
+                <li><a onclick="navigate('profile')" data-target="profile">🏆 Góc Thành Tích</a></li>
+            </ul>
+        </nav>
+        <div class="user-menu">
+            <div class="avatar" id="header-avatar">👦</div>
+            <span style="font-weight: 700;" id="header-name">Nhà thám hiểm</span>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="active">
+            <div class="mascot-banner">
+                <div class="mascot-icon"><i class="fa-solid fa-robot"></i></div>
+                <div class="mascot-dialogue">
+                    <h2>Xin chào người bạn mới! 👋</h2>
+                    <p>Tớ là TinBot! Hãy chọn cho mình một người bạn đồng hành bên dưới và bắt đầu chuyến thám hiểm thu thập kho báu tri thức nhé!</p>
+                </div>
+            </div>
+
+            <div class="avatar-section">
+                <h2>🎭 BÉ CHỌN NHÂN VẬT NÀO? 🎭</h2>
+                <div class="avatar-container" id="avatar-list">
+                    <button class="avatar-btn" onclick="selectAvatar('👦', this)">👦</button>
+                    <button class="avatar-btn" onclick="selectAvatar('👧', this)">👧</button>
+                    <button class="avatar-btn" onclick="selectAvatar('🐶', this)">🐶</button>
+                    <button class="avatar-btn" onclick="selectAvatar('🐱', this)">🐱</button>
+                    <button class="avatar-btn" onclick="selectAvatar('🐰', this)">🐰</button>
+                    <button class="avatar-btn" onclick="selectAvatar('🐻', this)">🐻</button>
+                    <button class="avatar-btn" onclick="selectAvatar('🦊', this)">🦊</button>
+                </div>
+            </div>
+
+            <div id="khu-vuc-tro-choi" style="margin-top: 2.5rem; margin-bottom: 3rem;">
+                <h2 class="text-center mb-3" style="font-family: 'Baloo 2', cursive; font-size: 2.5rem; color: var(--primary);">🗺️ BẢN ĐỒ VŨ TRỤ TIN HỌC</h2>
+                <div class="grid-3">
+                    <div class="game-card-v2">
+                        <div class="game-img-box img-shooter"><i class="fa-solid fa-crosshairs"></i></div>
+                        <div class="game-info-box">
+                            <h3 class="game-title">Thành Phố Thiết Bị</h3>
+                            <p class="game-desc">Bắn trúng các thiết bị máy tính đang bay lượn để bảo vệ thành phố!</p>
+                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="window.location.href='game_shooter.html'">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
+                        </div>
+                    </div>
+                    <div class="game-card-v2">
+                        <div class="game-img-box img-matching"><i class="fa-solid fa-link"></i></div>
+                        <div class="game-info-box">
+                            <h3 class="game-title">Đảo Tư Duy</h3>
+                            <p class="game-desc">Ghép các mảnh ghép kiến thức để hoàn thiện cỗ máy tri thức diệu kỳ.</p>
+                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="window.location.href='game_matching.html'">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
+                        </div>
+                    </div>
+                    <div class="game-card-v2">
+                        <div class="game-img-box img-debug"><i class="fa-solid fa-bug-slash"></i></div>
+                        <div class="game-info-box">
+                            <h3 class="game-title">Rừng Săn Lỗi</h3>
+                            <p class="game-desc">Trở thành thám tử, tìm ra những thói quen sử dụng máy tính chưa đúng.</p>
+                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="window.location.href='game_debug.html'">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
+                        </div>
+                    </div>
+                    <div class="game-card-v2">
+                        <div class="game-img-box img-miner"><i class="fa-solid fa-hammer"></i></div>
+                        <div class="game-info-box">
+                            <h3 class="game-title">Mỏ Kho Báu</h3>
+                            <p class="game-desc">Điều khiển cần cẩu để đào thật nhiều viên vàng tri thức quý giá.</p>
+                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="window.location.href='game_miner.html'">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
+                        </div>
+                    </div>
+                    <div class="game-card-v2">
+                        <div class="game-img-box img-obstacle"><i class="fa-solid fa-person-running"></i></div>
+                        <div class="game-info-box">
+                            <h3 class="game-title">Đường Đua Vui Nhộn</h3>
+                            <p class="game-desc">Nhảy qua các khối vuông kỳ diệu bằng cách hoàn thành các thử thách.</p>
+                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="window.location.href='game_obstacle.html'">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
+                        </div>
+                    </div>
+                    <div class="game-card-v2">
+                        <div class="game-img-box img-arena"><i class="fa-solid fa-khanda"></i></div>
+                        <div class="game-info-box">
+                            <h3 class="game-title">Đấu Trường So Tài</h3>
+                            <p class="game-desc">Tham gia so tài kiến thức Tin học cùng với chú Robot siêu phàm.</p>
+                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="window.location.href='game_arena_2.html'">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
+                        </div>
+                    </div>
+                    <div class="game-card-v2">
+                        <div class="game-img-box img-sort"><i class="fa-solid fa-boxes-packing"></i></div>
+                        <div class="game-info-box">
+                            <h3 class="game-title">Thư Viện Ngăn Nắp</h3>
+                            <p class="game-desc">Giúp bác thủ thư phân loại các thao tác đúng, thao tác sai trên máy tính.</p>
+                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="window.location.href='game_sort.html'">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
+                        </div>
+                    </div>
+                    <div class="game-card-v2">
+                        <div class="game-img-box img-submarine"><i class="fa-solid fa-water"></i></div>
+                        <div class="game-info-box">
+                            <h3 class="game-title">Tàu Ngầm Khám Phá</h3>
+                            <p class="game-desc">Điều khiển tàu ngầm đụng trúng chú cá mang từ khoá để tìm kiếm Internet.</p>
+                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="window.location.href='game_submarine.html'">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
+                        </div>
+                    </div>
+                    <div class="game-card-v2">
+                        <div class="game-img-box img-frog"><i class="fa-solid fa-frog"></i></div>
+                        <div class="game-info-box">
+                            <h3 class="game-title">Ếch Con Qua Sông</h3>
+                            <p class="game-desc">Chọn đúng thao tác Tệp và Thư mục để giúp ếch qua sông an toàn.</p>
+                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="window.location.href='game_frog_2.html'">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="profile">
+            <h2 class="mb-3 text-primary text-center" style="font-family: 'Baloo 2', cursive; font-size: 2.5rem;">🌟 GÓC THÀNH TÍCH 🌟</h2>
+            
+            <div class="card mb-3 profile-card">
+                <div class="avatar" id="prof-avatar" style="width: 100px; height: 100px; font-size: 4.5rem; background: var(--secondary);">👦</div>
+                <div style="flex: 1; text-align: left;">
+                    <h2 id="prof-name" class="text-primary" style="font-family: 'Baloo 2', cursive; font-size: 2rem;">Phi Hành Gia Nhí</h2>
+                    <p class="text-light" style="font-size: 1.1rem; font-weight: 700;">Học sinh lớp: <span id="prof-class" style="color: var(--secondary);">Lớp 4</span></p>
+                    <div class="progress-container mt-2" style="height: 15px; border-radius: 15px; background: #e2e8f0;">
+                        <div class="progress-bar" id="prof-xp-bar" style="width: 50%; background: var(--success); border-radius: 15px;"></div>
+                    </div>
+                    <p class="mt-1 font-weight-bold" style="font-size: 1.1rem; color: var(--text-main);">
+                        Cấp độ: <span id="prof-level" style="color: var(--warning); font-size: 1.5rem; font-family: 'Baloo 2', cursive;">1</span> - Thu thập được: <span id="prof-xp" class="text-success" style="font-weight: 800;">0</span> XP
+                    </p>
+                </div>
+            </div>
+            
+            <h3 class="mb-2 mt-3 text-primary" style="font-family: 'Baloo 2', cursive; font-size: 1.8rem;">🏅 BỘ SƯU TẬP HUY HIỆU</h3>
+            <div class="grid-4" id="achievements-container"></div>
+
+            <div class="text-center">
+                <button class="btn btn-danger mt-3" style="font-size: 1.1rem; padding: 15px 30px; border-radius: 25px;" onclick="resetData()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        &copy; 2026 Bản quyền thuộc về <strong>Dương Anh Quốc</strong>
+        <span class="sub-text">Khoa Tin học - Trường Đại học Sư phạm, Đại học Huế</span>
+    </footer>
+
+    <script src="script_3.js"></script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đảo Tư Duy | Ghép Kiến Thức</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-main: #e0f2fe; --bg-panel: #ffffff; --primary: #3b82f6; --success: #10b981; --error: #ef4444; --warning: #f59e0b; --text-main: #334155; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Nunito', sans-serif;}
+        body { background-color: var(--bg-main); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .game-container { width: 100%; max-width: 1000px; background: var(--bg-panel); border: 4px solid #bae6fd; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
+        .screen { display: none; padding: 30px; text-align: center;} .screen.active { display: block; animation: fadeIn 0.4s ease; }
+        .title-kid { font-size: 3rem; color: var(--primary); margin-bottom: 5px; font-family: 'Baloo 2', cursive; text-shadow: 2px 2px 0 #bfdbfe;}
+        
+        .btn { display: inline-block; padding: 12px 30px; background: var(--warning); color: #fff; font-size: 1.2rem; font-family: 'Baloo 2', cursive; cursor: pointer; border-radius: 25px; border: none; box-shadow: 0 6px 0 #d97706;}
+        .btn:active { transform: translateY(6px); box-shadow: none; }
+        .btn-outline { background: #f1f5f9; border: 3px solid #cbd5e1; color: #475569; box-shadow: 0 5px 0 #cbd5e1; }
+        
+        .hud-panel { display: flex; justify-content: space-between; background: #f0fdfa; border: 3px dashed var(--success); padding: 12px 25px; border-radius: 20px; margin-bottom: 20px; }
+        
+        /* CỘT GHÉP CẶP THIẾT KẾ MỚI */
+        .match-board { display: flex; gap: 3rem; justify-content: center; align-items: stretch; } 
+        .match-col { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+        
+        .match-item { 
+            background: #ffffff; padding: 15px 20px; border-radius: 15px; 
+            border: 3px solid #cbd5e1; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            font-weight: 700; display: flex; align-items: center; justify-content: center; 
+            min-height: 75px; box-shadow: 0 5px 0 #cbd5e1; font-size: 1.05rem; line-height: 1.3;
+        }
+        
+        /* Style riêng cho Cột Trái (Từ khóa) */
+        #col-terms .match-item { border-color: #93c5fd; box-shadow: 0 5px 0 #93c5fd; background: #eff6ff; color: #1e3a8a;}
+        /* Style riêng cho Cột Phải (Định nghĩa) */
+        #col-defs .match-item { border-color: #fde047; box-shadow: 0 5px 0 #fde047; background: #fefce8; color: #854d0e;}
+        
+        .match-item:hover { transform: translateY(-3px); }
+        
+        /* Hiệu ứng khi đang chọn */
+        #col-terms .match-item.selected { background: #3b82f6; color: white; border-color: #1d4ed8; box-shadow: 0 5px 0 #1d4ed8; transform: translateY(-3px) scale(1.03); }
+        #col-defs .match-item.selected { background: #eab308; color: white; border-color: #a16207; box-shadow: 0 5px 0 #a16207; transform: translateY(-3px) scale(1.03); }
+        
+        /* Hiệu ứng khi ghép đúng */
+        .match-item.matched { background: #10b981 !important; border-color: #047857 !important; color: white !important; box-shadow: none !important; pointer-events: none; animation: popMatch 0.5s; opacity: 0.9;}
+        /* Hiệu ứng khi ghép sai */
+        .match-item.error { background: #fee2e2 !important; border-color: #ef4444 !important; color: #ef4444 !important; animation: shake 0.4s; }
+        
+        .feedback-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); }
+        .feedback-modal.active { display: flex; animation: fadeIn 0.3s ease; }
+        .feedback-box { background: #fff; padding: 30px; border-radius: 25px; text-align: center; max-width: 450px; border: 5px solid #ef4444; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px);} to { opacity: 1; transform: translateY(0);} } 
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } } 
+        @keyframes popMatch { 0% {transform: scale(1);} 50% {transform: scale(1.08);} 100% {transform: scale(1);} }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="app">
+        <div id="screen-home" class="screen active">
+            <h1 class="title-kid">🧩 ĐẢO TƯ DUY</h1>
+            <p style="font-size: 1.3rem; margin-bottom: 30px; font-weight: 700;">Hãy tìm và ghép đúng tên thiết bị/thao tác với công dụng của nó nhé!</p>
+            <div><button class="btn" onclick="initGame()">CHƠI NGAY</button><button class="btn btn-outline" onclick="window.location.href='index.html#home'">VỀ BẢN ĐỒ</button></div>
+        </div>
+        
+        <div id="screen-game" class="screen">
+            <div style="text-align: left; margin-bottom: 10px;"><button class="btn btn-outline" style="padding: 6px 15px; font-size: 1rem; border-width: 2px; margin:0;" onclick="window.location.href='index.html#home'">← QUAY VỀ</button></div>
+            <div class="hud-panel">
+                <div>ĐÃ GHÉP: <span id="ui-progress" style="color:var(--primary); font-size: 1.5rem; font-family:'Baloo 2', cursive;">0/5</span></div>
+                <div>XP: <span id="ui-score" style="color:var(--warning); font-size: 1.5rem; font-family:'Baloo 2', cursive;">0</span></div>
+            </div>
+            <div class="match-board"><div class="match-col" id="col-terms"></div><div class="match-col" id="col-defs"></div></div>
+        </div>
+        
+        <div id="screen-result" class="screen">
+            <h1 class="title-kid" style="color: var(--success);">🎉 CHÚC MỪNG! 🎉</h1>
+            <p style="font-size: 1.5rem; font-weight: 800; margin: 30px 0;">Thu thập được: <span id="res-score" style="color: var(--warning); font-size: 2.5rem; font-family: 'Baloo 2', cursive;">0</span> XP</p>
+            <div><button class="btn" style="background:var(--primary);" onclick="initGame()">CHƠI LẠI</button><button class="btn btn-outline" onclick="saveAndGoHome()">THOÁT</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL GIẢI THÍCH LỖI SAI -->
+    <div class="feedback-modal" id="fb-modal">
+        <div class="feedback-box">
+            <h2 style="font-family: 'Baloo 2', cursive; font-size: 2rem; color: #ef4444; margin-bottom: 10px;">Chưa khớp rồi! 🧩</h2>
+            <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: #334155;">
+                <span id="fb-term" style="color: #ef4444;">...</span> không phải là: <span id="fb-def" style="color: #ef4444; display:block; margin-top:5px;">...</span>
+            </div>
+            <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; color: #10b981;" id="fb-exp">Giải thích</div>
+            <button class="btn btn-primary" onclick="closeFeedback()" style="background: #3b82f6;">THỬ LẠI NHÉ!</button>
+        </div>
+    </div>
+    
+    <script>
+const fullData = [
+    { id: 1, term: 'Từ khoá', def: 'Từ hoặc cụm từ thể hiện nội dung em muốn tìm kiếm.' },
+    { id: 2, term: 'Google.com', def: 'Địa chỉ của một máy tìm kiếm thông tin phổ biến.' },
+    { id: 3, term: 'Thanh địa chỉ', def: 'Nơi dùng để gõ tên trang web (như google.com).' },
+    { id: 4, term: 'Siêu liên kết', def: 'Dòng chữ nhấp vào sẽ mở ra trang thông tin chi tiết.' },
+    { id: 5, term: 'Phím Enter', def: 'Phím dùng để ra lệnh bắt đầu tìm kiếm trên Internet.' },
+    { id: 6, term: 'Lệnh Copy', def: 'Dùng để sao chép tệp/thư mục ra thêm một bản nữa.' },
+    { id: 7, term: 'Lệnh Move to', def: 'Dùng để di chuyển tệp/thư mục sang nơi khác.' },
+    { id: 8, term: 'Lệnh Rename', def: 'Dùng để thay đổi tên của tệp hoặc thư mục.' },
+    { id: 9, term: 'Lệnh Paste', def: 'Dùng để dán tệp/thư mục sau khi đã chọn lệnh Copy.' },
+    { id: 10, term: 'Lệnh Delete', def: 'Dùng để đưa các dữ liệu không còn sử dụng vào Thùng rác.' }
+];        
+        let score = 0, matchesFound = 0, selectedTerm = null, selectedDef = null, isProcessing = false, onFeedbackClose = null;
+        let currentRoundData = [];
+        
+        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        
+        function initGame() {
+            score = 0; matchesFound = 0; selectedTerm = null; selectedDef = null; isProcessing = false;
+            
+            // CHỈ BỐC NGẪU NHIÊN 5 CÂU HỎI ĐỂ VỪA MÀN HÌNH
+            currentRoundData = [...fullData].sort(() => 0.5 - Math.random()).slice(0, 5);
+            
+            let terms = [...currentRoundData].sort(() => 0.5 - Math.random()); 
+            let defs = [...currentRoundData].sort(() => 0.5 - Math.random());
+            
+            document.getElementById('col-terms').innerHTML = terms.map(t => `<div class="match-item" id="term-${t.id}" onclick="selectItem('term', ${t.id})">🔍 ${t.term}</div>`).join('');
+            document.getElementById('col-defs').innerHTML = defs.map(d => `<div class="match-item" id="def-${d.id}" onclick="selectItem('def', ${d.id})">${d.def}</div>`).join('');
+            
+            document.getElementById('ui-score').innerText = score; document.getElementById('ui-progress').innerText = `0/5`; showScreen('screen-game');
+        }
+        
+        function selectItem(type, id) {
+            if (isProcessing) return; 
+            let el = document.getElementById(`${type}-${id}`); 
+            if (el.classList.contains('matched')) return;
+            
+            document.querySelectorAll(`#col-${type}s .match-item`).forEach(n => n.classList.remove('selected')); 
+            el.classList.add('selected');
+            
+            if (type === 'term') selectedTerm = id; 
+            if (type === 'def') selectedDef = id;
+            if (selectedTerm && selectedDef) checkMatch();
+        }
+        
+        function checkMatch() {
+            isProcessing = true; 
+            let tEl = document.getElementById(`term-${selectedTerm}`); 
+            let dEl = document.getElementById(`def-${selectedDef}`);
+            
+            if (selectedTerm === selectedDef) {
+                tEl.className = 'match-item matched'; dEl.className = 'match-item matched'; 
+                score += 100; matchesFound++;
+                document.getElementById('ui-score').innerText = score; 
+                document.getElementById('ui-progress').innerText = `${matchesFound}/5`;
+                
+                selectedTerm = null; selectedDef = null; isProcessing = false;
+                if (matchesFound === 5) setTimeout(() => { document.getElementById('res-score').innerText = score; showScreen('screen-result'); }, 800);
+            } else {
+                tEl.classList.add('error'); dEl.classList.add('error'); 
+                let correctDef = fullData.find(d => d.id === selectedTerm).def;
+                
+                // Lọc bỏ icon cái kính lúp (🔍) để chữ hiện lên Modal đẹp hơn
+                let termText = tEl.innerText.replace('🔍', '').trim();
+                
+                showModal(termText, dEl.innerText, correctDef, () => {
+                    tEl.classList.remove('error','selected'); dEl.classList.remove('error','selected'); 
+                    selectedTerm = null; selectedDef = null; isProcessing = false;
+                });
+            }
+        }
+        
+        function showModal(termTxt, wrongDefTxt, correctDefTxt, callback) {
+            document.getElementById('fb-term').innerText = `[${termTxt}]`; 
+            document.getElementById('fb-def').innerText = wrongDefTxt;
+            document.getElementById('fb-exp').innerText = `💡 Sự thật là: ${termTxt} là ${correctDefTxt.toLowerCase()}`;
+            document.getElementById('fb-modal').classList.add('active'); onFeedbackClose = callback;
+        }
+        function closeFeedback() { document.getElementById('fb-modal').classList.remove('active'); if(onFeedbackClose) onFeedbackClose(); }
+        
+        function saveAndGoHome() { 
+            let data = localStorage.getItem('edtech_user_kid');
+            if (!data) {
+                alert("Lỗi: Không tìm thấy dữ liệu người chơi! Vui lòng đăng nhập lại.");
+                window.location.href = 'index.html';
+                return;
+            }
+            let user = JSON.parse(data);
+            
+            user.xp = (user.xp || 0) + score; 
+            user.level = Math.floor(user.xp / 500) + 1; 
+            user.last_played = new Date().toLocaleString('vi-VN');
+            
+            localStorage.setItem('edtech_user_kid', JSON.stringify(user)); 
+            
+            let leaderboard = JSON.parse(localStorage.getItem('edtech_leaderboard')) || [];
+            let existingStudent = leaderboard.findIndex(s => s.id === user.id);
+            if(existingStudent !== -1) { leaderboard[existingStudent] = user; } 
+            else { leaderboard.push(user); }
+            localStorage.setItem('edtech_leaderboard', JSON.stringify(leaderboard));
+
+            window.location.href = 'index.html#home'; 
+        }
+    </script>
+</body>
+</html>
