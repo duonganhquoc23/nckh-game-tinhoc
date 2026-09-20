@@ -3,7 +3,7 @@ require('dotenv').config();
 
 // Khởi tạo Connection Pool kết nối với Aiven MySQL (Đã gắn cứng thông số)
 const db = mysql.createPool({
-    host: 'mysql-31160401-aquocduong76-007c.a.aivencloud.com', // Gắn cứng chính xác tên miền Aiven
+    host: 'mysql-31160401-aquocduong76-007c.k.aivencloud.com', // Gắn cứng chính xác tên miền Aiven
     user: 'avnadmin',                                         // Gắn cứng tên User
     password: process.env.DB_PASSWORD,                        // Vẫn lấy mật khẩu từ tab Environment trên Render
     database: 'defaultdb',                                    // Gắn cứng tên Database
