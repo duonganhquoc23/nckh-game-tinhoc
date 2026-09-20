@@ -6,7 +6,7 @@ async function loadData() {
     tb.innerHTML = `<tr><td colspan="7" style="text-align:center;">⏳ Đang tải dữ liệu từ CSDL...</td></tr>`;
 
     try {
-        const response = await fetch('https://edtech-backend-api-nv0x.onrender.com/api/leaderboard');
+        const response = await fetch('https://nckh-game-tinhoc.onrender.com/api/leaderboard');
         allStudents = await response.json();
         
         updateClassFilterDropdown(); 
@@ -107,7 +107,7 @@ async function deleteStudent(id, name) {
     if(!confirm(`⚠️ Bạn có chắc chắn muốn xóa dữ liệu của học sinh "${name}" không?\nHành động này không thể hoàn tác!`)) return;
     
     try {
-        await fetch(`https://edtech-backend-api-nv0x.onrender.com/api/student/${id}`, { method: 'DELETE' });
+        await fetch(`https://nckh-game-tinhoc.onrender.com/api/student/${id}`, { method: 'DELETE' });
         loadData(); 
     } catch(e) { 
         console.error(e); 
@@ -126,7 +126,7 @@ async function deleteFiltered() {
     if(!confirm("Xác nhận lần 2: Dữ liệu bị xóa sẽ KHÔNG THỂ KHÔI PHỤC. Bạn vẫn tiếp tục?")) return;
 
     try {
-        let url = 'https://edtech-backend-api-nv0x.onrender.com/api/students';
+        let url = 'https://nckh-game-tinhoc.onrender.com/api/students';
         if(filterValue) url += `?class_name=${filterValue}`;
         
         const response = await fetch(url, { method: 'DELETE' });
