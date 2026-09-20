@@ -1,24 +1,22 @@
+const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com'; 
 let allStudents = []; 
 
-// Tải toàn bộ dữ liệu từ CSDL
 async function loadData() {
     const tb = document.getElementById('tb-students');
     tb.innerHTML = `<tr><td colspan="7" style="text-align:center;">⏳ Đang tải dữ liệu từ CSDL...</td></tr>`;
 
     try {
-        const response = await fetch('https://nckh-game-tinhoc.onrender.com/api/leaderboard');
+        const response = await fetch(`${API_BASE_URL}/api/leaderboard`);
         allStudents = await response.json();
         
         updateClassFilterDropdown(); 
         applyFilter(); 
-
     } catch (error) {
         console.error("Lỗi tải dữ liệu:", error);
         tb.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">❌ Không thể kết nối. Hãy đảm bảo Server Node.js đang chạy.</td></tr>`;
     }
 }
 
-// Cập nhật danh sách Lớp tự động vào Dropdown
 function updateClassFilterDropdown() {
     const filterSelect = document.getElementById('class-filter');
     const currentValue = filterSelect.value; 
@@ -33,7 +31,6 @@ function updateClassFilterDropdown() {
     filterSelect.value = currentValue; 
 }
 
-// Lọc dữ liệu và hiển thị lên bảng
 function applyFilter() {
     const filterValue = document.getElementById('class-filter').value;
     
@@ -69,7 +66,7 @@ function applyFilter() {
             <td><span class="badge">Lv ${s.level || 1}</span></td>
             <td style="color: #64748b; font-size: 0.9rem;">${lastPlayed}</td>
             <td style="text-align: center;">
-                <button class="btn-action btn-action-del" onclick="deleteStudent(${s.id}, '${s.name}')" title="Xóa học sinh này">
+                <button class="btn-action-del" onclick="deleteStudent(${s.id}, '${s.name}')" title="Xóa học sinh này">
                     <i class="fa-solid fa-xmark"></i> Xóa
                 </button>
             </td>
@@ -78,7 +75,6 @@ function applyFilter() {
     }).join('');
 }
 
-// Chức năng: Xuất Excel
 function exportExcel() {
     const filterValue = document.getElementById('class-filter').value;
     const dataToExport = filterValue ? allStudents.filter(s => s.class_name === filterValue) : allStudents;
@@ -102,20 +98,14 @@ function exportExcel() {
     XLSX.writeFile(workbook, fileName);
 }
 
-// Chức năng: Xóa 1 học sinh
 async function deleteStudent(id, name) {
     if(!confirm(`⚠️ Bạn có chắc chắn muốn xóa dữ liệu của học sinh "${name}" không?\nHành động này không thể hoàn tác!`)) return;
-    
     try {
-        await fetch(`https://nckh-game-tinhoc.onrender.com/api/student/${id}`, { method: 'DELETE' });
+        await fetch(`${API_BASE_URL}/api/student/${id}`, { method: 'DELETE' });
         loadData(); 
-    } catch(e) { 
-        console.error(e); 
-        alert("Lỗi khi xóa học sinh!"); 
-    }
+    } catch(e) { console.error(e); alert("Lỗi khi xóa học sinh!"); }
 }
 
-// Chức năng: Xóa toàn bộ học sinh (hoặc xóa theo Lớp)
 async function deleteFiltered() {
     const filterValue = document.getElementById('class-filter').value;
     let msg = filterValue 
@@ -126,7 +116,7 @@ async function deleteFiltered() {
     if(!confirm("Xác nhận lần 2: Dữ liệu bị xóa sẽ KHÔNG THỂ KHÔI PHỤC. Bạn vẫn tiếp tục?")) return;
 
     try {
-        let url = 'https://nckh-game-tinhoc.onrender.com/api/students';
+        let url = `${API_BASE_URL}/api/students`;
         if(filterValue) url += `?class_name=${filterValue}`;
         
         const response = await fetch(url, { method: 'DELETE' });
@@ -134,11 +124,7 @@ async function deleteFiltered() {
             document.getElementById('class-filter').value = ""; 
             loadData(); 
         }
-    } catch(e) { 
-        console.error(e); 
-        alert("Lỗi khi xóa dữ liệu!"); 
-    }
+    } catch(e) { console.error(e); alert("Lỗi khi xóa dữ liệu!"); }
 }
 
-// Tự động load dữ liệu
 window.addEventListener('DOMContentLoaded', loadData);
