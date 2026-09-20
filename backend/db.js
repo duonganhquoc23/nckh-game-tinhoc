@@ -1,22 +1,21 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Khởi tạo Connection Pool kết nối với Aiven MySQL
+// Sử dụng .trim() để dọn sạch các khoảng trắng/dấu enter ẩn bị lỗi khi copy
 const db = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 25060, // Cổng mặc định của Aiven thường là 5 số
+    host: process.env.DB_HOST ? process.env.DB_HOST.trim() : '',
+    user: process.env.DB_USER ? process.env.DB_USER.trim() : '',
+    password: process.env.DB_PASSWORD ? process.env.DB_PASSWORD.trim() : '',
+    database: process.env.DB_NAME ? process.env.DB_NAME.trim() : '',
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 28559,
     ssl: {
-        rejectUnauthorized: false // BẮT BUỘC ĐỂ KẾT NỐI VỚI AIVEN
+        rejectUnauthorized: false
     },
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
 });
 
-// Kiểm tra kết nối ngay khi khởi động
 db.getConnection()
     .then(connection => {
         console.log('✅ Đã kết nối thành công tới CSDL Aiven MySQL!');
