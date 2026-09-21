@@ -104,7 +104,7 @@
     </div>
 
     <header>
-        <div class="logo"><i class="fa-solid fa-rocket"></i> THẾ GIỚI TIN HỌC</div>
+        <div class="logo" id="secret-logo"><i class="fa-solid fa-rocket"></i> THẾ GIỚI TIN HỌC</div>
         <nav>
             <ul id="nav-menu">
                 <li><a onclick="navigate('home')" class="active" data-target="home">🗺️ Bản đồ Khám phá</a></li>
@@ -253,7 +253,41 @@
     </footer>
 
     <script src="script.js"></script>
-  
 
+    <!-- Nút Admin ẩn mặc định -->
+    <a id="btn-secret-admin" href="admin/index.html" style="display: none; position: fixed; bottom: 10px; right: 10px; z-index: 9999; background: #000; color: #fff; padding: 10px 15px; border-radius: 5px; text-decoration: none; border: 2px solid white;">⚙️ Mở Trang Admin</a>
+
+    <script>
+        // Cách 1: Nâng cấp bàn phím - Bắt sự kiện Capture Phase để tránh Electron "nuốt" phím
+        window.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.shiftKey && (event.code === 'KeyA' || event.key.toLowerCase() === 'a')) {
+                const adminBtn = document.getElementById('btn-secret-admin');
+                adminBtn.style.display = (adminBtn.style.display === 'none' || adminBtn.style.display === '') ? 'block' : 'none';
+            }
+        }, true);
+
+        // Cách 2: PHƯƠNG ÁN DỰ PHÒNG CHẮC CHẮN (Bấm 5 lần vào Logo)
+        let clickCount = 0;
+        let clickTimer;
+        const logo = document.getElementById('secret-logo');
+        
+        if (logo) {
+            logo.style.cursor = 'pointer';
+            logo.addEventListener('click', function() {
+                clickCount++;
+                clearTimeout(clickTimer);
+                
+                if (clickCount >= 5) {
+                    const adminBtn = document.getElementById('btn-secret-admin');
+                    adminBtn.style.display = (adminBtn.style.display === 'none' || adminBtn.style.display === '') ? 'block' : 'none';
+                    clickCount = 0;
+                }
+                
+                clickTimer = setTimeout(() => {
+                    clickCount = 0;
+                }, 1500);
+            });
+        }
+    </script>
 </body>
 </html>

@@ -19,7 +19,6 @@
         
         .hud-panel { display: flex; justify-content: space-between; background: #f0fdfa; border: 3px dashed var(--success); padding: 12px 25px; border-radius: 20px; margin-bottom: 20px; }
         
-        /* CỘT GHÉP CẶP THIẾT KẾ MỚI */
         .match-board { display: flex; gap: 3rem; justify-content: center; align-items: stretch; } 
         .match-col { flex: 1; display: flex; flex-direction: column; gap: 12px; }
         
@@ -30,20 +29,15 @@
             min-height: 75px; box-shadow: 0 5px 0 #cbd5e1; font-size: 1.05rem; line-height: 1.3;
         }
         
-        /* Style riêng cho Cột Trái (Từ khóa) */
         #col-terms .match-item { border-color: #93c5fd; box-shadow: 0 5px 0 #93c5fd; background: #eff6ff; color: #1e3a8a;}
-        /* Style riêng cho Cột Phải (Định nghĩa) */
         #col-defs .match-item { border-color: #fde047; box-shadow: 0 5px 0 #fde047; background: #fefce8; color: #854d0e;}
         
         .match-item:hover { transform: translateY(-3px); }
         
-        /* Hiệu ứng khi đang chọn */
         #col-terms .match-item.selected { background: #3b82f6; color: white; border-color: #1d4ed8; box-shadow: 0 5px 0 #1d4ed8; transform: translateY(-3px) scale(1.03); }
         #col-defs .match-item.selected { background: #eab308; color: white; border-color: #a16207; box-shadow: 0 5px 0 #a16207; transform: translateY(-3px) scale(1.03); }
         
-        /* Hiệu ứng khi ghép đúng */
         .match-item.matched { background: #10b981 !important; border-color: #047857 !important; color: white !important; box-shadow: none !important; pointer-events: none; animation: popMatch 0.5s; opacity: 0.9;}
-        /* Hiệu ứng khi ghép sai */
         .match-item.error { background: #fee2e2 !important; border-color: #ef4444 !important; color: #ef4444 !important; animation: shake 0.4s; }
         
         .feedback-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); }
@@ -79,7 +73,6 @@
         </div>
     </div>
 
-    <!-- MODAL GIẢI THÍCH LỖI SAI -->
     <div class="feedback-modal" id="fb-modal">
         <div class="feedback-box">
             <h2 style="font-family: 'Baloo 2', cursive; font-size: 2rem; color: #ef4444; margin-bottom: 10px;">Chưa khớp rồi! 🧩</h2>
@@ -92,18 +85,42 @@
     </div>
     
     <script>
-const fullData = [
-    { id: 1, term: 'Từ khoá', def: 'Từ hoặc cụm từ thể hiện nội dung em muốn tìm kiếm.' },
-    { id: 2, term: 'Google.com', def: 'Địa chỉ của một máy tìm kiếm thông tin phổ biến.' },
-    { id: 3, term: 'Thanh địa chỉ', def: 'Nơi dùng để gõ tên trang web (như google.com).' },
-    { id: 4, term: 'Siêu liên kết', def: 'Dòng chữ nhấp vào sẽ mở ra trang thông tin chi tiết.' },
-    { id: 5, term: 'Phím Enter', def: 'Phím dùng để ra lệnh bắt đầu tìm kiếm trên Internet.' },
-    { id: 6, term: 'Lệnh Copy', def: 'Dùng để sao chép tệp/thư mục ra thêm một bản nữa.' },
-    { id: 7, term: 'Lệnh Move to', def: 'Dùng để di chuyển tệp/thư mục sang nơi khác.' },
-    { id: 8, term: 'Lệnh Rename', def: 'Dùng để thay đổi tên của tệp hoặc thư mục.' },
-    { id: 9, term: 'Lệnh Paste', def: 'Dùng để dán tệp/thư mục sau khi đã chọn lệnh Copy.' },
-    { id: 10, term: 'Lệnh Delete', def: 'Dùng để đưa các dữ liệu không còn sử dụng vào Thùng rác.' }
-];        
+        const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
+        
+        // HÀM LƯU LỊCH SỬ VÀO DATABASE
+        async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+            let data = localStorage.getItem('edtech_user_kid');
+            if (!data) return;
+            let user = JSON.parse(data);
+            if (!user.name) return;
+            try {
+                await fetch(`${API_BASE_URL}/api/history`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_name: user.name,
+                        game_name: gameName,
+                        question: question,
+                        student_answer: studentAnswer,
+                        is_correct: isCorrect
+                    })
+                });
+            } catch (error) { console.error('Lỗi lưu lịch sử:', error); }
+        }
+
+        const fullData = [
+            { id: 1, term: 'Từ khoá', def: 'Từ hoặc cụm từ thể hiện nội dung em muốn tìm kiếm.' },
+            { id: 2, term: 'Google.com', def: 'Địa chỉ của một máy tìm kiếm thông tin phổ biến.' },
+            { id: 3, term: 'Thanh địa chỉ', def: 'Nơi dùng để gõ tên trang web (như google.com).' },
+            { id: 4, term: 'Siêu liên kết', def: 'Dòng chữ nhấp vào sẽ mở ra trang thông tin chi tiết.' },
+            { id: 5, term: 'Phím Enter', def: 'Phím dùng để ra lệnh bắt đầu tìm kiếm trên Internet.' },
+            { id: 6, term: 'Lệnh Copy', def: 'Dùng để sao chép tệp/thư mục ra thêm một bản nữa.' },
+            { id: 7, term: 'Lệnh Move to', def: 'Dùng để di chuyển tệp/thư mục sang nơi khác.' },
+            { id: 8, term: 'Lệnh Rename', def: 'Dùng để thay đổi tên của tệp hoặc thư mục.' },
+            { id: 9, term: 'Lệnh Paste', def: 'Dùng để dán tệp/thư mục sau khi đã chọn lệnh Copy.' },
+            { id: 10, term: 'Lệnh Delete', def: 'Dùng để đưa các dữ liệu không còn sử dụng vào Thùng rác.' }
+        ];        
+        
         let score = 0, matchesFound = 0, selectedTerm = null, selectedDef = null, isProcessing = false, onFeedbackClose = null;
         let currentRoundData = [];
         
@@ -111,8 +128,6 @@ const fullData = [
         
         function initGame() {
             score = 0; matchesFound = 0; selectedTerm = null; selectedDef = null; isProcessing = false;
-            
-            // CHỈ BỐC NGẪU NHIÊN 5 CÂU HỎI ĐỂ VỪA MÀN HÌNH
             currentRoundData = [...fullData].sort(() => 0.5 - Math.random()).slice(0, 5);
             
             let terms = [...currentRoundData].sort(() => 0.5 - Math.random()); 
@@ -141,8 +156,13 @@ const fullData = [
             isProcessing = true; 
             let tEl = document.getElementById(`term-${selectedTerm}`); 
             let dEl = document.getElementById(`def-${selectedDef}`);
+            let termText = tEl.innerText.replace('🔍', '').trim();
+            let defText = dEl.innerText.trim();
             
             if (selectedTerm === selectedDef) {
+                // GỌI HÀM LƯU LỊCH SỬ TẠI ĐÂY (ĐÚNG)
+                saveHistory("Ghép Kiến Thức", termText, defText, true);
+
                 tEl.className = 'match-item matched'; dEl.className = 'match-item matched'; 
                 score += 100; matchesFound++;
                 document.getElementById('ui-score').innerText = score; 
@@ -151,11 +171,11 @@ const fullData = [
                 selectedTerm = null; selectedDef = null; isProcessing = false;
                 if (matchesFound === 5) setTimeout(() => { document.getElementById('res-score').innerText = score; showScreen('screen-result'); }, 800);
             } else {
+                // GỌI HÀM LƯU LỊCH SỬ TẠI ĐÂY (SAI)
+                saveHistory("Ghép Kiến Thức", termText, defText, false);
+
                 tEl.classList.add('error'); dEl.classList.add('error'); 
                 let correctDef = fullData.find(d => d.id === selectedTerm).def;
-                
-                // Lọc bỏ icon cái kính lúp (🔍) để chữ hiện lên Modal đẹp hơn
-                let termText = tEl.innerText.replace('🔍', '').trim();
                 
                 showModal(termText, dEl.innerText, correctDef, () => {
                     tEl.classList.remove('error','selected'); dEl.classList.remove('error','selected'); 

@@ -40,7 +40,6 @@
         .explosion { position: absolute; font-size: 4rem; z-index: 20; transform: translate(-50%, -50%); animation: boom 0.6s forwards;}
         @keyframes boom { 0% { transform: translate(-50%, -50%) scale(0.5); opacity:1;} 100% { transform: translate(-50%, -50%) scale(2); opacity:0;} }
 
-        /* HIỆU ỨNG NỔI ĐIỂM KHI TRÚNG ĐÁP ÁN */
         .xp-float {
             position: absolute; font-family: 'Baloo 2', cursive; font-size: 3rem;
             color: #10b981; font-weight: 800; text-shadow: 2px 2px 0 #fff;
@@ -100,7 +99,6 @@
         </div>
     </div>
 
-    <!-- MODAL HIỂN THỊ LỖI SAI -->
     <div class="feedback-modal" id="fb-modal">
         <div class="feedback-box">
             <h2 style="font-family: 'Baloo 2', cursive; font-size: 2rem; color: #ef4444; margin-bottom: 10px;">Đụng nhầm cá rồi! 💥</h2>
@@ -112,18 +110,42 @@
     </div>
 
     <script>
-const qs = [
-    { q: "Ổ đĩa (D:) thường đóng vai trò là thư mục gì?", a: ["Thư mục gốc", "Thư mục con", "Tệp văn bản"], c: 0, exp: "Ổ đĩa là thư mục gốc to nhất, chứa toàn bộ các thư mục và tệp khác bên trong." },
-    { q: "Biểu tượng màu vàng hình kẹp tài liệu là gì?", a: ["Thư mục (Folder)", "Trang web", "Thùng rác"], c: 0, exp: "Các thư mục thường có biểu tượng màu vàng giống chiếc kẹp đựng tài liệu giấy." },
-    { q: "Nếu thư mục 'Nhom 1' nằm trong 'Lop 4A'. 'Lop 4A' gọi là gì?", a: ["Thư mục mẹ", "Thư mục con", "Thùng rác"], c: 0, exp: "Thư mục chứa thư mục khác ở bên trong nó được gọi là thư mục mẹ." },
-    { q: "Biểu tượng hình chữ 'W' màu xanh dương hoặc 'P' màu cam thường là gì?", a: ["Tệp (File)", "Thư mục", "Ổ đĩa"], c: 0, exp: "Đó là các Tệp văn bản (Word) hoặc Tệp trình chiếu (PowerPoint)." },
-    { q: "Cách tổ chức thư mục mẹ chứa thư mục con tạo thành hình gì?", a: ["Cây thư mục", "Mạng nhện", "Hình vuông"], c: 0, exp: "Nó được gọi là 'Cây thư mục' vì rẽ nhánh giống hệt như cành và lá cây." },
-    { q: "Để mở xem bên trong một thư mục có gì, em làm thao tác nào?", a: ["Nháy đúp chuột", "Nhấn phím Delete", "Nháy nút phải chuột"], c: 0, exp: "Nháy đúp chuột (nháy nhanh 2 lần nút trái) dùng để mở tệp hoặc thư mục." },
-    { q: "Lệnh nào tương đương với việc em 'Nhặt tệp ở đây, bỏ sang kia'?", a: ["Lệnh Move (Di chuyển)", "Lệnh Copy (Sao chép)", "Lệnh Rename (Đổi tên)"], c: 0, exp: "Move chính là nhấc hẳn tệp đi, vị trí cũ sẽ trống trơn." },
-    { q: "Tệp 'Gioi_thieu' và thư mục 'Hinh_anh' có thể cùng nằm trong thư mục 'Thu An' không?", a: ["Hoàn toàn có thể", "Không bao giờ"], c: 0, exp: "Thư mục mẹ có thể chứa lẫn lộn cả thư mục con và các tệp." },
-    { q: "Hai thư mục nằm cùng một chỗ có được đặt tên giống hệt nhau không?", a: ["Không được", "Có, thoải mái"], c: 0, exp: "Máy tính không cho phép 2 tệp hoặc 2 thư mục trùng tên hoàn toàn khi nằm cùng một chỗ." },
-    { q: "Khi nháy nút phải chuột vào thư mục, điều gì hiện ra?", a: ["Bảng lệnh (Copy, Rename...)", "Máy tính tắt luôn", "Google tìm kiếm"], c: 0, exp: "Nháy nút phải chuột sẽ mở ra bảng danh sách các lệnh để em thao tác." }
-];        
+    const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
+        
+    // HÀM LƯU LỊCH SỬ VÀO DATABASE
+    async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+        let data = localStorage.getItem('edtech_user_kid');
+        if (!data) return;
+        let user = JSON.parse(data);
+        if (!user.name) return;
+        try {
+            await fetch(`${API_BASE_URL}/api/history`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    student_name: user.name,
+                    game_name: gameName,
+                    question: question,
+                    student_answer: studentAnswer,
+                    is_correct: isCorrect
+                })
+            });
+        } catch (error) { console.error('Lỗi lưu lịch sử:', error); }
+    }
+
+    const qs = [
+        { q: "Ổ đĩa (D:) thường đóng vai trò là thư mục gì?", a: ["Thư mục gốc", "Thư mục con", "Tệp văn bản"], c: 0, exp: "Ổ đĩa là thư mục gốc to nhất, chứa toàn bộ các thư mục và tệp khác bên trong." },
+        { q: "Biểu tượng màu vàng hình kẹp tài liệu là gì?", a: ["Thư mục (Folder)", "Trang web", "Thùng rác"], c: 0, exp: "Các thư mục thường có biểu tượng màu vàng giống chiếc kẹp đựng tài liệu giấy." },
+        { q: "Nếu thư mục 'Nhom 1' nằm trong 'Lop 4A'. 'Lop 4A' gọi là gì?", a: ["Thư mục mẹ", "Thư mục con", "Thùng rác"], c: 0, exp: "Thư mục chứa thư mục khác ở bên trong nó được gọi là thư mục mẹ." },
+        { q: "Biểu tượng hình chữ 'W' màu xanh dương hoặc 'P' màu cam thường là gì?", a: ["Tệp (File)", "Thư mục", "Ổ đĩa"], c: 0, exp: "Đó là các Tệp văn bản (Word) hoặc Tệp trình chiếu (PowerPoint)." },
+        { q: "Cách tổ chức thư mục mẹ chứa thư mục con tạo thành hình gì?", a: ["Cây thư mục", "Mạng nhện", "Hình vuông"], c: 0, exp: "Nó được gọi là 'Cây thư mục' vì rẽ nhánh giống hệt như cành và lá cây." },
+        { q: "Để mở xem bên trong một thư mục có gì, em làm thao tác nào?", a: ["Nháy đúp chuột", "Nhấn phím Delete", "Nháy nút phải chuột"], c: 0, exp: "Nháy đúp chuột (nháy nhanh 2 lần nút trái) dùng để mở tệp hoặc thư mục." },
+        { q: "Lệnh nào tương đương với việc em 'Nhặt tệp ở đây, bỏ sang kia'?", a: ["Lệnh Move (Di chuyển)", "Lệnh Copy (Sao chép)", "Lệnh Rename (Đổi tên)"], c: 0, exp: "Move chính là nhấc hẳn tệp đi, vị trí cũ sẽ trống trơn." },
+        { q: "Tệp 'Gioi_thieu' và thư mục 'Hinh_anh' có thể cùng nằm trong thư mục 'Thu An' không?", a: ["Hoàn toàn có thể", "Không bao giờ"], c: 0, exp: "Thư mục mẹ có thể chứa lẫn lộn cả thư mục con và các tệp." },
+        { q: "Hai thư mục nằm cùng một chỗ có được đặt tên giống hệt nhau không?", a: ["Không được", "Có, thoải mái"], c: 0, exp: "Máy tính không cho phép 2 tệp hoặc 2 thư mục trùng tên hoàn toàn khi nằm cùng một chỗ." },
+        { q: "Khi nháy nút phải chuột vào thư mục, điều gì hiện ra?", a: ["Bảng lệnh (Copy, Rename...)", "Máy tính tắt luôn", "Google tìm kiếm"], c: 0, exp: "Nháy nút phải chuột sẽ mở ra bảng danh sách các lệnh để em thao tác." }
+    ];        
+        
         let playQueue=[], score=0, curr=0, onFeedbackClose=null;
         let subLane = 1; 
         const sub = document.getElementById('sub');
@@ -143,7 +165,7 @@ const qs = [
         }
         
         function loadQ(){
-            cancelAnimationFrame(gameLoopAnim); // Dọn dẹp frame cũ để tránh chạy lặp nhanh dần
+            cancelAnimationFrame(gameLoopAnim); 
             if(curr>=playQueue.length) return endGame();
             
             document.getElementById('ui-q').innerText=playQueue[curr].q; 
@@ -196,7 +218,6 @@ const qs = [
 
         function handleHit(fish) {
             isTransitioning = true;
-            // KHÔNG dừng isPlaying nữa, để game vẫn chạy liền mạch xuyên suốt
             
             let boom = document.createElement('div');
             boom.className = 'explosion'; boom.innerText = '🫧';
@@ -205,6 +226,9 @@ const qs = [
             setTimeout(() => boom.remove(), 600);
 
             fish.el.style.display = 'none';
+
+            // GỌI HÀM LƯU LỊCH SỬ KHI BẮT ĐƯỢC CÁ
+            saveHistory("Tàu Ngầm Khám Phá", playQueue[curr].q, fish.txt, fish.isC);
 
             if(fish.isC) {
                 score += 100; document.getElementById('ui-score').innerText = score;
@@ -216,7 +240,6 @@ const qs = [
                 xpTxt.style.top = sub.style.top;
                 ocean.appendChild(xpTxt);
 
-                // Game vẫn chạy nền, chữ vẫn bay, sau 1.5s câu hỏi mới mượt mà hiện ra
                 setTimeout(() => { 
                     curr++; 
                     loadQ(); 
@@ -224,7 +247,7 @@ const qs = [
             } else {
                 let cTxt = fishes.find(f => f.isC).txt;
                 setTimeout(() => {
-                    isPlaying = false; // Chỉ dừng lại nếu trả lời sai để hiện bảng giải thích
+                    isPlaying = false; 
                     showModal(fish.txt, cTxt, playQueue[curr].exp, () => { curr++; loadQ(); });
                 }, 800);
             }

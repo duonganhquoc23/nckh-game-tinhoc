@@ -85,18 +85,42 @@
     </div>
 
     <script>
-const qs = [
-    { q: "Em muốn tìm hiểu về các đời vua Hùng. Từ khoá nào chuẩn nhất?", a: ["Các đời vua Hùng", "Vua", "Truyện cổ tích", "Lịch sử"], c: 0, exp: "Từ khoá 'Các đời vua Hùng' đầy đủ và chính xác nhất với yêu cầu tìm kiếm." },
-    { q: "Muốn xem hình ảnh Hồ Gươm ở Hà Nội, chọn từ khoá nào?", a: ["Hồ Gươm", "Hồ nước đẹp", "Thủ đô", "Đi chơi"], c: 0, exp: "Gõ đúng tên địa danh 'Hồ Gươm' sẽ giúp máy tìm kiếm đưa ra ảnh chính xác nhất." },
-    { q: "Từ khoá để tìm 'Vai trò của không khí đối với con người'?", a: ["Vai trò của không khí", "Con người", "Gió và mây", "Môi trường"], c: 0, exp: "Phải có chữ 'Vai trò của không khí' thì máy mới hiểu em muốn hỏi về tác dụng của nó." },
-    { q: "Bạn Khoa muốn tìm địa chỉ Bảo tàng Dân tộc học Việt Nam?", a: ["Bảo tàng Dân tộc học Việt Nam", "Bảo tàng", "Dân tộc", "Địa chỉ ở đâu"], c: 0, exp: "Nên gõ tên đầy đủ của bảo tàng để Google chỉ đường chính xác, không nhầm sang bảo tàng khác." },
-    { q: "Để tra nghĩa của từ 'Thư mục' tiếng Anh là gì?", a: ["Thư mục tiếng Anh là gì", "Tiếng Anh", "Thư mục", "Tra từ điển"], c: 0, exp: "Đặt câu hỏi trực tiếp làm từ khoá cũng là một cách rất hay khi dùng Google." },
-    { q: "Từ khoá nào sau đây quá DÀI và KHÔNG cần thiết?", a: ["Cho tôi hỏi thời tiết ngày mai thế nào", "Thời tiết ngày mai", "Dự báo thời tiết", "Thời tiết Hà Nội"], c: 0, exp: "Không cần phải gõ 'Cho tôi hỏi...', chỉ cần gõ từ khoá chính như 'Thời tiết ngày mai' là đủ." },
-    { q: "Muốn học cách gấp con ếch bằng giấy, em tìm bằng từ khoá nào?", a: ["Cách gấp con ếch bằng giấy", "Con ếch", "Giấy màu", "Trò chơi"], c: 0, exp: "Gõ rõ ràng 'Cách gấp con ếch bằng giấy' sẽ ra rất nhiều video hướng dẫn chi tiết." },
-    { q: "Từ khoá 'Cách làm bánh chưng' sẽ trả về kết quả gì?", a: ["Hướng dẫn gói bánh chưng", "Lịch sử ngày Tết", "Mua bánh chưng", "Truyện Sự tích bánh chưng"], c: 0, exp: "Từ khoá chứa chữ 'Cách làm' nên Google sẽ ưu tiên các bài viết hướng dẫn nấu ăn." },
-    { q: "Muốn tìm thông tin về nhà toán học Lương Thế Vinh?", a: ["Lương Thế Vinh", "Nhà toán học", "Sách toán lớp 4", "Học giỏi toán"], c: 0, exp: "Tên riêng 'Lương Thế Vinh' chính là từ khoá quan trọng nhất." },
-    { q: "Từ khoá nào sau đây quá NGẮN, dễ ra sai kết quả?", a: ["Biển", "Bãi biển Mỹ Khê Đà Nẵng", "Cảnh đẹp biển Nha Trang", "Tắm biển Vũng Tàu"], c: 0, exp: "Chỉ gõ chữ 'Biển' thì máy tính sẽ không biết em muốn tìm biển ở đâu, biển nào." }
-];        
+        const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
+        
+        // HÀM LƯU LỊCH SỬ VÀO DATABASE
+        async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+            let data = localStorage.getItem('edtech_user_kid');
+            if (!data) return;
+            let user = JSON.parse(data);
+            if (!user.name) return;
+            try {
+                await fetch(`${API_BASE_URL}/api/history`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_name: user.name,
+                        game_name: gameName,
+                        question: question,
+                        student_answer: studentAnswer,
+                        is_correct: isCorrect
+                    })
+                });
+            } catch (error) { console.error('Lỗi lưu lịch sử:', error); }
+        }
+
+        const qs = [
+            { q: "Em muốn tìm hiểu về các đời vua Hùng. Từ khoá nào chuẩn nhất?", a: ["Các đời vua Hùng", "Vua", "Truyện cổ tích", "Lịch sử"], c: 0, exp: "Từ khoá 'Các đời vua Hùng' đầy đủ và chính xác nhất với yêu cầu tìm kiếm." },
+            { q: "Muốn xem hình ảnh Hồ Gươm ở Hà Nội, chọn từ khoá nào?", a: ["Hồ Gươm", "Hồ nước đẹp", "Thủ đô", "Đi chơi"], c: 0, exp: "Gõ đúng tên địa danh 'Hồ Gươm' sẽ giúp máy tìm kiếm đưa ra ảnh chính xác nhất." },
+            { q: "Từ khoá để tìm 'Vai trò của không khí đối với con người'?", a: ["Vai trò của không khí", "Con người", "Gió và mây", "Môi trường"], c: 0, exp: "Phải có chữ 'Vai trò của không khí' thì máy mới hiểu em muốn hỏi về tác dụng của nó." },
+            { q: "Bạn Khoa muốn tìm địa chỉ Bảo tàng Dân tộc học Việt Nam?", a: ["Bảo tàng Dân tộc học Việt Nam", "Bảo tàng", "Dân tộc", "Địa chỉ ở đâu"], c: 0, exp: "Nên gõ tên đầy đủ của bảo tàng để Google chỉ đường chính xác, không nhầm sang bảo tàng khác." },
+            { q: "Để tra nghĩa của từ 'Thư mục' tiếng Anh là gì?", a: ["Thư mục tiếng Anh là gì", "Tiếng Anh", "Thư mục", "Tra từ điển"], c: 0, exp: "Đặt câu hỏi trực tiếp làm từ khoá cũng là một cách rất hay khi dùng Google." },
+            { q: "Từ khoá nào sau đây quá DÀI và KHÔNG cần thiết?", a: ["Cho tôi hỏi thời tiết ngày mai thế nào", "Thời tiết ngày mai", "Dự báo thời tiết", "Thời tiết Hà Nội"], c: 0, exp: "Không cần phải gõ 'Cho tôi hỏi...', chỉ cần gõ từ khoá chính như 'Thời tiết ngày mai' là đủ." },
+            { q: "Muốn học cách gấp con ếch bằng giấy, em tìm bằng từ khoá nào?", a: ["Cách gấp con ếch bằng giấy", "Con ếch", "Giấy màu", "Trò chơi"], c: 0, exp: "Gõ rõ ràng 'Cách gấp con ếch bằng giấy' sẽ ra rất nhiều video hướng dẫn chi tiết." },
+            { q: "Từ khoá 'Cách làm bánh chưng' sẽ trả về kết quả gì?", a: ["Hướng dẫn gói bánh chưng", "Lịch sử ngày Tết", "Mua bánh chưng", "Truyện Sự tích bánh chưng"], c: 0, exp: "Từ khoá chứa chữ 'Cách làm' nên Google sẽ ưu tiên các bài viết hướng dẫn nấu ăn." },
+            { q: "Muốn tìm thông tin về nhà toán học Lương Thế Vinh?", a: ["Lương Thế Vinh", "Nhà toán học", "Sách toán lớp 4", "Học giỏi toán"], c: 0, exp: "Tên riêng 'Lương Thế Vinh' chính là từ khoá quan trọng nhất." },
+            { q: "Từ khoá nào sau đây quá NGẮN, dễ ra sai kết quả?", a: ["Biển", "Bãi biển Mỹ Khê Đà Nẵng", "Cảnh đẹp biển Nha Trang", "Tắm biển Vũng Tàu"], c: 0, exp: "Chỉ gõ chữ 'Biển' thì máy tính sẽ không biết em muốn tìm biển ở đâu, biển nào." }
+        ];        
+        
         let state = {score: 0, clearedObs: 0, questionPool: [], boxCount: 1}, onFeedbackClose = null;
         window.addEventListener('DOMContentLoaded', () => { document.getElementById('runner-character').innerText = (JSON.parse(localStorage.getItem('edtech_user_kid')) || {}).avatar || '👦'; });
 
@@ -116,6 +140,11 @@ const qs = [
         
         function submitAnswer(isCorrect, btn, ansMix){
             document.getElementById('ans-grid').classList.add('disabled-grid');
+            
+            // GỌI HÀM LƯU LỊCH SỬ TẠI ĐÂY
+            let userAnsTxt = btn.innerText;
+            saveHistory("Đường Đua Vui Nhộn", currentQ.q, userAnsTxt, isCorrect);
+
             if(isCorrect){ btn.classList.add('correct'); handleCorrect(); } 
             else { 
                 btn.classList.add('wrong'); const correctAns = ansMix.find(a => a.isC).txt;

@@ -90,18 +90,42 @@
     </div>
 
     <script>
-const qs = [
-    { q: "Tệp Gioi_thieu sau khi dùng lệnh Move (Di chuyển) từ thư mục A sang B thì tệp sẽ nằm ở đâu?", a: ["Chỉ nằm ở thư mục B", "Nằm ở cả A và B"], c: 0, exp: "Lệnh Move giống như em bưng sách từ bàn này sang bàn khác, chỗ cũ sẽ không còn sách nữa." },
-    { q: "Tệp Hinh_anh sau khi dùng lệnh Copy (Sao chép) từ thư mục A sang B thì tệp nằm ở đâu?", a: ["Nằm ở cả A và B", "Chỉ nằm ở thư mục B"], c: 0, exp: "Lệnh Copy tạo ra một bản sao y hệt, nên tệp sẽ tồn tại ở cả hai nơi." },
-    { q: "Thư mục 'Lop 4A' chứa thư mục 'Nhom 1'. Vậy 'Nhom 1' được gọi là gì?", a: ["Thư mục con", "Thư mục mẹ"], c: 0, exp: "Thư mục nằm bên trong thư mục khác được gọi là Thư mục con." },
-    { q: "Nếu xoá thư mục 'Nhom 1' thì các tệp bài tập bên trong nó sẽ ra sao?", a: ["Bị xoá theo tất cả", "Vẫn còn nguyên vẹn"], c: 0, exp: "Khi xoá thư mục, tất cả những gì chứa bên trong nó cũng sẽ bị ném vào thùng rác." },
-    { q: "Trong tổ chức cây thư mục, thư mục nào chứa tất cả các thư mục khác?", a: ["Thư mục gốc (Ổ đĩa)", "Thư mục con"], c: 0, exp: "Ổ đĩa (ví dụ ổ C:, ổ D:) chính là thư mục gốc to nhất, chứa toàn bộ dữ liệu." },
-    { q: "Khi di chuyển thư mục, các tệp bên trong có di chuyển theo không?", a: ["Có di chuyển theo", "Không di chuyển"], c: 0, exp: "Cả nhà sẽ cùng dọn đi! Khi chuyển thư mục, mọi tệp bên trong đều đi theo sang nơi mới." },
-    { q: "Bạn An muốn đổi tên tệp 'bai_tap' thành 'Tin_hoc'. Bạn dùng lệnh gì?", a: ["Rename", "Delete"], c: 0, exp: "Rename có nghĩa là đặt lại tên. Delete là xoá mất rồi!" },
-    { q: "Bạn Khoa xoá tệp trong thư mục Windows. Điều gì sẽ xảy ra?", a: ["Lỗi chương trình máy tính", "Máy chạy nhanh hơn"], c: 0, exp: "Thư mục Windows chứa bộ não của máy. Xoá nhầm sẽ làm máy tính ngừng hoạt động." },
-    { q: "Khi chọn lệnh Paste (Dán) mà chưa dùng lệnh Copy trước đó thì sao?", a: ["Không dán được gì cả", "Tạo ra một tệp trống"], c: 0, exp: "Em phải 'Sao chép' (Copy) thì máy mới biết em muốn 'Dán' (Paste) cái gì chứ!" },
-    { q: "Thư mục có thể chứa thư mục khác không?", a: ["Có, chứa được nhiều", "Không, chỉ chứa tệp"], c: 0, exp: "Thư mục có thể chứa rất nhiều tệp và cả các thư mục con khác ở bên trong nó." }
-];        
+        const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
+        
+        // HÀM LƯU LỊCH SỬ VÀO DATABASE
+        async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+            let data = localStorage.getItem('edtech_user_kid');
+            if (!data) return;
+            let user = JSON.parse(data);
+            if (!user.name) return;
+            try {
+                await fetch(`${API_BASE_URL}/api/history`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_name: user.name,
+                        game_name: gameName,
+                        question: question,
+                        student_answer: studentAnswer,
+                        is_correct: isCorrect
+                    })
+                });
+            } catch (error) { console.error('Lỗi lưu lịch sử:', error); }
+        }
+
+        const qs = [
+            { q: "Tệp Gioi_thieu sau khi dùng lệnh Move (Di chuyển) từ thư mục A sang B thì tệp sẽ nằm ở đâu?", a: ["Chỉ nằm ở thư mục B", "Nằm ở cả A và B"], c: 0, exp: "Lệnh Move giống như em bưng sách từ bàn này sang bàn khác, chỗ cũ sẽ không còn sách nữa." },
+            { q: "Tệp Hinh_anh sau khi dùng lệnh Copy (Sao chép) từ thư mục A sang B thì tệp nằm ở đâu?", a: ["Nằm ở cả A và B", "Chỉ nằm ở thư mục B"], c: 0, exp: "Lệnh Copy tạo ra một bản sao y hệt, nên tệp sẽ tồn tại ở cả hai nơi." },
+            { q: "Thư mục 'Lop 4A' chứa thư mục 'Nhom 1'. Vậy 'Nhom 1' được gọi là gì?", a: ["Thư mục con", "Thư mục mẹ"], c: 0, exp: "Thư mục nằm bên trong thư mục khác được gọi là Thư mục con." },
+            { q: "Nếu xoá thư mục 'Nhom 1' thì các tệp bài tập bên trong nó sẽ ra sao?", a: ["Bị xoá theo tất cả", "Vẫn còn nguyên vẹn"], c: 0, exp: "Khi xoá thư mục, tất cả những gì chứa bên trong nó cũng sẽ bị ném vào thùng rác." },
+            { q: "Trong tổ chức cây thư mục, thư mục nào chứa tất cả các thư mục khác?", a: ["Thư mục gốc (Ổ đĩa)", "Thư mục con"], c: 0, exp: "Ổ đĩa (ví dụ ổ C:, ổ D:) chính là thư mục gốc to nhất, chứa toàn bộ dữ liệu." },
+            { q: "Khi di chuyển thư mục, các tệp bên trong có di chuyển theo không?", a: ["Có di chuyển theo", "Không di chuyển"], c: 0, exp: "Cả nhà sẽ cùng dọn đi! Khi chuyển thư mục, mọi tệp bên trong đều đi theo sang nơi mới." },
+            { q: "Bạn An muốn đổi tên tệp 'bai_tap' thành 'Tin_hoc'. Bạn dùng lệnh gì?", a: ["Rename", "Delete"], c: 0, exp: "Rename có nghĩa là đặt lại tên. Delete là xoá mất rồi!" },
+            { q: "Bạn Khoa xoá tệp trong thư mục Windows. Điều gì sẽ xảy ra?", a: ["Lỗi chương trình máy tính", "Máy chạy nhanh hơn"], c: 0, exp: "Thư mục Windows chứa bộ não của máy. Xoá nhầm sẽ làm máy tính ngừng hoạt động." },
+            { q: "Khi chọn lệnh Paste (Dán) mà chưa dùng lệnh Copy trước đó thì sao?", a: ["Không dán được gì cả", "Tạo ra một tệp trống"], c: 0, exp: "Em phải 'Sao chép' (Copy) thì máy mới biết em muốn 'Dán' (Paste) cái gì chứ!" },
+            { q: "Thư mục có thể chứa thư mục khác không?", a: ["Có, chứa được nhiều", "Không, chỉ chứa tệp"], c: 0, exp: "Thư mục có thể chứa rất nhiều tệp và cả các thư mục con khác ở bên trong nó." }
+        ];        
+        
         let playQueue=[], score=0, currRow=0, scrollOffset=0, onFeedbackClose = null, isAnimating=false;
         let frog, river;
 
@@ -167,6 +191,9 @@ const qs = [
         function checkAns(isC, pad, userAnsTxt, mix){
             if(isAnimating) return;
             isAnimating = true;
+            
+            // GỌI HÀM LƯU LỊCH SỬ TẠI ĐÂY
+            saveHistory("Ếch Con Qua Sông", playQueue[currRow].q, userAnsTxt, isC);
             
             let padRect = pad.getBoundingClientRect();
             let riverRect = river.getBoundingClientRect();

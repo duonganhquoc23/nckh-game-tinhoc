@@ -36,7 +36,6 @@
         .hurt-anim { animation: shake 0.4s; filter: drop-shadow(0 0 20px red) !important; }
         .floating-dmg { position: absolute; font-family: 'Baloo 2', cursive; font-size: 2.5rem; font-weight: bold; pointer-events: none; animation: floatDmg 1s forwards; z-index: 100; text-shadow: 2px 2px 0 #fff; }
         
-        /* GIAO DIỆN THANH THỜI GIAN ĐƯỢC TÁCH RA NGOÀI ĐỂ NHÌN GỌN GÀNG HƠN */
         .time-box { background: #f8fafc; border: 3px solid var(--border); border-radius: 15px; padding: 10px 20px; margin-bottom: 15px; box-shadow: 0 4px 0 var(--border); }
         .energy-bar-bg { width: 100%; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; }
         .energy-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.1s linear; }
@@ -97,7 +96,6 @@
                 </div>
             </div>
 
-            <!-- TÁCH THANH NĂNG LƯỢNG RA VỊ TRÍ MỚI -->
             <div class="time-box">
                 <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; color: var(--text-main); font-size: 1rem;">
                     <span>⏰ THỜI GIAN TRẢ LỜI:</span>
@@ -129,7 +127,6 @@
         </div>
     </div>
 
-    <!-- KHUNG HIỂN THỊ LỖI SAI -->
     <div class="feedback-modal" id="fb-modal">
         <div class="feedback-box">
             <h2 class="fb-title">Ôi, bị phản đòn rồi! 😢</h2>
@@ -141,18 +138,41 @@
     </div>
 
     <script>
-const questionBank = [
-    { q: "Từ khoá (Keyword) trên Internet là gì?", ans: ["Từ hoặc cụm từ thể hiện nội dung cần tìm", "Mật khẩu máy tính", "Tên của thư mục", "Tên trang web"], correct: 0, exp: "Từ khoá là những từ quan trọng nhất giúp máy tìm kiếm hiểu em đang muốn tìm thông tin gì." },
-    { q: "Google.com được gọi là gì?", ans: ["Máy tìm kiếm", "Thư mục con", "Tệp văn bản", "Thùng rác"], correct: 0, exp: "Google.com là địa chỉ của một máy tìm kiếm rất phổ biến trên thế giới." },
-    { q: "Sau khi gõ từ khoá vào ô tìm kiếm, em nhấn phím nào để bắt đầu?", ans: ["Phím Enter", "Phím Shift", "Phím Delete", "Phím Ctrl"], correct: 0, exp: "Phím Enter dùng để ra lệnh cho máy tính bắt đầu thực hiện việc tìm kiếm." },
-    { q: "Siêu liên kết (Hyperlink) dùng để làm gì?", ans: ["Mở trang web xem chi tiết", "Xoá tệp tin", "Tạo thư mục mới", "Tắt máy tính"], correct: 0, exp: "Nháy chuột vào siêu liên kết sẽ đưa em đến một trang web chứa thông tin chi tiết." },
-    { q: "Lệnh Copy dùng để làm gì đối với tệp và thư mục?", ans: ["Sao chép", "Di chuyển", "Đổi tên", "Xoá"], correct: 0, exp: "Copy nghĩa là sao chép. Tệp sẽ có mặt ở cả chỗ cũ và chỗ mới." },
-    { q: "Lệnh Move to có tác dụng gì?", ans: ["Di chuyển sang nơi mới", "Tạo thêm bản sao", "Xoá vĩnh viễn", "Đổi tên tệp"], correct: 0, exp: "Khi dùng lệnh Move, tệp sẽ được chuyển hẳn sang nơi mới và không còn ở chỗ cũ nữa." },
-    { q: "Lệnh Rename có biểu tượng hình chữ nhật và con trỏ chuột, nó dùng để làm gì?", ans: ["Đổi tên tệp/thư mục", "Sao chép tệp", "Xoá tệp", "Mở Internet"], correct: 0, exp: "Rename có nghĩa là đặt lại tên mới cho tệp hoặc thư mục của em." },
-    { q: "Nơi chứa các tệp tin gọn gàng trên máy tính gọi là gì?", ans: ["Thư mục", "Trang web", "Máy tìm kiếm", "Thanh địa chỉ"], correct: 0, exp: "Thư mục giống như một chiếc cặp sách, giúp em cất giữ các tệp tin (bài tập, hình ảnh) gọn gàng." },
-    { q: "Khi sao chép một thư mục thì điều gì xảy ra?", ans: ["Các tệp bên trong cũng được sao chép theo", "Chỉ sao chép được vỏ thư mục", "Thư mục cũ sẽ bị xoá", "Máy tính sẽ bị lỗi"], correct: 0, exp: "Thư mục chứa gì bên trong thì khi sao chép, tất cả những thứ đó đều được copy theo." },
-    { q: "Lệnh nào dùng để xoá tệp hoặc thư mục?", ans: ["Delete", "Paste", "Copy", "Rename"], correct: 0, exp: "Nút Delete trên bàn phím hoặc lệnh Delete trên màn hình đều dùng để xoá dữ liệu." }
-];
+        const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
+        
+        // HÀM LƯU LỊCH SỬ VÀO DATABASE
+        async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+            let data = localStorage.getItem('edtech_user_kid');
+            if (!data) return;
+            let user = JSON.parse(data);
+            if (!user.name) return;
+            try {
+                await fetch(`${API_BASE_URL}/api/history`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_name: user.name,
+                        game_name: gameName,
+                        question: question,
+                        student_answer: studentAnswer,
+                        is_correct: isCorrect
+                    })
+                });
+            } catch (error) { console.error('Lỗi lưu lịch sử:', error); }
+        }
+
+        const questionBank = [
+            { q: "Từ khoá (Keyword) trên Internet là gì?", ans: ["Từ hoặc cụm từ thể hiện nội dung cần tìm", "Mật khẩu máy tính", "Tên của thư mục", "Tên trang web"], correct: 0, exp: "Từ khoá là những từ quan trọng nhất giúp máy tìm kiếm hiểu em đang muốn tìm thông tin gì." },
+            { q: "Google.com được gọi là gì?", ans: ["Máy tìm kiếm", "Thư mục con", "Tệp văn bản", "Thùng rác"], correct: 0, exp: "Google.com là địa chỉ của một máy tìm kiếm rất phổ biến trên thế giới." },
+            { q: "Sau khi gõ từ khoá vào ô tìm kiếm, em nhấn phím nào để bắt đầu?", ans: ["Phím Enter", "Phím Shift", "Phím Delete", "Phím Ctrl"], correct: 0, exp: "Phím Enter dùng để ra lệnh cho máy tính bắt đầu thực hiện việc tìm kiếm." },
+            { q: "Siêu liên kết (Hyperlink) dùng để làm gì?", ans: ["Mở trang web xem chi tiết", "Xoá tệp tin", "Tạo thư mục mới", "Tắt máy tính"], correct: 0, exp: "Nháy chuột vào siêu liên kết sẽ đưa em đến một trang web chứa thông tin chi tiết." },
+            { q: "Lệnh Copy dùng để làm gì đối với tệp và thư mục?", ans: ["Sao chép", "Di chuyển", "Đổi tên", "Xoá"], correct: 0, exp: "Copy nghĩa là sao chép. Tệp sẽ có mặt ở cả chỗ cũ và chỗ mới." },
+            { q: "Lệnh Move to có tác dụng gì?", ans: ["Di chuyển sang nơi mới", "Tạo thêm bản sao", "Xoá vĩnh viễn", "Đổi tên tệp"], correct: 0, exp: "Khi dùng lệnh Move, tệp sẽ được chuyển hẳn sang nơi mới và không còn ở chỗ cũ nữa." },
+            { q: "Lệnh Rename có biểu tượng hình chữ nhật và con trỏ chuột, nó dùng để làm gì?", ans: ["Đổi tên tệp/thư mục", "Sao chép tệp", "Xoá tệp", "Mở Internet"], correct: 0, exp: "Rename có nghĩa là đặt lại tên mới cho tệp hoặc thư mục của em." },
+            { q: "Nơi chứa các tệp tin gọn gàng trên máy tính gọi là gì?", ans: ["Thư mục", "Trang web", "Máy tìm kiếm", "Thanh địa chỉ"], correct: 0, exp: "Thư mục giống như một chiếc cặp sách, giúp em cất giữ các tệp tin (bài tập, hình ảnh) gọn gàng." },
+            { q: "Khi sao chép một thư mục thì điều gì xảy ra?", ans: ["Các tệp bên trong cũng được sao chép theo", "Chỉ sao chép được vỏ thư mục", "Thư mục cũ sẽ bị xoá", "Máy tính sẽ bị lỗi"], correct: 0, exp: "Thư mục chứa gì bên trong thì khi sao chép, tất cả những thứ đó đều được copy theo." },
+            { q: "Lệnh nào dùng để xoá tệp hoặc thư mục?", ans: ["Delete", "Paste", "Copy", "Rename"], correct: 0, exp: "Nút Delete trên bàn phím hoặc lệnh Delete trên màn hình đều dùng để xoá dữ liệu." }
+        ];
         let playerHP = 100, bossHP = 100, playQueue = [], currentQ = null, isProcessing = false, energyValue = 100, energyTimer = null;
         let onFeedbackClose = null;
 
@@ -207,12 +227,17 @@ const questionBank = [
             if (isProcessing) return; isProcessing = true; clearInterval(energyTimer); 
             Array.from(document.getElementById('ans-grid').children).forEach(b => b.classList.add('disabled'));
             
-            if (selectedOriginalIdx === currentQ.correct) {
+            let isCorrect = (selectedOriginalIdx === currentQ.correct);
+            let userTxt = currentQ.ans[selectedOriginalIdx];
+            
+            // GỌI HÀM LƯU LỊCH SỬ SAU KHI HỌC SINH CHỌN
+            saveHistory("Đấu Trường So Tài", currentQ.q, userTxt, isCorrect);
+
+            if (isCorrect) {
                 btn.classList.add('correct'); executeAttack('player');
             } else {
                 btn.classList.add('wrong'); 
                 const correctTxt = currentQ.ans[currentQ.correct];
-                const userTxt = currentQ.ans[selectedOriginalIdx];
                 Array.from(document.getElementById('ans-grid').children).forEach(b => { if(b.innerText === correctTxt) b.classList.add('correct'); });
                 
                 showFeedbackModal(userTxt, correctTxt, currentQ.exp, () => executeAttack('boss'));
@@ -222,6 +247,10 @@ const questionBank = [
         function handleTimeout() {
             if (isProcessing) return; isProcessing = true;
             Array.from(document.getElementById('ans-grid').children).forEach(b => { b.classList.add('disabled'); if(b.innerText === currentQ.ans[currentQ.correct]) b.classList.add('correct'); });
+            
+            // LƯU LỊCH SỬ KHI KHÔNG CHỌN KỊP
+            saveHistory("Đấu Trường So Tài", currentQ.q, "Không chọn kịp (Hết giờ)", false);
+            
             showFeedbackModal("Không chọn kịp giờ", currentQ.ans[currentQ.correct], currentQ.exp, () => executeAttack('boss_timeout'));
         }
 

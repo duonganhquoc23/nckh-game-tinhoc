@@ -63,18 +63,43 @@
     </div>
     
     <script>
-const bugs = [
-    { title: "Tình huống: Sắp xếp dữ liệu cá nhân", lines: ["1. Tạo thư mục riêng để lưu bài tập.", "2. Sao chép bài tập ra 100 thư mục khác nhau.", "3. Đặt tên thư mục là tên của em."], bugLine: 1, exp: "Sao chép ra quá nhiều nơi sẽ làm tốn bộ nhớ và khiến em rất khó tìm lại bài khi cần!", wrongExp: "Đây là thao tác rất TỐT giúp máy tính gọn gàng. Hãy tìm hành động sai cơ!" },
-    { title: "Tình huống: Dọn dẹp máy tính", lines: ["1. Xoá tệp bài làm cũ do chính em tạo ra.", "2. Xoá tệp lạ trong thư mục Windows.", "3. Gom các ảnh vào chung thư mục Hinh anh."], bugLine: 1, exp: "Thư mục Windows chứa các tệp hệ thống. Xoá nhầm sẽ làm lỗi chương trình, treo máy tính!", wrongExp: "Hành động này hoàn toàn đúng vì em có quyền xoá tệp do mình tạo ra." },
-    { title: "Tình huống: Dùng máy tính chung ở trường", lines: ["1. Di chuyển thư mục của bạn khác vào thùng rác.", "2. Tạo thư mục mang tên nhóm mình.", "3. Lưu bài trình chiếu vào đúng thư mục nhóm."], bugLine: 0, exp: "Xoá hoặc di chuyển thư mục của bạn khác sẽ làm mất bài tập của bạn, gây đảo lộn trật tự!", wrongExp: "Đây là việc nên làm để giữ gìn máy tính chung gọn gàng." },
-    { title: "Tình huống: Sao chép dữ liệu", lines: ["1. Dùng lệnh Copy để lưu thêm một bản dự phòng.", "2. Copy thư mục bài tập của mình sang ổ đĩa D.", "3. Sao chép tệp bài làm của bạn khác thành của mình."], bugLine: 2, exp: "Sao chép bài của bạn thành của mình là không trung thực trong học tập nhé!", wrongExp: "Việc sao chép để dự phòng (backup) là một thói quen cực kỳ an toàn." },
-    { title: "Tình huống: Tìm kiếm thông tin", lines: ["1. Gõ từ khoá thật dài không rõ nghĩa.", "2. Gõ từ khoá ngắn gọn, đúng trọng tâm.", "3. Kiểm tra kĩ từ khoá trước khi nhấn Enter."], bugLine: 0, exp: "Từ khoá quá dài và lan man sẽ làm máy tìm kiếm không hiểu được em thực sự muốn tìm gì.", wrongExp: "Đây là thao tác chuẩn xác để tìm được thông tin nhanh nhất." },
-    { title: "Tình huống: Đọc kết quả tìm kiếm", lines: ["1. Xem lướt các dòng tóm tắt bên dưới link.", "2. Nhấp chuột bừa bãi vào mọi siêu liên kết.", "3. Chọn siêu liên kết từ trang web uy tín."], bugLine: 1, exp: "Nhấp bừa bãi có thể đưa em vào các trang web chứa mã độc hoặc thông tin không phù hợp.", wrongExp: "Đọc tóm tắt là cách thông minh để biết trang web đó có chứa thứ mình cần không." },
-    { title: "Tình huống: Đổi tên thư mục", lines: ["1. Đổi tên thư mục Bài tập thành Bai tap Tin hoc.", "2. Đổi tên thư mục chứa trò chơi của anh trai.", "3. Đổi tên tệp văn bản của em cho dễ nhớ."], bugLine: 1, exp: "Đổi tên thư mục của người khác sẽ làm họ không tìm thấy dữ liệu của mình nữa.", wrongExp: "Tự sắp xếp và đổi tên dữ liệu của bản thân là điều rất đáng khen!" },
-    { title: "Tình huống: Di chuyển thư mục", lines: ["1. Chọn lệnh Move to để chuyển tệp.", "2. Kéo thả tệp hệ thống ra ngoài màn hình nền.", "3. Chuyển thư mục con vào đúng thư mục mẹ."], bugLine: 1, exp: "Tệp hệ thống cần nằm đúng chỗ của nó. Kéo ra ngoài sẽ làm máy tính báo lỗi ngay!", wrongExp: "Lệnh Move to sinh ra chính là để di chuyển dữ liệu gọn gàng hơn." },
-    { title: "Tình huống: Nhập địa chỉ web", lines: ["1. Gõ google.com vào thanh tìm kiếm.", "2. Nhấn Enter sau khi gõ xong địa chỉ.", "3. Gõ mật khẩu của em vào thanh địa chỉ."], bugLine: 2, exp: "Thanh địa chỉ chỉ dùng để gõ tên trang web (như google.com). Không bao giờ gõ mật khẩu lên đó!", wrongExp: "Thao tác này hoàn toàn đúng để truy cập vào trang web." },
-    { title: "Tình huống: Dùng chuột để Copy/Move", lines: ["1. Nháy nút phải chuột để hiện bảng lệnh.", "2. Chọn Copy rồi chọn Delete để dán.", "3. Chọn Copy rồi chọn Paste để dán tệp."], bugLine: 1, exp: "Lệnh Delete là để xoá! Muốn dán tệp vừa copy, em phải dùng lệnh Paste.", wrongExp: "Nháy nút phải chuột là cách rất nhanh để gọi bảng lệnh thao tác." }
-];        let queue = [], lives = 3, score = 0, currentBug = null, isProcessing = false, onFeedbackClose = null;
+        const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
+        
+        // HÀM LƯU LỊCH SỬ VÀO DATABASE
+        async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+            let data = localStorage.getItem('edtech_user_kid');
+            if (!data) return;
+            let user = JSON.parse(data);
+            if (!user.name) return;
+            try {
+                await fetch(`${API_BASE_URL}/api/history`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_name: user.name,
+                        game_name: gameName,
+                        question: question,
+                        student_answer: studentAnswer,
+                        is_correct: isCorrect
+                    })
+                });
+            } catch (error) { console.error('Lỗi lưu lịch sử:', error); }
+        }
+
+        const bugs = [
+            { title: "Tình huống: Sắp xếp dữ liệu cá nhân", lines: ["1. Tạo thư mục riêng để lưu bài tập.", "2. Sao chép bài tập ra 100 thư mục khác nhau.", "3. Đặt tên thư mục là tên của em."], bugLine: 1, exp: "Sao chép ra quá nhiều nơi sẽ làm tốn bộ nhớ và khiến em rất khó tìm lại bài khi cần!", wrongExp: "Đây là thao tác rất TỐT giúp máy tính gọn gàng. Hãy tìm hành động sai cơ!" },
+            { title: "Tình huống: Dọn dẹp máy tính", lines: ["1. Xoá tệp bài làm cũ do chính em tạo ra.", "2. Xoá tệp lạ trong thư mục Windows.", "3. Gom các ảnh vào chung thư mục Hinh anh."], bugLine: 1, exp: "Thư mục Windows chứa các tệp hệ thống. Xoá nhầm sẽ làm lỗi chương trình, treo máy tính!", wrongExp: "Hành động này hoàn toàn đúng vì em có quyền xoá tệp do mình tạo ra." },
+            { title: "Tình huống: Dùng máy tính chung ở trường", lines: ["1. Di chuyển thư mục của bạn khác vào thùng rác.", "2. Tạo thư mục mang tên nhóm mình.", "3. Lưu bài trình chiếu vào đúng thư mục nhóm."], bugLine: 0, exp: "Xoá hoặc di chuyển thư mục của bạn khác sẽ làm mất bài tập của bạn, gây đảo lộn trật tự!", wrongExp: "Đây là việc nên làm để giữ gìn máy tính chung gọn gàng." },
+            { title: "Tình huống: Sao chép dữ liệu", lines: ["1. Dùng lệnh Copy để lưu thêm một bản dự phòng.", "2. Copy thư mục bài tập của mình sang ổ đĩa D.", "3. Sao chép tệp bài làm của bạn khác thành của mình."], bugLine: 2, exp: "Sao chép bài của bạn thành của mình là không trung thực trong học tập nhé!", wrongExp: "Việc sao chép để dự phòng (backup) là một thói quen cực kỳ an toàn." },
+            { title: "Tình huống: Tìm kiếm thông tin", lines: ["1. Gõ từ khoá thật dài không rõ nghĩa.", "2. Gõ từ khoá ngắn gọn, đúng trọng tâm.", "3. Kiểm tra kĩ từ khoá trước khi nhấn Enter."], bugLine: 0, exp: "Từ khoá quá dài và lan man sẽ làm máy tìm kiếm không hiểu được em thực sự muốn tìm gì.", wrongExp: "Đây là thao tác chuẩn xác để tìm được thông tin nhanh nhất." },
+            { title: "Tình huống: Đọc kết quả tìm kiếm", lines: ["1. Xem lướt các dòng tóm tắt bên dưới link.", "2. Nhấp chuột bừa bãi vào mọi siêu liên kết.", "3. Chọn siêu liên kết từ trang web uy tín."], bugLine: 1, exp: "Nhấp bừa bãi có thể đưa em vào các trang web chứa mã độc hoặc thông tin không phù hợp.", wrongExp: "Đọc tóm tắt là cách thông minh để biết trang web đó có chứa thứ mình cần không." },
+            { title: "Tình huống: Đổi tên thư mục", lines: ["1. Đổi tên thư mục Bài tập thành Bai tap Tin hoc.", "2. Đổi tên thư mục chứa trò chơi của anh trai.", "3. Đổi tên tệp văn bản của em cho dễ nhớ."], bugLine: 1, exp: "Đổi tên thư mục của người khác sẽ làm họ không tìm thấy dữ liệu của mình nữa.", wrongExp: "Tự sắp xếp và đổi tên dữ liệu của bản thân là điều rất đáng khen!" },
+            { title: "Tình huống: Di chuyển thư mục", lines: ["1. Chọn lệnh Move to để chuyển tệp.", "2. Kéo thả tệp hệ thống ra ngoài màn hình nền.", "3. Chuyển thư mục con vào đúng thư mục mẹ."], bugLine: 1, exp: "Tệp hệ thống cần nằm đúng chỗ của nó. Kéo ra ngoài sẽ làm máy tính báo lỗi ngay!", wrongExp: "Lệnh Move to sinh ra chính là để di chuyển dữ liệu gọn gàng hơn." },
+            { title: "Tình huống: Nhập địa chỉ web", lines: ["1. Gõ google.com vào thanh tìm kiếm.", "2. Nhấn Enter sau khi gõ xong địa chỉ.", "3. Gõ mật khẩu của em vào thanh địa chỉ."], bugLine: 2, exp: "Thanh địa chỉ chỉ dùng để gõ tên trang web (như google.com). Không bao giờ gõ mật khẩu lên đó!", wrongExp: "Thao tác này hoàn toàn đúng để truy cập vào trang web." },
+            { title: "Tình huống: Dùng chuột để Copy/Move", lines: ["1. Nháy nút phải chuột để hiện bảng lệnh.", "2. Chọn Copy rồi chọn Delete để dán.", "3. Chọn Copy rồi chọn Paste để dán tệp."], bugLine: 1, exp: "Lệnh Delete là để xoá! Muốn dán tệp vừa copy, em phải dùng lệnh Paste.", wrongExp: "Nháy nút phải chuột là cách rất nhanh để gọi bảng lệnh thao tác." }
+        ];        
+        
+        let queue = [], lives = 3, score = 0, currentBug = null, isProcessing = false, onFeedbackClose = null;
 
         function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         function initGame() { queue = [...bugs].sort(() => Math.random() - 0.5); lives = 3; score = 0; updateHUD(); showScreen('screen-game'); loadCode(); }
@@ -89,7 +114,14 @@ const bugs = [
 
         function checkLine(i) {
             if (isProcessing) return; let el = document.getElementById(`line-${i}`); isProcessing = true;
-            if (i === currentBug.bugLine) {
+            
+            let isCorrect = (i === currentBug.bugLine);
+            let userTxt = currentBug.lines[i];
+            
+            // GỌI HÀM LƯU LỊCH SỬ TẠI ĐÂY
+            saveHistory("Rừng Săn Lỗi", currentBug.title, userTxt, isCorrect);
+
+            if (isCorrect) {
                 el.classList.add('correct-reveal'); score += 100; updateHUD();
                 showModal(true, "BẮT ĐÚNG LỖI! 🎉", currentBug.exp, () => loadCode());
             } else {
