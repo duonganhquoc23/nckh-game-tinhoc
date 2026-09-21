@@ -33,29 +33,25 @@
         .item-wrapper { 
             position: absolute; transform: translate(-50%, -50%); 
             display: flex; flex-direction: column; align-items: center; 
-            z-index: 10; 
+            z-index: 10; width: 140px;
         }
         
-        .gold-ore { background: #fde047; border-radius: 40% 60% 70% 30%; border: 3px solid #b45309; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2); transition: 0.2s; pointer-events: auto; width: 75px; height: 65px;}
+        .gold-ore { background: #fde047; border-radius: 40% 60% 70% 30%; border: 3px solid #b45309; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2); transition: 0.2s; pointer-events: auto; width: 75px; height: 65px; display: flex; justify-content: center; align-items: center;}
         .rock-ore { background: #94a3b8; border-radius: 50% 40% 60% 40%; border: 3px solid #334155; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.4); pointer-events: auto; width: 65px; height: 55px;}
-        .bomb-item { width: 45px; height: 45px; background: #1e293b; border-radius: 50%; border: 3px solid #020617; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.8), 0 5px 5px rgba(0,0,0,0.3); pointer-events: auto; position: relative; }
+        .bomb-item { width: 45px; height: 45px; background: #1e293b; border-radius: 50%; border: 3px solid #020617; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.8), 0 5px 5px rgba(0,0,0,0.3); pointer-events: auto; position: relative; margin-bottom: 5px;}
         .bomb-item::before { content: ''; position: absolute; top: -8px; left: 50%; width: 4px; height: 10px; background: #d97706; transform: translateX(-50%); }
         .bomb-item::after { content: '💣'; }
         
         .answer-tag { 
-            position: absolute;
-            top: 100%;
-            margin-top: 6px; 
             background: #fff; color: #1e293b; font-size: 13px; font-weight: 800; 
-            padding: 5px 10px; border-radius: 12px; border: 2px solid #cbd5e1; text-align: center; 
-            width: max-content; 
-            max-width: 140px;
-            word-wrap: break-word; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 20;
-            line-height: 1.3;
+            padding: 6px 8px; border-radius: 10px; border: 2px solid #cbd5e1; text-align: center; 
+            width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 20;
+            margin-top: 6px; line-height: 1.3;
         }
 
         @media (max-width: 650px) {
-            .answer-tag { max-width: 110px; font-size: 11px; padding: 4px 8px; }
+            .item-wrapper { width: 105px; }
+            .answer-tag { font-size: 11px; padding: 5px; margin-top: 5px;}
             .gold-ore { width: 60px; height: 50px; }
             .rock-ore { width: 50px; height: 40px; }
             .bomb-item { width: 35px; height: 35px; font-size: 1.4rem; }
@@ -110,7 +106,6 @@
     <script>
         const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
         
-        // HÀM LƯU LỊCH SỬ VÀO DATABASE
         async function saveHistory(gameName, question, studentAnswer, isCorrect) {
             let data = localStorage.getItem('edtech_user_kid');
             if (!data) return;
@@ -179,10 +174,13 @@
             
             hookState='swing'; hookLength=40; grabbedItem=null; craneSystem.style.height='40px'; itemsContainer.innerHTML=''; itemsOnBoard=[];
             
+            // Đã nâng toạ độ trục Y lên 25%, 50%, 75% để thu gọn vào hoàn toàn trong màn hình
             const slots = [
-                {x: 20, y: 18}, {x: 80, y: 18},
-                {x: 35, y: 48}, {x: 65, y: 48}, 
-                {x: 20, y: 75}, {x: 80, y: 75}  
+                {x: 20, y: 25}, 
+                {x: 80, y: 25}, 
+                {x: 50, y: 50}, 
+                {x: 25, y: 75}, 
+                {x: 75, y: 75}  
             ].sort(() => Math.random() - 0.5);
             
             let ansMix = q.ans.map((txt,idx)=>({txt, isCorrect: idx===q.correct})).sort(()=>Math.random()-0.5);
@@ -202,7 +200,8 @@
                 itemsOnBoard.push({el: el, isCorrect: ans.isCorrect, type: isGold ? 'gold' : 'rock'});
             });
             
-            for(let i=0; i < 2; i++) {
+            // Giữ 1 quả bom để khớp với 5 slot
+            for(let i=0; i < 1; i++) {
                 let slotIdx = ansMix.length + i; 
                 let el = document.createElement('div'); 
                 el.className = 'item-wrapper'; 
@@ -221,19 +220,26 @@
         function handleInput(e){if(e.type==='touchstart')e.preventDefault();if(e.type==='keydown'&&e.code!=='Space')return;if(hookState==='swing')hookState='drop';}
         
         function gameLoop(){
-            if(hookState==='swing'){ hookAngle+=1.5*hookDir; if(hookAngle>=65) hookDir=-1; if(hookAngle<=-65) hookDir=1; craneSystem.style.transform=`rotate(${hookAngle}deg)`; }
+            if(hookState==='swing'){ hookAngle+=1.5*hookDir; if(hookAngle>=70) hookDir=-1; if(hookAngle<=-70) hookDir=1; craneSystem.style.transform=`rotate(${hookAngle}deg)`; }
             else if(hookState==='drop'){
                 hookLength+=9; craneSystem.style.height=hookLength+'px';
-                let tipX=mineArea.clientWidth/2-Math.sin(hookAngle*Math.PI/180)*hookLength; let tipY=15+Math.cos(hookAngle*Math.PI/180)*hookLength;
+                let tipX=mineArea.clientWidth/2-Math.sin(hookAngle*Math.PI/180)*hookLength; 
+                let tipY=15+Math.cos(hookAngle*Math.PI/180)*hookLength;
                 
                 if(tipX<0 || tipX>mineArea.clientWidth || tipY>mineArea.clientHeight) hookState='return';
                 else{
                     let hitBomb = null;
                     let hitItem = null;
+
                     for(let i=0; i<itemsOnBoard.length; i++){
                         let item = itemsOnBoard[i];
-                        let hitRadius = item.type === 'bomb' ? 25 : 35;
-                        if(Math.hypot(tipX-item.el.offsetLeft, tipY-item.el.offsetTop) < hitRadius){
+                        
+                        let hitX = item.el.offsetLeft;
+                        let hitY = item.el.offsetTop - 20; 
+                        
+                        let hitRadius = item.type === 'bomb' ? 25 : 45; 
+
+                        if(Math.hypot(tipX - hitX, tipY - hitY) < hitRadius){
                             if(item.type === 'bomb') hitBomb = item;
                             else hitItem = item;
                         }
@@ -244,17 +250,28 @@
                         hookState='return'; 
                     } else if(hitBomb) { 
                         hookState='paused'; hitBomb.el.innerHTML='💥'; claw.classList.add('claw-broken'); 
-                        // LƯU LỊCH SỬ NẾU GẮP TRÚNG BOM
                         saveHistory("Mỏ Kho Báu", playQueue[currentIndex].q, "Gắp trúng Bom", false);
                         setTimeout(() => endGame(false), 1500); 
                     }
                 }
             }
             else if(hookState==='return'){
-                let speed = grabbedItem && grabbedItem.isCorrect ? 8 : (grabbedItem ? 4 : 12); hookLength -= speed;
+                let speed = grabbedItem && grabbedItem.isCorrect ? 8 : (grabbedItem ? 4 : 12); 
+                hookLength -= speed;
                 
-                if(grabbedItem){ grabbedItem.el.style.left=(mineArea.clientWidth/2-Math.sin(hookAngle*Math.PI/180)*hookLength)+'px'; grabbedItem.el.style.top=(15+Math.cos(hookAngle*Math.PI/180)*hookLength)+20+'px'; }
-                if(hookLength<=40){hookLength=40; processResult();} craneSystem.style.height=hookLength+'px';
+                if(grabbedItem){ 
+                    let tipX = mineArea.clientWidth/2 - Math.sin(hookAngle*Math.PI/180)*hookLength;
+                    let tipY = 15 + Math.cos(hookAngle*Math.PI/180)*hookLength;
+                    
+                    grabbedItem.el.style.left = tipX + 'px'; 
+                    grabbedItem.el.style.top = (tipY + 40) + 'px'; 
+                }
+                
+                if(hookLength<=40){
+                    hookLength=40; 
+                    processResult();
+                } 
+                craneSystem.style.height=hookLength+'px';
             }
             
             if(hookState!=='paused') animationId=requestAnimationFrame(gameLoop);
@@ -271,7 +288,6 @@
             grabbedItem.el.style.display='none';
             let userAnsTxt = grabbedItem.el.querySelector('.answer-tag').innerText;
             
-            // GỌI HÀM LƯU LỊCH SỬ KHI GẮP XONG
             saveHistory("Mỏ Kho Báu", playQueue[currentIndex].q, userAnsTxt, grabbedItem.isCorrect);
             
             if(grabbedItem.isCorrect){ 
