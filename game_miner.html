@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mỏ Kho Báu Tin Học</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-main: #f0fdfa; --sky: #bae6fd; --dirt-top: #65a30d; --dirt-deep: #d97706; --primary: #3b82f6; --success: #10b981; --error: #ef4444; --warning: #f59e0b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Nunito', sans-serif;}
+        body { background-color: var(--bg-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; padding: 20px;}
+        .game-wrapper { width: 100%; max-width: 900px; height: 100vh; max-height: 680px; background: var(--sky); position: relative; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; border: 4px solid var(--primary); }
+        .screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 50; background: rgba(255, 255, 255, 0.95); flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center;}
+        .screen.active { display: flex; animation: fadeIn 0.4s; }
+        #screen-game { background: transparent; z-index: 10; position: relative; display: flex; flex-direction: column; padding: 0; }
+        .title { font-family: 'Baloo 2', cursive; font-size: 3.5rem; color: var(--warning); text-shadow: 2px 3px 0 #b45309; margin-bottom: 10px;}
+        .btn { background: var(--warning); color: #fff; border: none; padding: 15px 35px; font-size: 1.2rem; font-weight: 800; border-radius: 25px; cursor: pointer; transition: 0.2s; font-family: 'Baloo 2', cursive; box-shadow: 0 6px 0 #d97706; margin: 10px; }
+        .btn:active { transform: translateY(6px); box-shadow: 0 0 0 #d97706; }
+        .btn-outline { background: #f1f5f9; border: 3px solid #cbd5e1; color: #475569; box-shadow: 0 5px 0 #cbd5e1; }
+        .header-bar { height: 75px; background: #fffbeb; border-bottom: 3px dashed var(--warning); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; font-weight: 800; z-index: 20; color: #b45309; font-size: 1.2rem;}
+        .question-panel { background: #fff; color: var(--primary); padding: 15px 20px; font-size: 1.3rem; font-weight: 800; border-bottom: 4px solid #bfdbfe; z-index: 15; text-align: center; font-family: 'Baloo 2', cursive;}
+        .mine-area { flex: 1; position: relative; width: 100%; background: linear-gradient(180deg, var(--dirt-deep) 0%, #78350f 100%); border-top: 20px solid var(--dirt-top); overflow: hidden; cursor: pointer; }
+        .machine-base { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 90px; height: 50px; background: #cbd5e1; border-radius: 0 0 45px 45px; border: 4px solid #64748b; z-index: 12; display: flex; justify-content: center; }
+        .cabin { position: absolute; top: -48px; left: 50%; transform: translateX(-50%); width: 70px; height: 60px; background: rgba(241, 245, 249, 0.8); border: 4px solid #64748b; border-bottom: none; border-radius: 35px 35px 0 0; z-index: 12; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 2px; }
+        #miner-character { font-size: 3rem; line-height: 1; z-index: 13; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+        #crane-system { position: absolute; top: 15px; left: 50%; width: 4px; height: 40px; transform-origin: top center; z-index: 11; }
+        #cable { width: 100%; height: 100%; background: #94a3b8; }
+        #claw { position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 45px; height: 35px; border: 5px solid #94a3b8; border-top: none; border-radius: 0 0 20px 20px; transition: border-color 0.2s;}
+        .claw-broken { border-color: var(--error) !important; border-style: dashed !important; }
+        
+        #items-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;}
+        
+        .item-wrapper { 
+            position: absolute; transform: translate(-50%, -50%); 
+            display: flex; flex-direction: column; align-items: center; 
+            z-index: 10; 
+        }
+        
+        .gold-ore { background: #fde047; border-radius: 40% 60% 70% 30%; border: 3px solid #b45309; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2); transition: 0.2s; pointer-events: auto; width: 75px; height: 65px;}
+        .rock-ore { background: #94a3b8; border-radius: 50% 40% 60% 40%; border: 3px solid #334155; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.4); pointer-events: auto; width: 65px; height: 55px;}
+        .bomb-item { width: 45px; height: 45px; background: #1e293b; border-radius: 50%; border: 3px solid #020617; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.8), 0 5px 5px rgba(0,0,0,0.3); pointer-events: auto; position: relative; }
+        .bomb-item::before { content: ''; position: absolute; top: -8px; left: 50%; width: 4px; height: 10px; background: #d97706; transform: translateX(-50%); }
+        .bomb-item::after { content: '💣'; }
+        
+        .answer-tag { 
+            position: absolute;
+            top: 100%;
+            margin-top: 6px; 
+            background: #fff; color: #1e293b; font-size: 12px; font-weight: 800; 
+            padding: 5px 8px; border-radius: 10px; border: 2px solid #cbd5e1; text-align: center; 
+            width: max-content; 
+            max-width: 120px;
+            word-wrap: break-word; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 20;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 650px) {
+            .answer-tag { max-width: 100px; font-size: 11px; padding: 4px 6px; }
+            .gold-ore { width: 60px; height: 50px; }
+            .rock-ore { width: 50px; height: 40px; }
+            .bomb-item { width: 35px; height: 35px; font-size: 1.4rem; }
+        }
+        
+        .feedback-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); }
+        .feedback-modal.active { display: flex; animation: fadeIn 0.3s ease; }
+        .feedback-box { background: #fff; padding: 30px; border-radius: 25px; text-align: center; max-width: 450px; width: 90%; border: 5px solid #ef4444; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px);} to { opacity: 1; transform: translateY(0);} }
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <div id="screen-home" class="screen active">
+            <h1 class="title">⛏️ MỎ KHO BÁU</h1>
+            <p style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; line-height: 1.6; background: #fffbeb; padding: 15px; border-radius: 15px; border: 2px dashed #f59e0b;">
+                🎯 <b>Nhiệm vụ:</b> Em hãy gắp chính xác đáp án ĐÚNG<br>
+                🌟🪨 <b>Chú ý:</b> Đừng để màu sắc đánh lừa, đáp án đúng có thể nằm ở Vàng hoặc Đá!<br>
+                💣 <b>Bom:</b> Tuyệt đối không gắp trúng nhé!
+            </p>
+            <div><button class="btn" onclick="initGame()">BẮT ĐẦU ĐÀO</button><button class="btn btn-outline" onclick="window.location.href='index.html#home'">VỀ BẢN ĐỒ</button></div>
+        </div>
+        
+        <div id="screen-game" class="screen">
+            <div class="header-bar"><button class="btn btn-outline" style="padding: 5px 15px; font-size: 1rem; border-width: 2px; margin: 0;" onclick="window.location.href='index.html#home'">← QUAY VỀ</button><div style="flex: 1;">Tiến độ: <span id="ui-progress">1/5</span></div><div style="display: flex; align-items: center; gap: 10px; font-family: 'Baloo 2', cursive; font-size: 1.5rem;">⭐ XP: <span id="ui-score" style="color: var(--primary);">0</span></div></div>
+            <div class="question-panel" id="ui-question">Câu hỏi...</div>
+            <div class="mine-area" id="mine-area">
+                <div class="machine-base"><div class="cabin"><div id="miner-character">👦</div></div></div>
+                <div id="crane-system"><div id="cable"></div><div id="claw"></div></div>
+                <div id="items-container"></div>
+            </div>
+        </div>
+        
+        <div id="screen-result" class="screen">
+            <h1 class="title" id="res-title" style="font-size: 3rem; color: var(--success); text-shadow: 2px 2px 0 #059669;">HOÀN THÀNH!</h1>
+            <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 30px;">Thu thập được: <span id="res-score" style="color: var(--warning); font-size: 2.5rem; font-family: 'Baloo 2', cursive;">0</span> XP</div>
+            <div><button class="btn" style="background:var(--primary);" onclick="initGame()">CHƠI LẠI</button><button class="btn btn-outline" onclick="saveAndGoHome()">THOÁT</button></div>
+        </div>
+    </div>
+
+    <div class="feedback-modal" id="fb-modal">
+        <div class="feedback-box">
+            <h2 style="font-family: 'Baloo 2', cursive; font-size: 2rem; color: #ef4444; margin-bottom: 10px;">Sai mất rồi! 😢</h2>
+            <div style="color: #ef4444; font-size: 1.2rem; font-weight: bold; text-decoration: line-through; margin-bottom: 5px;" id="fb-wrong">Em chọn: ...</div>
+            <div style="color: #10b981; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px;" id="fb-correct">Đáp án đúng: ...</div>
+            <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; line-height: 1.5;" id="fb-exp">Giải thích</div>
+            <button class="btn btn-primary" onclick="closeFeedback()">ĐÃ HIỂU!</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
+        
+        async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+            let data = localStorage.getItem('edtech_user_kid');
+            if (!data) return;
+            let user = JSON.parse(data);
+            if (!user.name) return;
+            try {
+                await fetch(`${API_BASE_URL}/api/history`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_name: user.name,
+                        game_name: gameName,
+                        question: question,
+                        student_answer: studentAnswer,
+                        is_correct: isCorrect
+                    })
+                });
+            } catch (error) { console.error('Lỗi lưu lịch sử:', error); }
+        }
+
+        const qs = [
+            { q: "Bước đầu tiên trước khi tìm kiếm trên Internet là gì?", ans: ["Xác định từ khoá", "Mở trình duyệt web", "Nhấn phím Enter", "Gõ vào ô tìm kiếm"], correct: 0, exp: "Em phải nghĩ trong đầu xem mình cần tìm gì (xác định từ khoá) thì mới có thể bắt đầu được." },
+            { q: "Sau khi xác định từ khoá, bước thứ 2 em làm gì?", ans: ["Mở trình duyệt, vào máy tìm kiếm", "Nháy chuột vào siêu liên kết", "Lưu ảnh về máy tính", "Nhấn Delete"], correct: 0, exp: "Em cần mở trình duyệt web và truy cập vào máy tìm kiếm như google.com." },
+            { q: "Để gõ từ khoá, em nhấp chuột vào đâu trên trang Google?", ans: ["Vào ô tìm kiếm", "Vào thanh địa chỉ", "Vào nút tắt web", "Vào logo Google"], correct: 0, exp: "Ô tìm kiếm ở giữa trang web là nơi dành riêng để em nhập từ khoá vào." },
+            { q: "Kết quả máy tìm kiếm trả về hiển thị dưới dạng gì?", ans: ["Danh sách các siêu liên kết", "Một video duy nhất", "Một bức ảnh", "Trang tính Excel"], correct: 0, exp: "Máy sẽ trả về một danh sách rất dài các trang web (siêu liên kết) có chứa thông tin em cần." },
+            { q: "Bước cuối cùng để xem thông tin chi tiết là gì?", ans: ["Nháy chuột vào siêu liên kết", "Gõ lại từ khoá", "Xoá siêu liên kết", "Khởi động lại máy"], correct: 0, exp: "Nháy chuột vào tiêu đề màu xanh (siêu liên kết) sẽ mở ra trang thông tin đầy đủ." },
+            { q: "Máy tìm kiếm có thể tìm được những gì?", ans: ["Bài viết, hình ảnh, video", "Chỉ tìm được bài viết", "Chỉ tìm được hình ảnh", "Không tìm được video"], correct: 0, exp: "Máy tìm kiếm rất thông minh, có thể tìm ra bài viết, hình ảnh, video và cả bản đồ." },
+            { q: "Khi gõ từ khoá trên Google, các cụm từ hiện ra bên dưới gọi là gì?", ans: ["Cụm từ gợi ý", "Siêu liên kết", "Lệnh máy tính", "Lỗi phần mềm"], correct: 0, exp: "Đó là các cụm từ gợi ý giúp em gõ nhanh hơn hoặc tìm từ khoá chính xác hơn." },
+            { q: "Tại sao không nên nhấp vào siêu liên kết lạ, có cảnh báo?", ans: ["Có thể chứa virus độc hại", "Làm máy chạy nhanh", "Giúp tải game miễn phí", "Tiết kiệm mạng"], correct: 0, exp: "Các liên kết không an toàn có thể chứa virus làm hỏng máy tính hoặc đánh cắp thông tin." },
+            { q: "Trình duyệt web và máy tìm kiếm có giống nhau không?", ans: ["Không giống nhau", "Giống hệt nhau", "Chỉ là một phần mềm", "Đều là thư mục"], correct: 0, exp: "Trình duyệt (Chrome) là chiếc xe, còn máy tìm kiếm (Google.com) là thư viện em đi tới." },
+            { q: "Khi xem kết quả, nếu không thấy thông tin cần tìm em nên làm gì?", ans: ["Đổi từ khoá khác phù hợp hơn", "Đập bàn phím", "Tắt máy đi ngủ", "Nhấn Enter 10 lần"], correct: 0, exp: "Nếu từ khoá chưa chuẩn, em hãy thay đổi từ khoá khác ngắn gọn và rõ nghĩa hơn nhé." }
+        ];        
+        
+        let playQueue=[], currentIndex=0, score=0, hookAngle=0, hookDir=1, hookState='swing', hookLength=40, grabbedItem=null, itemsOnBoard=[], animationId=null;
+        const mineArea=document.getElementById('mine-area'), itemsContainer=document.getElementById('items-container'), craneSystem=document.getElementById('crane-system'), claw=document.getElementById('claw'); 
+        let onFeedbackClose = null;
+
+        window.addEventListener('DOMContentLoaded', () => { document.getElementById('miner-character').innerText = (JSON.parse(localStorage.getItem('edtech_user_kid')) || {}).avatar || '👦'; });
+
+        function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+        
+        function initGame(){
+            cancelAnimationFrame(animationId);
+            window.removeEventListener('keydown',handleInput); 
+            mineArea.removeEventListener('mousedown',handleInput);
+            mineArea.removeEventListener('touchstart',handleInput);
+
+            playQueue=[...qs].sort(()=>Math.random()-0.5); currentIndex=0; score=0; 
+            claw.classList.remove('claw-broken'); showScreen('screen-game');
+            window.addEventListener('keydown',handleInput); 
+            mineArea.addEventListener('mousedown',handleInput); 
+            mineArea.addEventListener('touchstart',handleInput,{passive:false});
+            
+            if(nextQuestion()){
+                gameLoop();
+            }
+        }
+
+        function nextQuestion(){
+            if(currentIndex>=playQueue.length) { endGame(true); return false; }
+            
+            const q = playQueue[currentIndex]; 
+            document.getElementById('ui-question').innerText = q.q; 
+            document.getElementById('ui-progress').innerText = `${currentIndex+1}/${playQueue.length}`; 
+            document.getElementById('ui-score').innerText = score;
+            
+            hookState='swing'; hookLength=40; grabbedItem=null; craneSystem.style.height='40px'; itemsContainer.innerHTML=''; itemsOnBoard=[];
+            
+            // Căn chỉnh lại vị trí để chống đè và dễ gắp hơn
+            const slots = [
+                {x: 18, y: 30}, {x: 50, y: 35}, {x: 82, y: 30},
+                {x: 25, y: 65}, {x: 50, y: 75}, {x: 75, y: 65}
+            ].sort(() => Math.random() - 0.5);
+            
+            let ansMix = q.ans.map((txt,idx)=>({txt, isCorrect: idx===q.correct})).sort(()=>Math.random()-0.5);
+            
+            ansMix.forEach((ans, index)=>{
+                let isGold = Math.random() > 0.5; 
+                let el = document.createElement('div'); 
+                el.className = 'item-wrapper'; 
+                el.style.left = slots[index].x + '%'; 
+                el.style.top = slots[index].y + '%';
+                el.style.zIndex = '10'; 
+                
+                if(isGold) el.innerHTML = `<div class="gold-ore"></div><div class="answer-tag">${ans.txt}</div>`; 
+                else el.innerHTML = `<div class="rock-ore"></div><div class="answer-tag">${ans.txt}</div>`;
+                
+                itemsContainer.appendChild(el); 
+                itemsOnBoard.push({el: el, isCorrect: ans.isCorrect, type: isGold ? 'gold' : 'rock'});
+            });
+            
+            for(let i=0; i < 2; i++) {
+                let slotIdx = ansMix.length + i; 
+                let el = document.createElement('div'); 
+                el.className = 'item-wrapper'; 
+                el.style.left = slots[slotIdx].x + '%'; 
+                el.style.top = slots[slotIdx].y + '%';
+                el.style.zIndex = '5';
+                
+                el.innerHTML = `<div class="bomb-item"></div>`; 
+                itemsContainer.appendChild(el); 
+                itemsOnBoard.push({el: el, type: 'bomb'});
+            }
+            
+            return true;
+        }
+
+        function handleInput(e){if(e.type==='touchstart')e.preventDefault();if(e.type==='keydown'&&e.code!=='Space')return;if(hookState==='swing')hookState='drop';}
+        
+        function gameLoop(){
+            // Mở rộng góc quét của móc lên 75 độ để bắt được hai viền
+            if(hookState==='swing'){ hookAngle+=1.5*hookDir; if(hookAngle>=75) hookDir=-1; if(hookAngle<=-75) hookDir=1; craneSystem.style.transform=`rotate(${hookAngle}deg)`; }
+            else if(hookState==='drop'){
+                hookLength+=9; craneSystem.style.height=hookLength+'px';
+                let tipX=mineArea.clientWidth/2-Math.sin(hookAngle*Math.PI/180)*hookLength; let tipY=15+Math.cos(hookAngle*Math.PI/180)*hookLength;
+                
+                if(tipX<0 || tipX>mineArea.clientWidth || tipY>mineArea.clientHeight) hookState='return';
+                else{
+                    let hitBomb = null;
+                    let hitItem = null;
+                    for(let i=0; i<itemsOnBoard.length; i++){
+                        let item = itemsOnBoard[i];
+                        let hitRadius = item.type === 'bomb' ? 25 : 35;
+                        if(Math.hypot(tipX-item.el.offsetLeft, tipY-item.el.offsetTop) < hitRadius){
+                            if(item.type === 'bomb') hitBomb = item;
+                            else hitItem = item;
+                        }
+                    }
+                    if(hitItem) { 
+                        grabbedItem = hitItem; 
+                        itemsOnBoard = itemsOnBoard.filter(i => i !== hitItem); 
+                        hookState='return'; 
+                    } else if(hitBomb) { 
+                        hookState='paused'; hitBomb.el.innerHTML='💥'; claw.classList.add('claw-broken'); 
+                        saveHistory("Mỏ Kho Báu", playQueue[currentIndex].q, "Gắp trúng Bom", false);
+                        setTimeout(() => endGame(false), 1500); 
+                    }
+                }
+            }
+            else if(hookState==='return'){
+                let speed = grabbedItem && grabbedItem.isCorrect ? 8 : (grabbedItem ? 4 : 12); hookLength -= speed;
+                
+                if(grabbedItem){ grabbedItem.el.style.left=(mineArea.clientWidth/2-Math.sin(hookAngle*Math.PI/180)*hookLength)+'px'; grabbedItem.el.style.top=(15+Math.cos(hookAngle*Math.PI/180)*hookLength)+20+'px'; }
+                if(hookLength<=40){hookLength=40; processResult();} craneSystem.style.height=hookLength+'px';
+            }
+            
+            if(hookState!=='paused') animationId=requestAnimationFrame(gameLoop);
+        }
+
+        function processResult(){
+            hookState='paused';
+
+            if(!grabbedItem){ 
+                setTimeout(()=>{ hookState='swing'; animationId = requestAnimationFrame(gameLoop); }, 500); 
+                return; 
+            }
+            
+            grabbedItem.el.style.display='none';
+            let userAnsTxt = grabbedItem.el.querySelector('.answer-tag').innerText;
+            
+            saveHistory("Mỏ Kho Báu", playQueue[currentIndex].q, userAnsTxt, grabbedItem.isCorrect);
+            
+            if(grabbedItem.isCorrect){ 
+                score+=100; currentIndex++; document.getElementById('ui-score').innerText=score; 
+                setTimeout(() => {
+                    if(nextQuestion()) {
+                        animationId = requestAnimationFrame(gameLoop);
+                    }
+                }, 600); 
+            } else { 
+                let correctTxt = itemsOnBoard.find(i=>i.isCorrect).el.querySelector('.answer-tag').innerText;
+                showModal(userAnsTxt, correctTxt, playQueue[currentIndex].exp, () => {
+                    currentIndex++; 
+                    if(nextQuestion()) {
+                        animationId = requestAnimationFrame(gameLoop);
+                    }
+                });
+            }
+        }
+
+        function showModal(userAns, correctAns, exp, callback) {
+            document.getElementById('fb-wrong').innerText = "Em chọn: " + userAns; document.getElementById('fb-correct').innerText = "Đáp án đúng: " + correctAns;
+            document.getElementById('fb-exp').innerText = "💡 Chú ý: " + exp; document.getElementById('fb-modal').classList.add('active'); onFeedbackClose = callback;
+        }
+
+        function closeFeedback() { document.getElementById('fb-modal').classList.remove('active'); if (onFeedbackClose) onFeedbackClose(); }
+        
+        function endGame(isWin){ cancelAnimationFrame(animationId); document.getElementById('res-score').innerText=score; showScreen('screen-result'); }
+        
+        function saveAndGoHome() { 
+            let data = localStorage.getItem('edtech_user_kid');
+            if (!data) { window.location.href = 'index.html'; return; }
+            let user = JSON.parse(data);
+            if (!user.name) { window.location.href = 'index.html'; return; }
+
+            user.xp = (user.xp || 0) + score; 
+            user.level = Math.floor(user.xp / 500) + 1; 
+            user.last_played = new Date().toLocaleString('vi-VN');
+            
+            localStorage.setItem('edtech_user_kid', JSON.stringify(user)); 
+            
+            let leaderboard = JSON.parse(localStorage.getItem('edtech_leaderboard')) || [];
+            let existingStudent = leaderboard.findIndex(s => s.id === user.id);
+            if(existingStudent !== -1) { leaderboard[existingStudent] = user; } 
+            else { leaderboard.push(user); }
+            localStorage.setItem('edtech_leaderboard', JSON.stringify(leaderboard));
+
+            window.location.href = 'index.html#home'; 
+        }
+    </script>
+</body>
+</html>

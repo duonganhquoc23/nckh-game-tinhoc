@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tàu Ngầm Khám Phá</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-main: #e0f2fe; --primary: #0284c7; --success: #10b981; --error: #ef4444; --warning: #f59e0b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Nunito', sans-serif;}
+        body { background-color: var(--bg-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;}
+        
+        .game-container { width: 100%; max-width: 950px; background: #ffffff; border: 4px solid var(--primary); border-radius: 30px; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        .screen { display: none; padding: 40px; text-align: center; } .screen.active { display: block; animation: fadeIn 0.4s ease; }
+        .title-kid { font-family: 'Baloo 2', cursive; font-size: 3.5rem; color: var(--primary); margin-bottom: 10px; text-shadow: 2px 2px 0 #bae6fd;}
+        .btn { padding: 15px 35px; background: var(--warning); color: white; font-size: 1.2rem; font-weight: 800; border-radius: 25px; cursor: pointer; box-shadow: 0 6px 0 #d97706; margin: 10px; border: none; font-family: 'Baloo 2', cursive;}
+        .btn:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
+        .btn-outline { background: #f1f5f9; border: 3px solid #cbd5e1; color: #475569; box-shadow: 0 5px 0 #cbd5e1; }
+        
+        .hud { display: flex; justify-content: space-between; background: #f0fdfa; padding: 15px 30px; font-size: 1.4rem; font-weight: 800; color: var(--primary); border-bottom: 4px solid #ccfbf1; font-family: 'Baloo 2', cursive; }
+        .q-box { background: #fff; padding: 20px; font-size: 1.4rem; font-weight: 800; color: #334155; border-bottom: 4px solid #0284c7; z-index: 10; min-height: 90px; display: flex; align-items: center; justify-content: center;}
+        
+        .ocean-area { height: 380px; position: relative; background: linear-gradient(180deg, #38bdf8 0%, #0369a1 100%); overflow: hidden; display: flex; flex-direction: column;}
+        .lane { flex: 1; border-bottom: 2px dashed rgba(255,255,255,0.2); position: relative; cursor: pointer; display: flex; align-items: center; transition: 0.2s;}
+        .lane:hover { background: rgba(255,255,255,0.1); }
+        
+        .submarine { 
+            font-size: 4.5rem; 
+            position: absolute; 
+            left: 5%; 
+            z-index: 10; 
+            transition: top 0.3s cubic-bezier(0.25, 1, 0.5, 1); 
+            transform: translateY(-50%) scaleX(-1); 
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+        }
+        
+        .fish-bubble { position: absolute; background: rgba(255,255,255,0.9); border: 4px solid #fff; border-radius: 30px; padding: 10px 20px; font-size: 1.2rem; font-weight: 800; color: #0284c7; display: flex; align-items: center; gap: 10px; z-index: 5; transform: translateY(-50%); white-space: nowrap; box-shadow: 0 5px 15px rgba(0,0,0,0.2);}
+        .fish-bubble::before { content: '🐠'; font-size: 2rem; }
+
+        .explosion { position: absolute; font-size: 4rem; z-index: 20; transform: translate(-50%, -50%); animation: boom 0.6s forwards;}
+        @keyframes boom { 0% { transform: translate(-50%, -50%) scale(0.5); opacity:1;} 100% { transform: translate(-50%, -50%) scale(2); opacity:0;} }
+
+        .xp-float {
+            position: absolute; font-family: 'Baloo 2', cursive; font-size: 3rem;
+            color: #10b981; font-weight: 800; text-shadow: 2px 2px 0 #fff;
+            pointer-events: none; z-index: 100; animation: floatUp 1.5s ease-out forwards;
+        }
+        @keyframes floatUp { 
+            0% { opacity: 1; transform: translateY(-50%) scale(0.5); } 
+            20% { opacity: 1; transform: translateY(-70%) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-120%) scale(1); } 
+        }
+
+        .bubbles { position: absolute; top: 0; left: 0; width: 200%; font-size: 2rem; letter-spacing: 150px; opacity: 0.3; animation: moveBg 10s linear infinite; pointer-events: none;}
+        .bubbles::after { content: '🫧 🫧 🫧 🫧 🫧 🫧 🫧'; }
+        @keyframes moveBg { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        .feedback-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); }
+        .feedback-modal.active { display: flex; animation: fadeIn 0.3s ease; }
+        .feedback-box { background: #fff; padding: 30px; border-radius: 25px; text-align: center; max-width: 450px; width: 90%; border: 5px solid #ef4444; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        
+        @keyframes fadeIn { from { opacity:0; transform: translateY(15px); } to { opacity:1; transform: translateY(0); } } 
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div id="screen-home" class="screen active">
+            <h1 class="title-kid">🚢 TÀU NGẦM KHÁM PHÁ</h1>
+            <p style="font-size:1.3rem; margin-bottom:30px; font-weight:700;">Nhấp chuột vào luồng nước để điều khiển tàu ngầm đụng trúng chú cá mang đáp án chính xác nhé!</p>
+            <div>
+                <button class="btn" onclick="initGame()">LẶN XUỐNG</button>
+                <button class="btn btn-outline" onclick="window.location.href='index.html#home'">VỀ BẢN ĐỒ</button>
+            </div>
+        </div>
+        
+        <div id="screen-game" class="screen" style="padding: 0;">
+            <div style="width: 100%; text-align: left; padding: 10px 30px; background: #f0fdfa; border-bottom: 2px solid #ccfbf1;"><button class="btn btn-outline" style="padding: 5px 15px; font-size: 1rem; border-width: 2px; margin: 0; background: white;" onclick="window.location.href='index.html#home'">← QUAY VỀ</button></div>
+            <div class="hud">
+                <div>Chặng: <span id="ui-prog" style="color: var(--warning);">1/10</span></div>
+                <div>XP: <span id="ui-score" style="color: var(--success);">0</span></div>
+            </div>
+            <div class="q-box" id="ui-q">Câu hỏi...</div>
+            <div class="ocean-area" id="ocean">
+                <div class="bubbles"></div>
+                <div class="lane" onclick="moveSub(0)"></div>
+                <div class="lane" onclick="moveSub(1)"></div>
+                <div class="lane" onclick="moveSub(2)"></div>
+                <div class="submarine" id="sub">🛥️</div>
+            </div>
+        </div>
+        
+        <div id="screen-result" class="screen">
+            <h1 class="title-kid" style="color: var(--success);">TUYỆT VỜI!</h1>
+            <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 30px;">Thu thập được: <span id="res-score" style="color: var(--warning); font-size: 2.5rem; font-family: 'Baloo 2', cursive;">0</span> XP</div>
+            <div>
+                <button class="btn" style="background:var(--primary);" onclick="initGame()">CHƠI LẠI</button>
+                <button class="btn btn-outline" onclick="saveAndGoHome()">THOÁT</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback-modal" id="fb-modal">
+        <div class="feedback-box">
+            <h2 style="font-family: 'Baloo 2', cursive; font-size: 2rem; color: #ef4444; margin-bottom: 10px;">Đụng nhầm cá rồi! 💥</h2>
+            <div style="color: #ef4444; font-size: 1.2rem; font-weight: bold; text-decoration: line-through; margin-bottom: 5px;" id="fb-wrong">Cá em bắt: ...</div>
+            <div style="color: #10b981; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px;" id="fb-correct">Cá đúng là: ...</div>
+            <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;" id="fb-exp">Giải thích</div>
+            <button class="btn btn-primary" onclick="closeFeedback()" style="background: #0284c7;">ĐÃ HIỂU!</button>
+        </div>
+    </div>
+
+    <script>
+    const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
+        
+    async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+        let data = localStorage.getItem('edtech_user_kid');
+        if (!data) return;
+        let user = JSON.parse(data);
+        if (!user.name) return;
+        try {
+            await fetch(`${API_BASE_URL}/api/history`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    student_name: user.name,
+                    game_name: gameName,
+                    question: question,
+                    student_answer: studentAnswer,
+                    is_correct: isCorrect
+                })
+            });
+        } catch (error) { console.error('Lỗi lưu lịch sử:', error); }
+    }
+
+    // Đã bổ sung đầy đủ 3 đáp án cho toàn bộ câu hỏi
+    const qs = [
+        { q: "Ổ đĩa (D:) thường đóng vai trò là thư mục gì?", a: ["Thư mục gốc", "Thư mục con", "Tệp văn bản"], c: 0, exp: "Ổ đĩa là thư mục gốc to nhất, chứa toàn bộ các thư mục và tệp khác bên trong." },
+        { q: "Biểu tượng màu vàng hình kẹp tài liệu là gì?", a: ["Thư mục (Folder)", "Trang web", "Thùng rác"], c: 0, exp: "Các thư mục thường có biểu tượng màu vàng giống chiếc kẹp đựng tài liệu giấy." },
+        { q: "Nếu thư mục 'Nhom 1' nằm trong 'Lop 4A'. 'Lop 4A' gọi là gì?", a: ["Thư mục mẹ", "Thư mục con", "Thùng rác"], c: 0, exp: "Thư mục chứa thư mục khác ở bên trong nó được gọi là thư mục mẹ." },
+        { q: "Biểu tượng hình chữ 'W' màu xanh dương hoặc 'P' màu cam thường là gì?", a: ["Tệp (File)", "Thư mục", "Ổ đĩa"], c: 0, exp: "Đó là các Tệp văn bản (Word) hoặc Tệp trình chiếu (PowerPoint)." },
+        { q: "Cách tổ chức thư mục mẹ chứa thư mục con tạo thành hình gì?", a: ["Cây thư mục", "Mạng nhện", "Hình vuông"], c: 0, exp: "Nó được gọi là 'Cây thư mục' vì rẽ nhánh giống hệt như cành và lá cây." },
+        { q: "Để mở xem bên trong một thư mục có gì, em làm thao tác nào?", a: ["Nháy đúp chuột", "Nhấn phím Delete", "Nháy nút phải chuột"], c: 0, exp: "Nháy đúp chuột (nháy nhanh 2 lần nút trái) dùng để mở tệp hoặc thư mục." },
+        { q: "Lệnh nào tương đương với việc em 'Nhặt tệp ở đây, bỏ sang kia'?", a: ["Lệnh Move (Di chuyển)", "Lệnh Copy (Sao chép)", "Lệnh Rename (Đổi tên)"], c: 0, exp: "Move chính là nhấc hẳn tệp đi, vị trí cũ sẽ trống trơn." },
+        { q: "Tệp 'Gioi_thieu' và thư mục 'Hinh_anh' có thể cùng nằm trong thư mục 'Thu An' không?", a: ["Hoàn toàn có thể", "Không bao giờ", "Chỉ chứa được tệp"], c: 0, exp: "Thư mục mẹ có thể chứa lẫn lộn cả thư mục con và các tệp." },
+        { q: "Hai thư mục nằm cùng một chỗ có được đặt tên giống hệt nhau không?", a: ["Không được", "Có, thoải mái", "Máy sẽ tự sửa"], c: 0, exp: "Máy tính không cho phép 2 tệp hoặc 2 thư mục trùng tên hoàn toàn khi nằm cùng một chỗ." },
+        { q: "Khi nháy nút phải chuột vào thư mục, điều gì hiện ra?", a: ["Bảng lệnh (Copy, Rename...)", "Máy tính tắt luôn", "Google tìm kiếm"], c: 0, exp: "Nháy nút phải chuột sẽ mở ra bảng danh sách các lệnh để em thao tác." }
+    ];        
+        
+        let playQueue=[], score=0, curr=0, onFeedbackClose=null;
+        let subLane = 1; 
+        const sub = document.getElementById('sub');
+        const ocean = document.getElementById('ocean');
+        let gameLoopAnim, fishes = [], isPlaying = false, isTransitioning = false;
+
+        function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        
+        function initGame(){ 
+            playQueue=[...qs].sort(()=>Math.random()-0.5); score=0; curr=0; 
+            showScreen('screen-game'); moveSub(1); loadQ(); 
+        }
+
+        function moveSub(laneIndex) {
+            subLane = laneIndex;
+            sub.style.top = (16.66 + laneIndex * 33.33) + '%';
+        }
+        
+        function loadQ(){
+            cancelAnimationFrame(gameLoopAnim); 
+            if(curr>=playQueue.length) return endGame();
+            
+            document.getElementById('ui-q').innerText=playQueue[curr].q; 
+            document.getElementById('ui-prog').innerText=`${curr+1}/${playQueue.length}`; 
+            document.getElementById('ui-score').innerText=score; 
+            
+            document.querySelectorAll('.fish-bubble').forEach(e => e.remove());
+            document.querySelectorAll('.xp-float').forEach(e => e.remove()); 
+            fishes = [];
+            
+            let mix = playQueue[curr].a.map((txt,i)=>({txt, isC: i===playQueue[curr].c})).sort(()=>Math.random()-0.5);
+            
+            mix.forEach((ans, i) => { 
+                let f = document.createElement('div');
+                f.className = 'fish-bubble';
+                f.innerText = ans.txt;
+                f.style.top = (16.66 + i * 33.33) + '%';
+                f.style.left = '100%';
+                ocean.appendChild(f);
+                fishes.push({ el: f, x: 100, lane: i, isC: ans.isC, txt: ans.txt });
+            });
+
+            isTransitioning = false;
+            isPlaying = true;
+            gameLoopAnim = requestAnimationFrame(updateGame);
+        }
+
+        function updateGame() {
+            if(!isPlaying) return; 
+            
+            fishes.forEach(fish => {
+                // Giảm tốc độ từ 0.15 xuống 0.1 để cá bơi mượt và dễ nhìn hơn
+                fish.x -= 0.1; 
+                fish.el.style.left = fish.x + '%';
+                
+                if(!isTransitioning && fish.x < 15 && fish.x > 5) {
+                    if(subLane === fish.lane) {
+                        handleHit(fish);
+                    }
+                }
+                
+                if(!isTransitioning && fish.x < 0 && subLane === fish.lane) {
+                    handleHit(fish);
+                }
+            });
+
+            if(isPlaying) {
+                gameLoopAnim = requestAnimationFrame(updateGame);
+            }
+        }
+
+        function handleHit(fish) {
+            isTransitioning = true;
+            
+            let boom = document.createElement('div');
+            boom.className = 'explosion'; boom.innerText = '🫧';
+            boom.style.left = '15%'; boom.style.top = sub.style.top;
+            ocean.appendChild(boom);
+            setTimeout(() => boom.remove(), 600);
+
+            fish.el.style.display = 'none';
+
+            saveHistory("Tàu Ngầm Khám Phá", playQueue[curr].q, fish.txt, fish.isC);
+
+            if(fish.isC) {
+                score += 100; document.getElementById('ui-score').innerText = score;
+                
+                let xpTxt = document.createElement('div');
+                xpTxt.className = 'xp-float';
+                xpTxt.innerText = '+100 XP';
+                xpTxt.style.left = '15%';
+                xpTxt.style.top = sub.style.top;
+                ocean.appendChild(xpTxt);
+
+                setTimeout(() => { 
+                    curr++; 
+                    loadQ(); 
+                }, 1500); 
+            } else {
+                let cTxt = fishes.find(f => f.isC).txt;
+                setTimeout(() => {
+                    isPlaying = false; 
+                    showModal(fish.txt, cTxt, playQueue[curr].exp, () => { curr++; loadQ(); });
+                }, 800);
+            }
+        }
+
+        function showModal(userAns, correctAns, exp, callback) {
+            document.getElementById('fb-wrong').innerText = "Cá em bắt: " + userAns; 
+            document.getElementById('fb-correct').innerText = "Cá mang đáp án đúng: " + correctAns;
+            document.getElementById('fb-exp').innerText = "💡 Nhớ nhé: " + exp; 
+            document.getElementById('fb-modal').classList.add('active'); 
+            onFeedbackClose = callback;
+        }
+
+        function closeFeedback() { document.getElementById('fb-modal').classList.remove('active'); if(onFeedbackClose) onFeedbackClose(); }
+
+        function endGame(){ isPlaying = false; document.getElementById('res-score').innerText=score; showScreen('screen-result'); }
+        
+        function saveAndGoHome() { 
+            let data = localStorage.getItem('edtech_user_kid');
+            if (!data) { window.location.href = 'index.html'; return; }
+            let user = JSON.parse(data);
+            if (!user.name) { window.location.href = 'index.html'; return; }
+
+            user.xp = (user.xp || 0) + score; 
+            user.level = Math.floor(user.xp / 500) + 1; 
+            user.last_played = new Date().toLocaleString('vi-VN');
+            
+            localStorage.setItem('edtech_user_kid', JSON.stringify(user)); 
+            
+            let leaderboard = JSON.parse(localStorage.getItem('edtech_leaderboard')) || [];
+            let existingStudent = leaderboard.findIndex(s => s.id === user.id);
+            if(existingStudent !== -1) { leaderboard[existingStudent] = user; } 
+            else { leaderboard.push(user); }
+            localStorage.setItem('edtech_leaderboard', JSON.stringify(leaderboard));
+
+            window.location.href = 'index.html#home'; 
+        }
+    </script>
+</body>
+</html>
