@@ -134,9 +134,26 @@
     }
 
     const qs = [
-        { q: "Đoạn chữ 'Yêu Tổ quốc, yêu đồng bào...' là thông tin dạng gì?", a: ["Dạng văn bản", "Dạng hình ảnh", "Dạng âm thanh"], c: 0, exp: "Những dòng chữ được viết ra thuộc loại thông tin dạng văn bản." },
-        { q: "Bức tranh minh họa các bạn học sinh đang vui chơi là thông tin dạng gì?", a: ["Dạng văn bản", "Dạng hình ảnh", "Dạng âm thanh"], c: 1, exp: "Các bức vẽ, tranh hay ảnh chụp là thông tin dưới dạng hình ảnh." },
-        { q: "Đoạn video clip phát trên màn hình chứa loại thông tin dạng gì?", a: ["Chỉ có hình ảnh", "Chỉ có âm thanh", "Hình ảnh và âm thanh"], c: 2, exp: "Video clip bao gồm cả hình ảnh chuyển động kết hợp với âm thanh." },
+        const qs = [
+    { 
+        // Thay link/tên file ảnh thật của bạn vào chỗ src='...'
+        q: "<div style='display:flex; align-items:center; gap:15px;'><img src='https://via.placeholder.com/150x80?text=Yeu+To+Quoc' style='height: 70px; border-radius: 10px;'> Đoạn chữ trong ảnh là thông tin dạng gì?</div>", 
+        a: ["Dạng văn bản", "Dạng hình ảnh", "Dạng âm thanh"], 
+        c: 0, 
+        exp: "Những dòng chữ được viết ra thuộc loại thông tin dạng văn bản." 
+    },
+    { 
+        q: "<div style='display:flex; align-items:center; gap:15px;'><img src='https://via.placeholder.com/150x80?text=Tranh+Hoc+Sinh' style='height: 70px; border-radius: 10px;'> Bức tranh minh họa này là thông tin dạng gì?</div>", 
+        a: ["Dạng văn bản", "Dạng hình ảnh", "Dạng âm thanh"], 
+        c: 1, 
+        exp: "Các bức vẽ, tranh hay ảnh chụp là thông tin dưới dạng hình ảnh." 
+    },
+    { 
+        q: "<div style='display:flex; align-items:center; gap:15px;'><img src='https://via.placeholder.com/150x80?text=Video+Clip' style='height: 70px; border-radius: 10px;'> Đoạn video clip có biểu tượng nút Play này chứa loại thông tin dạng gì?</div>", 
+        a: ["Chỉ có hình ảnh", "Chỉ có âm thanh", "Hình ảnh và âm thanh"], 
+        c: 2, 
+        exp: "Video clip bao gồm cả hình ảnh chuyển động kết hợp với âm thanh." 
+    },
         { q: "Em nên chia sẻ trang web không phù hợp cho bạn bè cùng xem. Đúng hay sai?", a: ["Đúng", "Sai", "Không quan tâm"], c: 1, exp: "Tuyệt đối không chia sẻ các trang web có nội dung xấu, không phù hợp cho người khác." },
         { q: "Khi gặp trang web không phù hợp, em nên đóng và báo cho người lớn. Đúng hay sai?", a: ["Đúng", "Sai", "Tự xem một mình"], c: 0, exp: "Đây là cách xử lý an toàn và chính xác nhất để bảo vệ bản thân trên Internet." },
         { q: "Chỉ nên truy cập các trang web phù hợp với lứa tuổi và mục đích học tập. Đúng hay sai?", a: ["Đúng", "Sai", "Xem web nào cũng được"], c: 0, exp: "Truy cập web phù hợp giúp em học tập tốt và tránh xa các nội dung độc hại." }
