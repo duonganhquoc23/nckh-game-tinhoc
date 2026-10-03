@@ -105,7 +105,7 @@
             <div style="color: #ef4444; font-size: 1.2rem; font-weight: bold; text-decoration: line-through; margin-bottom: 5px;" id="fb-wrong">Cá em bắt: ...</div>
             <div style="color: #10b981; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px;" id="fb-correct">Cá đúng là: ...</div>
             <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;" id="fb-exp">Giải thích</div>
-            <button class="btn btn-primary" onclick="closeFeedback()" style="background: #0284c7;">ĐÃ HIỂU!</button>
+            <button class="btn btn-primary" onclick="closeFeedback()" style="background: #0284c7; border:none; padding:10px 20px; color:white; border-radius:15px; font-weight:bold; cursor:pointer;">ĐÃ HIỂU!</button>
         </div>
     </div>
 
@@ -134,16 +134,12 @@
     }
 
     const qs = [
-        { q: "Ổ đĩa (D:) thường đóng vai trò là thư mục gì?", a: ["Thư mục gốc", "Thư mục con", "Tệp văn bản"], c: 0, exp: "Ổ đĩa là thư mục gốc to nhất, chứa toàn bộ các thư mục và tệp khác bên trong." },
-        { q: "Biểu tượng màu vàng hình kẹp tài liệu là gì?", a: ["Thư mục (Folder)", "Trang web", "Thùng rác"], c: 0, exp: "Các thư mục thường có biểu tượng màu vàng giống chiếc kẹp đựng tài liệu giấy." },
-        { q: "Nếu thư mục 'Nhom 1' nằm trong 'Lop 4A'. 'Lop 4A' gọi là gì?", a: ["Thư mục mẹ", "Thư mục con", "Thùng rác"], c: 0, exp: "Thư mục chứa thư mục khác ở bên trong nó được gọi là thư mục mẹ." },
-        { q: "Biểu tượng hình chữ 'W' màu xanh dương hoặc 'P' màu cam thường là gì?", a: ["Tệp (File)", "Thư mục", "Ổ đĩa"], c: 0, exp: "Đó là các Tệp văn bản (Word) hoặc Tệp trình chiếu (PowerPoint)." },
-        { q: "Cách tổ chức thư mục mẹ chứa thư mục con tạo thành hình gì?", a: ["Cây thư mục", "Mạng nhện", "Hình vuông"], c: 0, exp: "Nó được gọi là 'Cây thư mục' vì rẽ nhánh giống hệt như cành và lá cây." },
-        { q: "Để mở xem bên trong một thư mục có gì, em làm thao tác nào?", a: ["Nháy đúp chuột", "Nhấn phím Delete", "Nháy nút phải chuột"], c: 0, exp: "Nháy đúp chuột (nháy nhanh 2 lần nút trái) dùng để mở tệp hoặc thư mục." },
-        { q: "Lệnh nào tương đương với việc em 'Nhặt tệp ở đây, bỏ sang kia'?", a: ["Lệnh Move (Di chuyển)", "Lệnh Copy (Sao chép)", "Lệnh Rename (Đổi tên)"], c: 0, exp: "Move chính là nhấc hẳn tệp đi, vị trí cũ sẽ trống trơn." },
-        { q: "Tệp 'Gioi_thieu' và thư mục 'Hinh_anh' có thể cùng nằm trong thư mục 'Thu An' không?", a: ["Hoàn toàn có thể", "Không bao giờ"], c: 0, exp: "Thư mục mẹ có thể chứa lẫn lộn cả thư mục con và các tệp." },
-        { q: "Hai thư mục nằm cùng một chỗ có được đặt tên giống hệt nhau không?", a: ["Không được", "Có, thoải mái"], c: 0, exp: "Máy tính không cho phép 2 tệp hoặc 2 thư mục trùng tên hoàn toàn khi nằm cùng một chỗ." },
-        { q: "Khi nháy nút phải chuột vào thư mục, điều gì hiện ra?", a: ["Bảng lệnh (Copy, Rename...)", "Máy tính tắt luôn", "Google tìm kiếm"], c: 0, exp: "Nháy nút phải chuột sẽ mở ra bảng danh sách các lệnh để em thao tác." }
+        { q: "Đoạn chữ 'Yêu Tổ quốc, yêu đồng bào...' là thông tin dạng gì?", a: ["Dạng văn bản", "Dạng hình ảnh", "Dạng âm thanh"], c: 0, exp: "Những dòng chữ được viết ra thuộc loại thông tin dạng văn bản." },
+        { q: "Bức tranh minh họa các bạn học sinh đang vui chơi là thông tin dạng gì?", a: ["Dạng văn bản", "Dạng hình ảnh", "Dạng âm thanh"], c: 1, exp: "Các bức vẽ, tranh hay ảnh chụp là thông tin dưới dạng hình ảnh." },
+        { q: "Đoạn video clip phát trên màn hình chứa loại thông tin dạng gì?", a: ["Chỉ có hình ảnh", "Chỉ có âm thanh", "Hình ảnh và âm thanh"], c: 2, exp: "Video clip bao gồm cả hình ảnh chuyển động kết hợp với âm thanh." },
+        { q: "Em nên chia sẻ trang web không phù hợp cho bạn bè cùng xem. Đúng hay sai?", a: ["Đúng", "Sai", "Không quan tâm"], c: 1, exp: "Tuyệt đối không chia sẻ các trang web có nội dung xấu, không phù hợp cho người khác." },
+        { q: "Khi gặp trang web không phù hợp, em nên đóng và báo cho người lớn. Đúng hay sai?", a: ["Đúng", "Sai", "Tự xem một mình"], c: 0, exp: "Đây là cách xử lý an toàn và chính xác nhất để bảo vệ bản thân trên Internet." },
+        { q: "Chỉ nên truy cập các trang web phù hợp với lứa tuổi và mục đích học tập. Đúng hay sai?", a: ["Đúng", "Sai", "Xem web nào cũng được"], c: 0, exp: "Truy cập web phù hợp giúp em học tập tốt và tránh xa các nội dung độc hại." }
     ];        
         
         let playQueue=[], score=0, curr=0, onFeedbackClose=null;
