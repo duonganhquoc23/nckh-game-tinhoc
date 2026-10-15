@@ -11,7 +11,7 @@ app.use(express.json());
 // API 1: Tạo bảng CSDL (Chỉ chạy 1 lần lúc setup)
 app.get('/api/setup', async (req, res) => {
     try {
-        // 1. Tạo bảng users (Cũ)
+        // 1. Tạo bảng users (Đã thêm cột played_submarine để giới hạn 1 lần chơi)
         const createTableUsers = `
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -20,6 +20,7 @@ app.get('/api/setup', async (req, res) => {
                 avatar VARCHAR(255),
                 level INT DEFAULT 1,
                 xp INT DEFAULT 0,
+                played_submarine BOOLEAN DEFAULT FALSE, 
                 last_played TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         `;
@@ -39,7 +40,15 @@ app.get('/api/setup', async (req, res) => {
         `;
         await db.query(createTableHistory);
 
-        res.status(200).send("🎉 TUYỆT VỜI! Đã tạo bảng users và game_history thành công.");
+        // Nếu bảng users đã tồn tại từ trước mà chưa có cột played_submarine, hãy chạy lệnh ALTER TABLE này
+        try {
+            await db.query("ALTER TABLE users ADD COLUMN played_submarine BOOLEAN DEFAULT FALSE");
+            console.log("Đã thêm cột played_submarine vào bảng users hiện tại.");
+        } catch (e) {
+            // Bỏ qua lỗi nếu cột đã tồn tại
+        }
+
+        res.status(200).send("🎉 TUYỆT VỜI! Đã tạo/cập nhật bảng users và game_history thành công.");
     } catch (error) {
         res.status(500).send("Lỗi tạo bảng: " + error.message);
     }
@@ -64,6 +73,53 @@ app.post('/api/sync', async (req, res) => {
     }
 });
 
+// -------------------------------------------------------------
+// API MỚI: KIỂM TRA QUYỀN CHƠI GAME TÀU NGẦM (GIỚI HẠN 1 LẦN)
+// -------------------------------------------------------------
+app.post('/api/check-submarine-status', async (req, res) => {
+    const { name, class_name } = req.body;
+    
+    if (!name) {
+        return res.status(400).json({ error: "Thiếu tên học sinh" });
+    }
+
+    try {
+        const [rows] = await db.query("SELECT played_submarine FROM users WHERE name = ?", [name]);
+        
+        if (rows.length === 0) {
+            // Nếu user chưa có trong DB (lần đầu đăng nhập), chắc chắn là được chơi
+            return res.status(200).json({ can_play: true });
+        }
+
+        // Nếu played_submarine là true/1 => Không cho chơi, ngược lại => Cho chơi
+        const hasPlayed = rows[0].played_submarine;
+        res.status(200).json({ can_play: !hasPlayed });
+        
+    } catch (error) {
+        console.error("Lỗi kiểm tra trạng thái game:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// -------------------------------------------------------------
+// API MỚI: ĐÁNH DẤU ĐÃ CHƠI XONG GAME TÀU NGẦM (KHÓA LẠI)
+// -------------------------------------------------------------
+app.post('/api/mark-submarine-played', async (req, res) => {
+    const { name } = req.body;
+    
+    if (!name) {
+        return res.status(400).json({ error: "Thiếu tên học sinh" });
+    }
+
+    try {
+        await db.query("UPDATE users SET played_submarine = TRUE WHERE name = ?", [name]);
+        res.status(200).json({ message: "Đã khóa quyền chơi Tàu Ngầm Khám Phá cho học sinh này." });
+    } catch (error) {
+        console.error("Lỗi cập nhật trạng thái game:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // API 3: Trả dữ liệu cho Admin hiển thị
 app.get('/api/leaderboard', async (req, res) => {
     try {
@@ -78,7 +134,6 @@ app.get('/api/leaderboard', async (req, res) => {
 // API 4: Xóa 1 học sinh theo ID
 app.delete('/api/student/:id', async (req, res) => {
     try {
-        // Lấy tên học sinh trước khi xóa để xóa luôn lịch sử của em đó (Tùy chọn)
         const [student] = await db.query("SELECT name FROM users WHERE id = ?", [req.params.id]);
         if (student.length > 0) {
             await db.query("DELETE FROM game_history WHERE student_name = ?", [student[0].name]);
@@ -95,14 +150,12 @@ app.delete('/api/students', async (req, res) => {
     try {
         const className = req.query.class_name;
         if (className) {
-            // Xóa lịch sử những em trong lớp đó trước
             const [students] = await db.query("SELECT name FROM users WHERE class_name = ?", [className]);
             for (let s of students) {
                 await db.query("DELETE FROM game_history WHERE student_name = ?", [s.name]);
             }
             await db.query("DELETE FROM users WHERE class_name = ?", [className]);
         } else {
-            // Xóa tất cả
             await db.query("DELETE FROM game_history");
             await db.query("DELETE FROM users");
         }
@@ -112,7 +165,7 @@ app.delete('/api/students', async (req, res) => {
     }
 });
 
-// API 6 (MỚI): Lưu lịch sử 1 câu trả lời từ Game
+// API 6: Lưu lịch sử 1 câu trả lời từ Game
 app.post('/api/history', async (req, res) => {
     const { student_name, game_name, question, student_answer, is_correct } = req.body;
     try {
@@ -128,7 +181,7 @@ app.post('/api/history', async (req, res) => {
     }
 });
 
-// API 7 (MỚI): Lấy lịch sử làm bài của 1 học sinh (Dành cho trang Admin)
+// API 7: Lấy lịch sử làm bài của 1 học sinh (Dành cho trang Admin)
 app.get('/api/history/:student_name', async (req, res) => {
     try {
         const [rows] = await db.query(
