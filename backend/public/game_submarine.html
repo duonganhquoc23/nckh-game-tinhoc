@@ -18,6 +18,12 @@
         .btn-outline { background: #f1f5f9; border: 3px solid #cbd5e1; color: #475569; box-shadow: 0 5px 0 #cbd5e1; }
         
         .hud { display: flex; justify-content: space-between; background: #f0fdfa; padding: 15px 30px; font-size: 1.4rem; font-weight: 800; color: var(--primary); border-bottom: 4px solid #ccfbf1; font-family: 'Baloo 2', cursive; }
+        
+        /* Đồng hồ đếm ngược */
+        .timer-box { background: #ef4444; color: white; padding: 5px 15px; border-radius: 20px; box-shadow: 0 4px 0 #b91c1c; }
+        .timer-box.warning { animation: pulseTimer 1s infinite; }
+        @keyframes pulseTimer { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
         .q-box { background: #fff; padding: 20px; font-size: 1.4rem; font-weight: 800; color: #334155; border-bottom: 4px solid #0284c7; z-index: 10; min-height: 90px; display: flex; align-items: center; justify-content: center;}
         
         .ocean-area { height: 380px; position: relative; background: linear-gradient(180deg, #38bdf8 0%, #0369a1 100%); overflow: hidden; display: flex; flex-direction: column;}
@@ -66,7 +72,8 @@
     <div class="game-container">
         <div id="screen-home" class="screen active">
             <h1 class="title-kid">🚢 TÀU NGẦM KHÁM PHÁ</h1>
-            <p style="font-size:1.3rem; margin-bottom:30px; font-weight:700;">Nhấp chuột vào luồng nước để điều khiển tàu ngầm đụng trúng chú cá mang đáp án chính xác nhé!</p>
+            <p style="font-size:1.3rem; margin-bottom:15px; font-weight:700;">Nhấp chuột vào luồng nước để điều khiển tàu ngầm đụng trúng chú cá mang đáp án chính xác nhé!</p>
+            <p style="font-size:1.2rem; margin-bottom:30px; color: var(--error); font-weight: 800;">⚠️ Chú ý: Con chỉ có <span style="font-size: 1.5rem;">3 PHÚT</span> và chỉ được chơi <span style="font-size: 1.5rem;">1 LẦN DUY NHẤT</span>!</p>
             <div>
                 <button class="btn" onclick="initGame()">LẶN XUỐNG</button>
                 <button class="btn btn-outline" onclick="window.location.href='index.html#home'">VỀ BẢN ĐỒ</button>
@@ -74,9 +81,10 @@
         </div>
         
         <div id="screen-game" class="screen" style="padding: 0;">
-            <div style="width: 100%; text-align: left; padding: 10px 30px; background: #f0fdfa; border-bottom: 2px solid #ccfbf1;"><button class="btn btn-outline" style="padding: 5px 15px; font-size: 1rem; border-width: 2px; margin: 0; background: white;" onclick="window.location.href='index.html#home'">← QUAY VỀ</button></div>
+            <!-- Nút quay về đã bị ẩn để học sinh không tự ý thoát khi đang đếm giờ -->
             <div class="hud">
                 <div>Chặng: <span id="ui-prog" style="color: var(--warning);">1/10</span></div>
+                <div class="timer-box" id="ui-timer">⏱️ 03:00</div>
                 <div>XP: <span id="ui-score" style="color: var(--success);">0</span></div>
             </div>
             <div class="q-box" id="ui-q">Câu hỏi...</div>
@@ -90,15 +98,17 @@
         </div>
         
         <div id="screen-result" class="screen">
-            <h1 class="title-kid" style="color: var(--success);">TUYỆT VỜI!</h1>
+            <h1 class="title-kid" id="res-title" style="color: var(--success);">TUYỆT VỜI!</h1>
+            <p id="res-msg" style="font-size: 1.2rem; font-weight: bold; margin-bottom: 20px;"></p>
             <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 30px;">Thu thập được: <span id="res-score" style="color: var(--warning); font-size: 2.5rem; font-family: 'Baloo 2', cursive;">0</span> XP</div>
             <div>
-                <button class="btn" style="background:var(--primary);" onclick="initGame()">CHƠI LẠI</button>
-                <button class="btn btn-outline" onclick="saveAndGoHome()">THOÁT</button>
+                <!-- Nút CHƠI LẠI ĐÃ BỊ XÓA -->
+                <button class="btn btn-outline" onclick="saveAndGoHome()" style="background: var(--primary); color: white;">HOÀN THÀNH & THOÁT</button>
             </div>
         </div>
     </div>
 
+    <!-- Feedback Modal giữ nguyên -->
     <div class="feedback-modal" id="fb-modal">
         <div class="feedback-box">
             <h2 style="font-family: 'Baloo 2', cursive; font-size: 2rem; color: #ef4444; margin-bottom: 10px;">Đụng nhầm cá rồi! 💥</h2>
@@ -112,12 +122,16 @@
     <script>
     const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
         
-    // HÀM LƯU LỊCH SỬ VÀO DATABASE
-    async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+    // Lấy thông tin user hiện tại
+    function getCurrentUser() {
         let data = localStorage.getItem('edtech_user_kid');
-        if (!data) return;
-        let user = JSON.parse(data);
-        if (!user.name) return;
+        return data ? JSON.parse(data) : null;
+    }
+
+    // GỌI API LƯU LỊCH SỬ CÂU TRẢ LỜI (Giữ nguyên)
+    async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+        let user = getCurrentUser();
+        if (!user || !user.name) return;
         try {
             await fetch(`${API_BASE_URL}/api/history`, {
                 method: 'POST',
@@ -131,6 +145,19 @@
                 })
             });
         } catch (error) { console.error('Lỗi lưu lịch sử:', error); }
+    }
+
+    // GỌI API ĐÁNH DẤU ĐÃ CHƠI TÀU NGẦM XONG
+    async function markSubmarineAsPlayed() {
+        let user = getCurrentUser();
+        if (!user || !user.name) return;
+        try {
+            await fetch(`${API_BASE_URL}/api/mark-submarine-played`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: user.name, class_name: user.class_name })
+            });
+        } catch (error) { console.error('Lỗi đánh dấu hoàn thành game:', error); }
     }
 
     const qs = [
@@ -157,145 +184,209 @@
         { q: "Chỉ nên truy cập các trang web phù hợp với lứa tuổi và mục đích học tập. Đúng hay sai?", a: ["Đúng", "Sai", "Xem web nào cũng được"], c: 0, exp: "Truy cập web phù hợp giúp em học tập tốt và tránh xa các nội dung độc hại." }
     ];        
         
-        let playQueue=[], score=0, curr=0, onFeedbackClose=null;
-        let subLane = 1; 
-        const sub = document.getElementById('sub');
-        const ocean = document.getElementById('ocean');
-        let gameLoopAnim, fishes = [], isPlaying = false, isTransitioning = false;
+    let playQueue=[], score=0, curr=0, onFeedbackClose=null;
+    let subLane = 1; 
+    const sub = document.getElementById('sub');
+    const ocean = document.getElementById('ocean');
+    let gameLoopAnim, fishes = [], isPlaying = false, isTransitioning = false;
 
-        function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    // --- LOGIC THỜI GIAN 3 PHÚT ---
+    let timeLeft = 180; // 180 giây = 3 phút
+    let timerInterval;
+
+    function formatTime(seconds) {
+        let m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        let s = (seconds % 60).toString().padStart(2, '0');
+        return `⏱️ ${m}:${s}`;
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        let timerUI = document.getElementById('ui-timer');
+        timerUI.innerText = formatTime(timeLeft);
+        timerUI.classList.remove('warning');
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerUI.innerText = formatTime(timeLeft);
+
+            if (timeLeft <= 30) {
+                timerUI.classList.add('warning'); // Nhấp nháy đỏ khi còn 30s
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                handleTimeOut(); // HẾT GIỜ
+            }
+        }, 1000);
+    }
+
+    function handleTimeOut() {
+        isPlaying = false;
+        cancelAnimationFrame(gameLoopAnim);
+        closeFeedback(); // Đóng thông báo đang mở nếu có
+        document.getElementById('res-title').innerText = "HẾT GIỜ RỒI!";
+        document.getElementById('res-title').style.color = "var(--error)";
+        document.getElementById('res-msg').innerText = "Chuyến thám hiểm đã kết thúc do hết thời gian quy định.";
+        endGame();
+    }
+    // ------------------------------
+
+    function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    
+    function initGame(){ 
+        // Kiểm tra đăng nhập (đề phòng)
+        if(!getCurrentUser()){
+            alert("Vui lòng đăng nhập trước khi chơi!");
+            window.location.href = 'index.html';
+            return;
+        }
+
+        playQueue=[...qs].sort(()=>Math.random()-0.5); 
+        score=0; curr=0; timeLeft=180;
+        showScreen('screen-game'); 
+        moveSub(1); 
+        startTimer(); // Bắt đầu đếm ngược
+        loadQ(); 
+    }
+
+    function moveSub(laneIndex) {
+        if(!isPlaying) return; // Khóa di chuyển nếu đang dừng game
+        subLane = laneIndex;
+        sub.style.top = (16.66 + laneIndex * 33.33) + '%';
+    }
+    
+    function loadQ(){
+        cancelAnimationFrame(gameLoopAnim); 
+        if(curr>=playQueue.length) {
+            document.getElementById('res-title').innerText = "TUYỆT VỜI!";
+            document.getElementById('res-title').style.color = "var(--success)";
+            document.getElementById('res-msg').innerText = "Con đã trả lời xuất sắc tất cả câu hỏi!";
+            return endGame();
+        }
         
-        function initGame(){ 
-            playQueue=[...qs].sort(()=>Math.random()-0.5); score=0; curr=0; 
-            showScreen('screen-game'); moveSub(1); loadQ(); 
-        }
-
-        function moveSub(laneIndex) {
-            subLane = laneIndex;
-            sub.style.top = (16.66 + laneIndex * 33.33) + '%';
-        }
+        document.getElementById('ui-q').innerHTML=playQueue[curr].q; 
+        document.getElementById('ui-prog').innerText=`${curr+1}/${playQueue.length}`; 
+        document.getElementById('ui-score').innerText=score; 
         
-        function loadQ(){
-            cancelAnimationFrame(gameLoopAnim); 
-            if(curr>=playQueue.length) return endGame();
-            
-            // SỬA: Dùng innerHTML thay vì innerText để hiển thị được thẻ <img>
-            document.getElementById('ui-q').innerHTML=playQueue[curr].q; 
-            document.getElementById('ui-prog').innerText=`${curr+1}/${playQueue.length}`; 
-            document.getElementById('ui-score').innerText=score; 
-            
-            document.querySelectorAll('.fish-bubble').forEach(e => e.remove());
-            document.querySelectorAll('.xp-float').forEach(e => e.remove()); 
-            fishes = [];
-            
-            let mix = playQueue[curr].a.map((txt,i)=>({txt, isC: i===playQueue[curr].c})).sort(()=>Math.random()-0.5);
-            
-            mix.forEach((ans, i) => { 
-                let f = document.createElement('div');
-                f.className = 'fish-bubble';
-                f.innerText = ans.txt;
-                f.style.top = (16.66 + i * 33.33) + '%';
-                f.style.left = '100%';
-                ocean.appendChild(f);
-                fishes.push({ el: f, x: 100, lane: i, isC: ans.isC, txt: ans.txt });
-            });
+        document.querySelectorAll('.fish-bubble').forEach(e => e.remove());
+        document.querySelectorAll('.xp-float').forEach(e => e.remove()); 
+        fishes = [];
+        
+        let mix = playQueue[curr].a.map((txt,i)=>({txt, isC: i===playQueue[curr].c})).sort(()=>Math.random()-0.5);
+        
+        mix.forEach((ans, i) => { 
+            let f = document.createElement('div');
+            f.className = 'fish-bubble';
+            f.innerText = ans.txt;
+            f.style.top = (16.66 + i * 33.33) + '%';
+            f.style.left = '100%';
+            ocean.appendChild(f);
+            fishes.push({ el: f, x: 100, lane: i, isC: ans.isC, txt: ans.txt });
+        });
 
-            isTransitioning = false;
-            isPlaying = true;
-            gameLoopAnim = requestAnimationFrame(updateGame);
-        }
+        isTransitioning = false;
+        isPlaying = true;
+        gameLoopAnim = requestAnimationFrame(updateGame);
+    }
 
-        function updateGame() {
-            if(!isPlaying) return; 
+    function updateGame() {
+        if(!isPlaying) return; 
+        
+        fishes.forEach(fish => {
+            fish.x -= 0.15; 
+            fish.el.style.left = fish.x + '%';
             
-            fishes.forEach(fish => {
-                fish.x -= 0.15; 
-                fish.el.style.left = fish.x + '%';
-                
-                if(!isTransitioning && fish.x < 15 && fish.x > 5) {
-                    if(subLane === fish.lane) {
-                        handleHit(fish);
-                    }
-                }
-                
-                if(!isTransitioning && fish.x < 0 && subLane === fish.lane) {
+            if(!isTransitioning && fish.x < 15 && fish.x > 5) {
+                if(subLane === fish.lane) {
                     handleHit(fish);
                 }
-            });
-
-            if(isPlaying) {
-                gameLoopAnim = requestAnimationFrame(updateGame);
             }
-        }
-
-        function handleHit(fish) {
-            isTransitioning = true;
             
-            let boom = document.createElement('div');
-            boom.className = 'explosion'; boom.innerText = '🫧';
-            boom.style.left = '15%'; boom.style.top = sub.style.top;
-            ocean.appendChild(boom);
-            setTimeout(() => boom.remove(), 600);
+            if(!isTransitioning && fish.x < 0 && subLane === fish.lane) {
+                handleHit(fish);
+            }
+        });
 
-            fish.el.style.display = 'none';
+        if(isPlaying) {
+            gameLoopAnim = requestAnimationFrame(updateGame);
+        }
+    }
 
-            saveHistory("Tàu Ngầm Khám Phá", playQueue[curr].q.replace(/<[^>]*>?/gm, ''), fish.txt, fish.isC); // Lọc HTML khi lưu data
+    function handleHit(fish) {
+        isTransitioning = true;
+        
+        let boom = document.createElement('div');
+        boom.className = 'explosion'; boom.innerText = '🫧';
+        boom.style.left = '15%'; boom.style.top = sub.style.top;
+        ocean.appendChild(boom);
+        setTimeout(() => boom.remove(), 600);
 
-            if(fish.isC) {
-                score += 100; document.getElementById('ui-score').innerText = score;
-                
-                let xpTxt = document.createElement('div');
-                xpTxt.className = 'xp-float';
-                xpTxt.innerText = '+100 XP';
-                xpTxt.style.left = '15%';
-                xpTxt.style.top = sub.style.top;
-                ocean.appendChild(xpTxt);
+        fish.el.style.display = 'none';
 
-                setTimeout(() => { 
+        saveHistory("Tàu Ngầm Khám Phá", playQueue[curr].q.replace(/<[^>]*>?/gm, ''), fish.txt, fish.isC);
+
+        if(fish.isC) {
+            score += 100; document.getElementById('ui-score').innerText = score;
+            
+            let xpTxt = document.createElement('div');
+            xpTxt.className = 'xp-float';
+            xpTxt.innerText = '+100 XP';
+            xpTxt.style.left = '15%';
+            xpTxt.style.top = sub.style.top;
+            ocean.appendChild(xpTxt);
+
+            setTimeout(() => { 
+                if(timeLeft > 0) {
                     curr++; 
                     loadQ(); 
-                }, 1500); 
-            } else {
-                let cTxt = fishes.find(f => f.isC).txt;
-                setTimeout(() => {
+                }
+            }, 1500); 
+        } else {
+            let cTxt = fishes.find(f => f.isC).txt;
+            setTimeout(() => {
+                if(timeLeft > 0) {
                     isPlaying = false; 
                     showModal(fish.txt, cTxt, playQueue[curr].exp, () => { curr++; loadQ(); });
-                }, 800);
-            }
+                }
+            }, 800);
         }
+    }
 
-        function showModal(userAns, correctAns, exp, callback) {
-            document.getElementById('fb-wrong').innerText = "Cá em bắt: " + userAns; 
-            document.getElementById('fb-correct').innerText = "Cá mang đáp án đúng: " + correctAns;
-            document.getElementById('fb-exp').innerText = "💡 Nhớ nhé: " + exp; 
-            document.getElementById('fb-modal').classList.add('active'); 
-            onFeedbackClose = callback;
-        }
+    function showModal(userAns, correctAns, exp, callback) {
+        document.getElementById('fb-wrong').innerText = "Cá em bắt: " + userAns; 
+        document.getElementById('fb-correct').innerText = "Cá mang đáp án đúng: " + correctAns;
+        document.getElementById('fb-exp').innerText = "💡 Nhớ nhé: " + exp; 
+        document.getElementById('fb-modal').classList.add('active'); 
+        onFeedbackClose = callback;
+    }
 
-        function closeFeedback() { document.getElementById('fb-modal').classList.remove('active'); if(onFeedbackClose) onFeedbackClose(); }
+    function closeFeedback() { 
+        document.getElementById('fb-modal').classList.remove('active'); 
+        if(onFeedbackClose) onFeedbackClose(); 
+    }
 
-        function endGame(){ isPlaying = false; document.getElementById('res-score').innerText=score; showScreen('screen-result'); }
+    function endGame(){ 
+        isPlaying = false; 
+        clearInterval(timerInterval); // Dừng đồng hồ
+        document.getElementById('res-score').innerText=score; 
+        showScreen('screen-result'); 
+
+        // Quan trọng: Gửi request lên server đánh dấu đã chơi (Dù thắng hay hết giờ)
+        markSubmarineAsPlayed();
+    }
+    
+    function saveAndGoHome() { 
+        let user = getCurrentUser();
+        if (!user || !user.name) { window.location.href = 'index.html'; return; }
+
+        user.xp = (user.xp || 0) + score; 
+        user.level = Math.floor(user.xp / 500) + 1; 
+        user.last_played = new Date().toLocaleString('vi-VN');
         
-        function saveAndGoHome() { 
-            let data = localStorage.getItem('edtech_user_kid');
-            if (!data) { window.location.href = 'index.html'; return; }
-            let user = JSON.parse(data);
-            if (!user.name) { window.location.href = 'index.html'; return; }
-
-            user.xp = (user.xp || 0) + score; 
-            user.level = Math.floor(user.xp / 500) + 1; 
-            user.last_played = new Date().toLocaleString('vi-VN');
-            
-            localStorage.setItem('edtech_user_kid', JSON.stringify(user)); 
-            
-            let leaderboard = JSON.parse(localStorage.getItem('edtech_leaderboard')) || [];
-            let existingStudent = leaderboard.findIndex(s => s.id === user.id);
-            if(existingStudent !== -1) { leaderboard[existingStudent] = user; } 
-            else { leaderboard.push(user); }
-            localStorage.setItem('edtech_leaderboard', JSON.stringify(leaderboard));
-
-            window.location.href = 'index.html#home'; 
-        }
+        localStorage.setItem('edtech_user_kid', JSON.stringify(user)); 
+        window.location.href = 'index.html#home'; 
+    }
     </script>
 </body>
 </html>
