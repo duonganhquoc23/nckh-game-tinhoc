@@ -7,6 +7,12 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Trang chủ kiểm tra trạng thái Server (Rất hữu ích khi deploy lên Render)
+app.get('/', (req, res) => {
+    res.send('🚀 Backend Thế Giới Game Tin Học đang hoạt động bình thường!');
+});
 
 // API 1: Tạo bảng CSDL (Chỉ chạy 1 lần lúc setup)
 app.get('/api/setup', async (req, res) => {
@@ -26,7 +32,7 @@ app.get('/api/setup', async (req, res) => {
         `;
         await db.query(createTableUsers);
 
-        // 2. Tạo bảng game_history (MỚI - Lưu lịch sử câu hỏi)
+        // 2. Tạo bảng game_history (Lưu lịch sử câu hỏi)
         const createTableHistory = `
             CREATE TABLE IF NOT EXISTS game_history (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -40,7 +46,7 @@ app.get('/api/setup', async (req, res) => {
         `;
         await db.query(createTableHistory);
 
-        // Nếu bảng users đã tồn tại từ trước mà chưa có cột played_submarine, hãy chạy lệnh ALTER TABLE này
+        // Nếu bảng users đã tồn tại từ trước mà chưa có cột played_submarine, lệnh ALTER TABLE này sẽ thêm vào
         try {
             await db.query("ALTER TABLE users ADD COLUMN played_submarine BOOLEAN DEFAULT FALSE");
             console.log("Đã thêm cột played_submarine vào bảng users hiện tại.");
@@ -79,12 +85,13 @@ app.post('/api/sync', async (req, res) => {
 app.post('/api/check-submarine-status', async (req, res) => {
     const { name, class_name } = req.body;
     
-    if (!name) {
-        return res.status(400).json({ error: "Thiếu tên học sinh" });
+    // Kiểm tra cả tên và lớp để đảm bảo tính chính xác
+    if (!name || !class_name) {
+        return res.status(400).json({ error: "Thiếu tên hoặc lớp của học sinh" });
     }
 
     try {
-        const [rows] = await db.query("SELECT played_submarine FROM users WHERE name = ?", [name]);
+        const [rows] = await db.query("SELECT played_submarine FROM users WHERE name = ? AND class_name = ?", [name, class_name]);
         
         if (rows.length === 0) {
             // Nếu user chưa có trong DB (lần đầu đăng nhập), chắc chắn là được chơi
@@ -105,14 +112,15 @@ app.post('/api/check-submarine-status', async (req, res) => {
 // API MỚI: ĐÁNH DẤU ĐÃ CHƠI XONG GAME TÀU NGẦM (KHÓA LẠI)
 // -------------------------------------------------------------
 app.post('/api/mark-submarine-played', async (req, res) => {
-    const { name } = req.body;
+    const { name, class_name } = req.body;
     
-    if (!name) {
-        return res.status(400).json({ error: "Thiếu tên học sinh" });
+    if (!name || !class_name) {
+        return res.status(400).json({ error: "Thiếu tên hoặc lớp của học sinh" });
     }
 
     try {
-        await db.query("UPDATE users SET played_submarine = TRUE WHERE name = ?", [name]);
+        // Update dựa trên cả tên và lớp
+        await db.query("UPDATE users SET played_submarine = TRUE WHERE name = ? AND class_name = ?", [name, class_name]);
         res.status(200).json({ message: "Đã khóa quyền chơi Tàu Ngầm Khám Phá cho học sinh này." });
     } catch (error) {
         console.error("Lỗi cập nhật trạng thái game:", error);
