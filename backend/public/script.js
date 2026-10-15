@@ -1,4 +1,4 @@
-// URL Backend: Đổi thành 'http://localhost:3000' nếu bạn chạy trên máy cá nhân thay vì Render
+// URL Backend
 const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
 
 // DANH SÁCH HUY HIỆU (Yêu cầu điểm XP để mở khóa)
@@ -23,6 +23,56 @@ async function syncDataToServer(playerData) {
     }
 }
 
+// Lấy ID/Username của user hiện tại
+function getCurrentUser() {
+    let data = localStorage.getItem('edtech_user_kid');
+    return data ? JSON.parse(data) : null;
+}
+
+// ---------------------------------------------------------
+// TÍNH NĂNG MỚI: KIỂM TRA QUYỀN CHƠI GAME TÀU NGẦM
+// ---------------------------------------------------------
+async function checkAndPlaySubmarine() {
+    const user = getCurrentUser();
+    if (!user) {
+        alert("Vui lòng đăng nhập trước khi chơi!");
+        return;
+    }
+
+    // Tạm thời hiển thị trạng thái đang kiểm tra
+    const btn = event.currentTarget;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải...';
+    btn.disabled = true;
+
+    try {
+        // Gọi API backend để kiểm tra (bạn cần cung cấp file backend để tôi viết API này)
+        // Gửi name và class_name để định danh user (hoặc ID nếu bạn dùng cơ chế ID)
+        const response = await fetch(`${API_BASE_URL}/api/check-submarine-status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: user.name, class_name: user.class_name })
+        });
+        
+        const data = await response.json();
+        
+        if (data.can_play) {
+            // Cho phép chơi
+            window.location.href = 'game_submarine.html';
+        } else {
+            // Đã chơi rồi
+            alert("Rất tiếc! Mỗi bạn chỉ được chơi Tàu Ngầm Khám Phá 1 lần duy nhất thôi nhé!");
+            btn.innerHTML = 'Đã hoàn thành <i class="fa-solid fa-check"></i>';
+            btn.classList.replace('btn-primary', 'btn-secondary');
+        }
+    } catch (error) {
+        console.error("Lỗi khi kiểm tra trạng thái game:", error);
+        alert("Có lỗi kết nối đến máy chủ. Vui lòng thử lại sau!");
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
 // 2. CHỨC NĂNG ĐĂNG NHẬP (Bắt đầu chơi)
 function startGame() {
     const name = document.getElementById('login-name').value.trim();
@@ -41,16 +91,12 @@ function startGame() {
         avatar: avatar,
         level: 1,
         xp: 0,
-        unlocked: [] // Mảng lưu trữ các huy hiệu đã mở khóa
+        unlocked: []
     };
 
-    // Lưu vào trình duyệt
     localStorage.setItem('edtech_user_kid', JSON.stringify(userData));
-    
-    // Gửi lên server
     syncDataToServer(userData);
 
-    // Cập nhật giao diện
     document.documentElement.classList.remove('no-auth');
     document.documentElement.classList.add('is-auth');
     updateHeader(userData);
@@ -65,7 +111,7 @@ function navigate(targetId) {
     document.querySelector(`[data-target="${targetId}"]`).classList.add('active');
     
     if(targetId === 'profile') {
-        loadUserProfile(); // Gọi hàm load profile khi chuyển sang Góc thành tích
+        loadUserProfile();
     }
 }
 
@@ -80,9 +126,8 @@ function selectAvatar(avatar, btn) {
     document.querySelectorAll('#avatar-list .avatar-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
     
-    let data = localStorage.getItem('edtech_user_kid');
-    if(data) {
-        let user = JSON.parse(data);
+    let user = getCurrentUser();
+    if(user) {
         user.avatar = avatar;
         localStorage.setItem('edtech_user_kid', JSON.stringify(user));
         updateHeader(user);
@@ -97,9 +142,8 @@ function updateHeader(user) {
 }
 
 function loadUserProfile() {
-    let data = localStorage.getItem('edtech_user_kid');
-    if(!data) return;
-    let user = JSON.parse(data);
+    let user = getCurrentUser();
+    if(!user) return;
     
     document.getElementById('prof-name').innerText = user.name || "Khách";
     document.getElementById('prof-class').innerText = user.class_name || "Lớp";
@@ -107,16 +151,14 @@ function loadUserProfile() {
     document.getElementById('prof-level').innerText = user.level || 1;
     document.getElementById('prof-xp').innerText = user.xp || 0;
 
-    // Cập nhật thanh tiến trình XP
     let xp = user.xp || 0;
     let progressPercent = ((xp % 500) / 500) * 100;
     let progressBar = document.getElementById('prof-xp-bar');
     if(progressBar) progressBar.style.width = progressPercent + "%";
 
-    // XỬ LÝ VẼ BỘ SƯU TẬP HUY HIỆU
     const container = document.getElementById('achievements-container');
     if(!container) return;
-    container.innerHTML = ''; // Xóa trắng để vẽ lại
+    container.innerHTML = '';
     
     if(!user.unlocked) user.unlocked = [];
     
@@ -146,21 +188,17 @@ function loadUserProfile() {
 
 // 7. CHỨC NĂNG BẤM NÚT MỞ KHÓA HUY HIỆU
 function unlockBadge(badgeId, btnElement) {
-    let data = localStorage.getItem('edtech_user_kid');
-    if(!data) return;
-    let user = JSON.parse(data);
+    let user = getCurrentUser();
+    if(!user) return;
     if(!user.unlocked) user.unlocked = [];
 
-    // Thêm huy hiệu vào danh sách đã mở
     user.unlocked.push(badgeId);
     localStorage.setItem('edtech_user_kid', JSON.stringify(user));
     syncDataToServer(user);
     
-    // Tạo hiệu ứng pháo hoa tại vị trí nút bấm
     let rect = btnElement.getBoundingClientRect();
     createConfetti(rect.left + rect.width / 2, rect.top);
     
-    // Tải lại giao diện sau 0.8 giây
     setTimeout(() => { loadUserProfile(); }, 800);
 }
 
@@ -195,10 +233,9 @@ function resetData() {
 
 // 9. KIỂM TRA ĐĂNG NHẬP KHI TẢI TRANG
 window.addEventListener('DOMContentLoaded', () => {
-    let data = localStorage.getItem('edtech_user_kid');
-    if(data) {
-        updateHeader(JSON.parse(data));
-        // Kiểm tra xem URL có chứa #profile không để mở tab thành tích ngay
+    let user = getCurrentUser();
+    if(user) {
+        updateHeader(user);
         if (window.location.hash === '#profile') {
             navigate('profile');
         }
