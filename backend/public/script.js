@@ -31,7 +31,7 @@ function getCurrentUser() {
 
 // ---------------------------------------------------------
 // TÍNH NĂNG MỚI: KIỂM TRA QUYỀN CHƠI GAME TÀU NGẦM
-// Đã thêm chữ "event" vào trong ngoặc đơn ở dưới đây
+// Đã fix: Yêu cầu biến 'event' truyền từ file HTML sang
 // ---------------------------------------------------------
 async function checkAndPlaySubmarine(event) {
     const user = getCurrentUser();
@@ -40,7 +40,7 @@ async function checkAndPlaySubmarine(event) {
         return;
     }
 
-    // Tạm thời hiển thị trạng thái đang kiểm tra
+    // Lấy đúng phần tử nút bấm (button) đã kích hoạt sự kiện
     const btn = event.currentTarget;
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải...';
