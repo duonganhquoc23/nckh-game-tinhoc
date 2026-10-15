@@ -31,8 +31,9 @@ function getCurrentUser() {
 
 // ---------------------------------------------------------
 // TÍNH NĂNG MỚI: KIỂM TRA QUYỀN CHƠI GAME TÀU NGẦM
+// Đã thêm chữ "event" vào trong ngoặc đơn ở dưới đây
 // ---------------------------------------------------------
-async function checkAndPlaySubmarine() {
+async function checkAndPlaySubmarine(event) {
     const user = getCurrentUser();
     if (!user) {
         alert("Vui lòng đăng nhập trước khi chơi!");
@@ -46,8 +47,6 @@ async function checkAndPlaySubmarine() {
     btn.disabled = true;
 
     try {
-        // Gọi API backend để kiểm tra (bạn cần cung cấp file backend để tôi viết API này)
-        // Gửi name và class_name để định danh user (hoặc ID nếu bạn dùng cơ chế ID)
         const response = await fetch(`${API_BASE_URL}/api/check-submarine-status`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
