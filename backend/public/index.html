@@ -216,13 +216,13 @@
                         </div>
                     </div>
 
-                    <!-- GAME TÀU NGẦM KHÁM PHÁ: MỞ (Thêm logic kiểm tra trước khi chuyển trang) -->
+                    <!-- GAME TÀU NGẦM KHÁM PHÁ: ĐÃ ĐƯỢC FIX TRUYỀN 'event' VÀO HÀM -->
                     <div class="game-card-v2">
                         <div class="game-img-box img-submarine"><i class="fa-solid fa-water"></i></div>
                         <div class="game-info-box">
                             <h3 class="game-title">Tàu Ngầm Khám Phá</h3>
                             <p class="game-desc">Điều khiển tàu ngầm đụng trúng chú cá mang từ khoá để tìm kiếm Internet.</p>
-                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="checkAndPlaySubmarine()">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
+                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="checkAndPlaySubmarine(event)">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
                         </div>
                     </div>
                     
@@ -240,7 +240,7 @@
             </div>
         </section>
 
-        <!-- (Phần profile giữ nguyên) -->
+        <!-- Phần profile giữ nguyên -->
         <section id="profile">
             <h2 class="mb-3 text-primary text-center" style="font-family: 'Baloo 2', cursive; font-size: 2.5rem;">🌟 GÓC THÀNH TÍCH 🌟</h2>
             
