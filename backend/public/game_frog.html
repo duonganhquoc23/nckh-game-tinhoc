@@ -110,18 +110,56 @@
             } catch (error) {}
         }
 
-        const qs = [
-            { q: "Tệp Gioi_thieu sau khi dùng lệnh Move (Di chuyển) từ thư mục A sang B thì tệp sẽ nằm ở đâu?", a: ["Chỉ nằm ở thư mục B", "Nằm ở cả A và B"], c: 0, exp: "Lệnh Move giống như em bưng sách từ bàn này sang bàn khác, chỗ cũ sẽ không còn sách nữa." },
-            { q: "Tệp Hinh_anh sau khi dùng lệnh Copy (Sao chép) từ thư mục A sang B thì tệp nằm ở đâu?", a: ["Nằm ở cả A và B", "Chỉ nằm ở thư mục B"], c: 0, exp: "Lệnh Copy tạo ra một bản sao y hệt, nên tệp sẽ tồn tại ở cả hai nơi." },
-            { q: "Thư mục 'Lop 4A' chứa thư mục 'Nhom 1'. Vậy 'Nhom 1' được gọi là gì?", a: ["Thư mục con", "Thư mục mẹ"], c: 0, exp: "Thư mục nằm bên trong thư mục khác được gọi là Thư mục con." },
-            { q: "Nếu xoá thư mục 'Nhom 1' thì các tệp bài tập bên trong nó sẽ ra sao?", a: ["Bị xoá theo tất cả", "Vẫn còn nguyên vẹn"], c: 0, exp: "Khi xoá thư mục, tất cả những gì chứa bên trong nó cũng sẽ bị ném vào thùng rác." },
-            { q: "Trong tổ chức cây thư mục, thư mục nào chứa tất cả các thư mục khác?", a: ["Thư mục gốc (Ổ đĩa)", "Thư mục con"], c: 0, exp: "Ổ đĩa (ví dụ ổ C:, ổ D:) chính là thư mục gốc to nhất, chứa toàn bộ dữ liệu." },
-            { q: "Khi di chuyển thư mục, các tệp bên trong có di chuyển theo không?", a: ["Có di chuyển theo", "Không di chuyển"], c: 0, exp: "Cả nhà sẽ cùng dọn đi! Khi chuyển thư mục, mọi tệp bên trong đều đi theo sang nơi mới." },
-            { q: "Bạn An muốn đổi tên tệp 'bai_tap' thành 'Tin_hoc'. Bạn dùng lệnh gì?", a: ["Rename", "Delete"], c: 0, exp: "Rename có nghĩa là đặt lại tên. Delete là xoá mất rồi!" },
-            { q: "Bạn Khoa xoá tệp trong thư mục Windows. Điều gì sẽ xảy ra?", a: ["Lỗi chương trình máy tính", "Máy chạy nhanh hơn"], c: 0, exp: "Thư mục Windows chứa bộ não của máy. Xoá nhầm sẽ làm máy tính ngừng hoạt động." },
-            { q: "Khi chọn lệnh Paste (Dán) mà chưa dùng lệnh Copy trước đó thì sao?", a: ["Không dán được gì cả", "Tạo ra một tệp trống"], c: 0, exp: "Em phải 'Sao chép' (Copy) thì máy mới biết em muốn 'Dán' (Paste) cái gì chứ!" },
-            { q: "Thư mục có thể chứa thư mục khác không?", a: ["Có, chứa được nhiều", "Không, chỉ chứa tệp"], c: 0, exp: "Thư mục có thể chứa rất nhiều tệp và cả các thư mục con khác ở bên trong nó." }
-        ];        
+const qs = [
+            { 
+                q: "Từ khóa tìm kiếm là gì?", 
+                a: ["Một từ hoặc cụm từ thể hiện nội dung cần tìm", "Một bức ảnh đẹp được lưu sẵn trên máy tính"], 
+                c: 0, 
+                exp: "Từ khóa là những từ hoặc cụm từ ngắn gọn giúp máy tìm kiếm hiểu đúng điều em muốn tìm." 
+            },
+            { 
+                q: "Khi muốn tìm thông tin về Hồ Gươm ở Hà Nội, từ khóa nào phù hợp nhất?", 
+                a: ["Hồ Gươm Hà Nội", "Cách nấu ăn ngon"], 
+                c: 0, 
+                exp: "Từ khóa cần ngắn gọn và chứa đúng các từ khóa chính xác về địa điểm em cần tìm." 
+            },
+            { 
+                q: "Để tìm kiếm thông tin trên Internet bằng máy tìm kiếm, em thực hiện theo thứ tự nào?", 
+                a: ["Mở trình duyệt → Truy cập máy tìm kiếm → Gõ từ khóa → Chọn kết quả phù hợp", "Gõ từ khóa → Mở trình duyệt → Chọn kết quả → Truy cập máy tìm kiếm"], 
+                c: 0, 
+                exp: "Em phải mở trình duyệt lên trước, vào máy tìm kiếm rồi mới gõ từ khóa và chọn kết quả nhé!" 
+            },
+            { 
+                q: "Sau khi gõ từ khóa và nhấn Enter, em cần làm gì tiếp theo?", 
+                a: ["Chọn một kết quả tìm kiếm phù hợp để xem thông tin", "Tắt ngay máy tính đi"], 
+                c: 0, 
+                exp: "Nhấn Enter xong, màn hình sẽ hiện ra danh sách kết quả, việc của em là chọn một trang web phù hợp để đọc." 
+            },
+            { 
+                q: "Máy tìm kiếm dùng để làm gì?", 
+                a: ["Tìm kiếm thông tin trên Internet", "Chơi trò chơi điện tử offline"], 
+                c: 0, 
+                exp: "Máy tìm kiếm (như Google, Cốc Cốc) giúp em tìm nhanh các thông tin, hình ảnh, bài học trên mạng internet." 
+            },
+            { 
+                q: "Bạn An muốn tìm bài hát 'Quốc ca Việt Nam'. Từ khóa nào dưới đây phù hợp nhất?", 
+                a: ["Quốc ca Việt Nam", "Con mèo trèo cây cau"], 
+                c: 0, 
+                exp: "Để tìm bài hát nào thì mình gõ đúng tên bài hát đó làm từ khóa tìm kiếm." 
+            },
+            { 
+                q: "Để sử dụng máy tìm kiếm, trước tiên em cần làm gì?", 
+                a: ["Mở trình duyệt web", "Vẽ tranh bằng phần mềm Paint"], 
+                c: 0, 
+                exp: "Bước đầu tiên để lướt web hay tìm kiếm là em phải mở trình duyệt web (như Chrome, Cốc Cốc, Edge)." 
+            },
+            { 
+                q: "Sau khi gõ từ khóa và nhấn Enter, em cần làm gì tiếp theo?", 
+                a: ["Chọn một kết quả tìm kiếm phù hợp để xem thông tin", "Rút phích cắm điện máy tính"], 
+                c: 0, 
+                exp: "Sau khi nhấn Enter, máy tính sẽ hiển thị hàng loạt kết quả và em cần nháy chuột chọn trang web phù hợp nhất." 
+            }
+        ];
         
         let playQueue=[], score=0, currRow=0, scrollOffset=0, onFeedbackClose = null, isAnimating=false;
         let frog, river;
