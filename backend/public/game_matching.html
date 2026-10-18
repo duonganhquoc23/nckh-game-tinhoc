@@ -92,22 +92,31 @@
         const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
         const GAME_NAME = "Ghép Kiến Thức";
         
-        async function saveHistory(gameName, question, studentAnswer, isCorrect) {
-            let data = localStorage.getItem('edtech_user_kid');
-            if (!data) return;
-            let user = JSON.parse(data);
-            if (!user.name) return;
+async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+    let data = localStorage.getItem('edtech_user_kid');
+    if (!data) return;
+    let user = JSON.parse(data);
+    if (!user.name) return;
 
-            let playCount = user.playCounts && user.playCounts[gameName] ? user.playCounts[gameName] : 1;
-            if (playCount <= 1) return;
+    // Đã xóa bỏ dòng kiểm tra `if (playCount <= 1) return;` ở đây 
+    // để lịch sử được ghi nhận ngay từ lần chơi đầu tiên của học sinh.
 
-            try {
-                await fetch(`${API_BASE_URL}/api/history`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ student_name: user.name, game_name: gameName, question: question, student_answer: studentAnswer, is_correct: isCorrect })
-                });
-            } catch (error) {}
-        }
+    try {
+        await fetch(`${API_BASE_URL}/api/history`, {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                student_name: user.name, 
+                game_name: gameName, 
+                question: question, 
+                student_answer: studentAnswer, 
+                is_correct: isCorrect 
+            })
+        });
+    } catch (error) {
+        console.error("Lỗi khi lưu lịch sử:", error);
+    }
+}
 
         const fullData = [
             { id: 1, term: 'Từ khoá', def: 'Từ hoặc cụm từ thể hiện nội dung em muốn tìm kiếm.' },
