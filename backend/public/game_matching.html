@@ -66,13 +66,16 @@
             <div class="match-board"><div class="match-col" id="col-terms"></div><div class="match-col" id="col-defs"></div></div>
         </div>
         
-        <div id="screen-result" class="screen">
+<div id="screen-result" class="screen">
             <h1 class="title-kid" style="color: var(--success);">🎉 CHÚC MỪNG! 🎉</h1>
             <p style="font-size: 1.5rem; font-weight: 800; margin: 30px 0;">Thu thập được: <span id="res-score" style="color: var(--warning); font-size: 2.5rem; font-family: 'Baloo 2', cursive;">0</span> XP</p>
-            <div><button class="btn" style="background:var(--primary);" onclick="initGame()">CHƠI LẠI</button><button class="btn btn-outline" onclick="saveAndGoHome()">THOÁT</button></div>
+            <div>
+                <button class="btn btn-outline" style="width: 250px;" onclick="saveAndGoHome()">VỀ LẠI BẢN ĐỒ</button>
+            </div>
         </div>
     </div>
 
+    <!-- Feedback modal giữ nguyên -->
     <div class="feedback-modal" id="fb-modal">
         <div class="feedback-box">
             <h2 style="font-family: 'Baloo 2', cursive; font-size: 2rem; color: #ef4444; margin-bottom: 10px;">Chưa khớp rồi! 🧩</h2>
@@ -86,26 +89,24 @@
     
     <script>
         const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
+        const GAME_NAME = "Ghép Kiến Thức";
         
-        // HÀM LƯU LỊCH SỬ VÀO DATABASE
         async function saveHistory(gameName, question, studentAnswer, isCorrect) {
             let data = localStorage.getItem('edtech_user_kid');
             if (!data) return;
             let user = JSON.parse(data);
             if (!user.name) return;
+
+            // KIỂM TRA LẦN CHƠI: Lần 1 không gửi lên máy chủ
+            let playCount = user.playCounts && user.playCounts[gameName] ? user.playCounts[gameName] : 1;
+            if (playCount <= 1) return; // Thoát luôn, không gọi fetch
+
             try {
                 await fetch(`${API_BASE_URL}/api/history`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        student_name: user.name,
-                        game_name: gameName,
-                        question: question,
-                        student_answer: studentAnswer,
-                        is_correct: isCorrect
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_name: user.name, game_name: gameName, question: question, student_answer: studentAnswer, is_correct: isCorrect })
                 });
-            } catch (error) { console.error('Lỗi lưu lịch sử:', error); }
+            } catch (error) {}
         }
 
         const fullData = [
@@ -121,62 +122,54 @@
             { id: 10, term: 'Lệnh Delete', def: 'Dùng để đưa các dữ liệu không còn sử dụng vào Thùng rác.' }
         ];        
         
-        let score = 0, matchesFound = 0, selectedTerm = null, selectedDef = null, isProcessing = false, onFeedbackClose = null;
-        let currentRoundData = [];
+        let score = 0, matchesFound = 0, selectedTerm = null, selectedDef = null, isProcessing = false, onFeedbackClose = null, currentRoundData = [];
         
         function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         
         function initGame() {
+            // LƯU LẠI SỐ LẦN CHƠI KHI BẮT ĐẦU
+            let data = localStorage.getItem('edtech_user_kid');
+            if(data) {
+                let user = JSON.parse(data);
+                if (!user.playCounts) user.playCounts = {};
+                user.playCounts[GAME_NAME] = (user.playCounts[GAME_NAME] || 0) + 1;
+                localStorage.setItem('edtech_user_kid', JSON.stringify(user));
+            }
+
             score = 0; matchesFound = 0; selectedTerm = null; selectedDef = null; isProcessing = false;
             currentRoundData = [...fullData].sort(() => 0.5 - Math.random()).slice(0, 5);
-            
             let terms = [...currentRoundData].sort(() => 0.5 - Math.random()); 
             let defs = [...currentRoundData].sort(() => 0.5 - Math.random());
             
             document.getElementById('col-terms').innerHTML = terms.map(t => `<div class="match-item" id="term-${t.id}" onclick="selectItem('term', ${t.id})">🔍 ${t.term}</div>`).join('');
             document.getElementById('col-defs').innerHTML = defs.map(d => `<div class="match-item" id="def-${d.id}" onclick="selectItem('def', ${d.id})">${d.def}</div>`).join('');
-            
             document.getElementById('ui-score').innerText = score; document.getElementById('ui-progress').innerText = `0/5`; showScreen('screen-game');
         }
         
         function selectItem(type, id) {
             if (isProcessing) return; 
-            let el = document.getElementById(`${type}-${id}`); 
-            if (el.classList.contains('matched')) return;
-            
-            document.querySelectorAll(`#col-${type}s .match-item`).forEach(n => n.classList.remove('selected')); 
-            el.classList.add('selected');
-            
-            if (type === 'term') selectedTerm = id; 
-            if (type === 'def') selectedDef = id;
+            let el = document.getElementById(`${type}-${id}`); if (el.classList.contains('matched')) return;
+            document.querySelectorAll(`#col-${type}s .match-item`).forEach(n => n.classList.remove('selected')); el.classList.add('selected');
+            if (type === 'term') selectedTerm = id; if (type === 'def') selectedDef = id;
             if (selectedTerm && selectedDef) checkMatch();
         }
         
         function checkMatch() {
             isProcessing = true; 
-            let tEl = document.getElementById(`term-${selectedTerm}`); 
-            let dEl = document.getElementById(`def-${selectedDef}`);
-            let termText = tEl.innerText.replace('🔍', '').trim();
-            let defText = dEl.innerText.trim();
+            let tEl = document.getElementById(`term-${selectedTerm}`); let dEl = document.getElementById(`def-${selectedDef}`);
+            let termText = tEl.innerText.replace('🔍', '').trim(); let defText = dEl.innerText.trim();
             
             if (selectedTerm === selectedDef) {
-                // GỌI HÀM LƯU LỊCH SỬ TẠI ĐÂY (ĐÚNG)
-                saveHistory("Ghép Kiến Thức", termText, defText, true);
-
+                saveHistory(GAME_NAME, termText, defText, true);
                 tEl.className = 'match-item matched'; dEl.className = 'match-item matched'; 
                 score += 100; matchesFound++;
-                document.getElementById('ui-score').innerText = score; 
-                document.getElementById('ui-progress').innerText = `${matchesFound}/5`;
-                
+                document.getElementById('ui-score').innerText = score; document.getElementById('ui-progress').innerText = `${matchesFound}/5`;
                 selectedTerm = null; selectedDef = null; isProcessing = false;
                 if (matchesFound === 5) setTimeout(() => { document.getElementById('res-score').innerText = score; showScreen('screen-result'); }, 800);
             } else {
-                // GỌI HÀM LƯU LỊCH SỬ TẠI ĐÂY (SAI)
-                saveHistory("Ghép Kiến Thức", termText, defText, false);
-
+                saveHistory(GAME_NAME, termText, defText, false);
                 tEl.classList.add('error'); dEl.classList.add('error'); 
                 let correctDef = fullData.find(d => d.id === selectedTerm).def;
-                
                 showModal(termText, dEl.innerText, correctDef, () => {
                     tEl.classList.remove('error','selected'); dEl.classList.remove('error','selected'); 
                     selectedTerm = null; selectedDef = null; isProcessing = false;
@@ -185,8 +178,7 @@
         }
         
         function showModal(termTxt, wrongDefTxt, correctDefTxt, callback) {
-            document.getElementById('fb-term').innerText = `[${termTxt}]`; 
-            document.getElementById('fb-def').innerText = wrongDefTxt;
+            document.getElementById('fb-term').innerText = `[${termTxt}]`; document.getElementById('fb-def').innerText = wrongDefTxt;
             document.getElementById('fb-exp').innerText = `💡 Sự thật là: ${termTxt} là ${correctDefTxt.toLowerCase()}`;
             document.getElementById('fb-modal').classList.add('active'); onFeedbackClose = callback;
         }
@@ -194,25 +186,10 @@
         
         function saveAndGoHome() { 
             let data = localStorage.getItem('edtech_user_kid');
-            if (!data) {
-                alert("Lỗi: Không tìm thấy dữ liệu người chơi! Vui lòng đăng nhập lại.");
-                window.location.href = 'index.html';
-                return;
-            }
+            if (!data) { window.location.href = 'index.html'; return; }
             let user = JSON.parse(data);
-            
-            user.xp = (user.xp || 0) + score; 
-            user.level = Math.floor(user.xp / 500) + 1; 
-            user.last_played = new Date().toLocaleString('vi-VN');
-            
+            user.xp = (user.xp || 0) + score; user.level = Math.floor(user.xp / 500) + 1; 
             localStorage.setItem('edtech_user_kid', JSON.stringify(user)); 
-            
-            let leaderboard = JSON.parse(localStorage.getItem('edtech_leaderboard')) || [];
-            let existingStudent = leaderboard.findIndex(s => s.id === user.id);
-            if(existingStudent !== -1) { leaderboard[existingStudent] = user; } 
-            else { leaderboard.push(user); }
-            localStorage.setItem('edtech_leaderboard', JSON.stringify(leaderboard));
-
             window.location.href = 'index.html#home'; 
         }
     </script>
