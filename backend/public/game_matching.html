@@ -220,12 +220,12 @@
             // Đồng bộ điểm lên Backend
             if (user.name) {
                 try {
-                    await fetch(`${API_BASE_URL}/api/users`, {
+                    await fetch(`${API_BASE_URL}/api/sync`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
                             name: user.name, 
-                            className: user.className || '', 
+                            class_name: user.className || '', 
                             xp: user.xp, 
                             level: user.level,
                             avatar: user.avatar || '👦'
