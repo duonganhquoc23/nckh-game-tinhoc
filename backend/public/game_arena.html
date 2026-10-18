@@ -115,18 +115,18 @@
             </div>
         </div>
 
-        <div id="screen-result" class="screen" style="justify-content: center;">
+<div id="screen-result" class="screen" style="justify-content: center;">
             <h1 class="title-kid" id="res-title" style="font-size: 3.5rem; margin-bottom: 5px;">CHIẾN THẮNG! 🎉</h1>
             <p id="res-subtitle" style="text-align: center; color: var(--text-dim); margin-bottom: 10px; font-size: 1.2rem; font-weight: 700;"></p>
             <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 25px; text-align: center;">Thu thập được: <span id="res-score" style="color: var(--warning); font-size: 2.5rem; font-family: 'Baloo 2', cursive;">0</span> XP</div>
             
-            <div style="display: flex; gap: 15px; justify-content: center;">
-                <button class="btn btn-outline" style="width: 220px;" onclick="saveAndGoHome()">VỀ BẢN ĐỒ</button>
-                <button class="btn btn-primary" style="width: 220px;" onclick="initGame()">CHƠI LẠI</button>
+            <div style="display: flex; justify-content: center;">
+                <button class="btn btn-outline" style="width: 250px;" onclick="saveAndGoHome()">VỀ LẠI BẢN ĐỒ</button>
             </div>
         </div>
     </div>
 
+    <!-- Modal giữ nguyên -->
     <div class="feedback-modal" id="fb-modal">
         <div class="feedback-box">
             <h2 class="fb-title">Ôi, bị phản đòn rồi! 😢</h2>
@@ -139,26 +139,23 @@
 
     <script>
         const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
+        const GAME_NAME = "Đấu Trường So Tài";
         
-        // HÀM LƯU LỊCH SỬ VÀO DATABASE
         async function saveHistory(gameName, question, studentAnswer, isCorrect) {
             let data = localStorage.getItem('edtech_user_kid');
             if (!data) return;
             let user = JSON.parse(data);
             if (!user.name) return;
+
+            let playCount = user.playCounts && user.playCounts[gameName] ? user.playCounts[gameName] : 1;
+            if (playCount <= 1) return; // Không gửi nếu chơi lần 1
+
             try {
                 await fetch(`${API_BASE_URL}/api/history`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        student_name: user.name,
-                        game_name: gameName,
-                        question: question,
-                        student_answer: studentAnswer,
-                        is_correct: isCorrect
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_name: user.name, game_name: gameName, question: question, student_answer: studentAnswer, is_correct: isCorrect })
                 });
-            } catch (error) { console.error('Lỗi lưu lịch sử:', error); }
+            } catch (error) {}
         }
 
         const questionBank = [
@@ -178,15 +175,20 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             let data = localStorage.getItem('edtech_user_kid');
-            if(data) {
-                let user = JSON.parse(data);
-                document.getElementById('player-sprite').innerText = user.avatar || '👦';
-            }
+            if(data) { let user = JSON.parse(data); document.getElementById('player-sprite').innerText = user.avatar || '👦'; }
         });
 
         function switchScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
         function initGame() {
+            let data = localStorage.getItem('edtech_user_kid');
+            if(data) {
+                let user = JSON.parse(data);
+                if (!user.playCounts) user.playCounts = {};
+                user.playCounts[GAME_NAME] = (user.playCounts[GAME_NAME] || 0) + 1;
+                localStorage.setItem('edtech_user_kid', JSON.stringify(user));
+            }
+
             playerHP = 100; bossHP = 100; isProcessing = false; playQueue = [...questionBank].sort(() => Math.random() - 0.5);
             updateHPUI(); switchScreen('screen-arena'); nextTurn();
         }
@@ -230,16 +232,12 @@
             let isCorrect = (selectedOriginalIdx === currentQ.correct);
             let userTxt = currentQ.ans[selectedOriginalIdx];
             
-            // GỌI HÀM LƯU LỊCH SỬ SAU KHI HỌC SINH CHỌN
-            saveHistory("Đấu Trường So Tài", currentQ.q, userTxt, isCorrect);
+            saveHistory(GAME_NAME, currentQ.q, userTxt, isCorrect);
 
-            if (isCorrect) {
-                btn.classList.add('correct'); executeAttack('player');
-            } else {
-                btn.classList.add('wrong'); 
-                const correctTxt = currentQ.ans[currentQ.correct];
+            if (isCorrect) { btn.classList.add('correct'); executeAttack('player'); } 
+            else {
+                btn.classList.add('wrong'); const correctTxt = currentQ.ans[currentQ.correct];
                 Array.from(document.getElementById('ans-grid').children).forEach(b => { if(b.innerText === correctTxt) b.classList.add('correct'); });
-                
                 showFeedbackModal(userTxt, correctTxt, currentQ.exp, () => executeAttack('boss'));
             }
         }
@@ -247,25 +245,16 @@
         function handleTimeout() {
             if (isProcessing) return; isProcessing = true;
             Array.from(document.getElementById('ans-grid').children).forEach(b => { b.classList.add('disabled'); if(b.innerText === currentQ.ans[currentQ.correct]) b.classList.add('correct'); });
-            
-            // LƯU LỊCH SỬ KHI KHÔNG CHỌN KỊP
-            saveHistory("Đấu Trường So Tài", currentQ.q, "Không chọn kịp (Hết giờ)", false);
-            
+            saveHistory(GAME_NAME, currentQ.q, "Không chọn kịp (Hết giờ)", false);
             showFeedbackModal("Không chọn kịp giờ", currentQ.ans[currentQ.correct], currentQ.exp, () => executeAttack('boss_timeout'));
         }
 
         function showFeedbackModal(userAns, correctAns, exp, callback) {
-            document.getElementById('fb-wrong').innerText = "Em đã chọn: " + userAns;
-            document.getElementById('fb-correct').innerText = "Đáp án đúng: " + correctAns;
-            document.getElementById('fb-exp').innerText = "💡 Chú ý: " + exp;
-            document.getElementById('fb-modal').classList.add('active');
-            onFeedbackClose = callback;
+            document.getElementById('fb-wrong').innerText = "Em đã chọn: " + userAns; document.getElementById('fb-correct').innerText = "Đáp án đúng: " + correctAns;
+            document.getElementById('fb-exp').innerText = "💡 Chú ý: " + exp; document.getElementById('fb-modal').classList.add('active'); onFeedbackClose = callback;
         }
 
-        function closeFeedback() {
-            document.getElementById('fb-modal').classList.remove('active');
-            if (onFeedbackClose) onFeedbackClose();
-        }
+        function closeFeedback() { document.getElementById('fb-modal').classList.remove('active'); if (onFeedbackClose) onFeedbackClose(); }
 
         function executeAttack(attacker) {
             let dmg = 0;
@@ -285,42 +274,20 @@
         }
 
         function resolveMatch(isWin) {
-            clearInterval(energyTimer);
-            const t = document.getElementById('res-title'), st = document.getElementById('res-subtitle');
+            clearInterval(energyTimer); const t = document.getElementById('res-title'), st = document.getElementById('res-subtitle');
             let currentScore = isWin ? 250 : 50;
-            
-            if (isWin) { 
-                t.innerText = "CHIẾN THẮNG! 🎉"; t.style.color = "var(--success)"; 
-                st.innerText = "Em đã đánh bại Robot Siêu Phàm xuất sắc!"; 
-            } else { 
-                t.innerText = "KẾT THÚC 😢"; t.style.color = "var(--error)"; 
-                st.innerText = "Không sao cả, hãy nạp năng lượng và thử lại nhé!"; 
-            }
-            
-            document.getElementById('res-score').innerText = currentScore;
-            switchScreen('screen-result');
+            if (isWin) { t.innerText = "CHIẾN THẮNG! 🎉"; t.style.color = "var(--success)"; st.innerText = "Em đã đánh bại Robot Siêu Phàm xuất sắc!"; } 
+            else { t.innerText = "KẾT THÚC 😢"; t.style.color = "var(--error)"; st.innerText = "Không sao cả, hãy nạp năng lượng và thử lại nhé!"; }
+            document.getElementById('res-score').innerText = currentScore; switchScreen('screen-result');
         }
 
         function saveAndGoHome() { 
             let data = localStorage.getItem('edtech_user_kid');
             if (!data) { window.location.href = 'index.html'; return; }
             let user = JSON.parse(data);
-            if (!user.name) { window.location.href = 'index.html'; return; }
-
             let currentScore = (bossHP <= 0) ? 250 : 50;
-
-            user.xp = (user.xp || 0) + currentScore; 
-            user.level = Math.floor(user.xp / 500) + 1; 
-            user.last_played = new Date().toLocaleString('vi-VN');
-            
+            user.xp = (user.xp || 0) + currentScore; user.level = Math.floor(user.xp / 500) + 1; 
             localStorage.setItem('edtech_user_kid', JSON.stringify(user)); 
-            
-            let leaderboard = JSON.parse(localStorage.getItem('edtech_leaderboard')) || [];
-            let existingStudent = leaderboard.findIndex(s => s.id === user.id);
-            if(existingStudent !== -1) { leaderboard[existingStudent] = user; } 
-            else { leaderboard.push(user); }
-            localStorage.setItem('edtech_leaderboard', JSON.stringify(leaderboard));
-
             window.location.href = 'index.html#home'; 
         }
     </script>
