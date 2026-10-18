@@ -152,33 +152,39 @@
                 <h2 class="text-center mb-3" style="font-family: 'Baloo 2', cursive; font-size: 2.5rem; color: var(--primary);">🗺️ BẢN ĐỒ VŨ TRỤ TIN HỌC</h2>
                 <div class="grid-3">
                     
-                    <!-- 1. ĐẢO TƯ DUY -->
+                    <!-- 1. ĐẢO TƯ DUY (Đã thêm id="btn-daotuduy" để JS mở khóa) -->
                     <div class="game-card-v2 game-locked">
                         <div class="game-img-box img-matching"><i class="fa-solid fa-link"></i></div>
                         <div class="game-info-box">
                             <h3 class="game-title">Đảo Tư Duy</h3>
                             <p class="game-desc">Ghép các mảnh ghép kiến thức để hoàn thiện cỗ máy tri thức diệu kỳ.</p>
-                            <div class="game-actions"><button class="btn btn-secondary w-100 disabled">Đang bảo trì 🔒</button></div>
+                            <div class="game-actions">
+                                <button class="btn btn-warning w-100" id="btn-daotuduy">Đang tải...</button>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- 2. ĐẤU TRƯỜNG SO TÀI -->
+                    <!-- 2. ĐẤU TRƯỜNG SO TÀI (Đã thêm id="btn-dautruong" để JS mở khóa) -->
                     <div class="game-card-v2 game-locked">
                         <div class="game-img-box img-arena"><i class="fa-solid fa-khanda"></i></div>
                         <div class="game-info-box">
                             <h3 class="game-title">Đấu Trường So Tài</h3>
                             <p class="game-desc">Tham gia so tài kiến thức Tin học cùng với chú Robot siêu phàm.</p>
-                            <div class="game-actions"><button class="btn btn-secondary w-100 disabled">Đang bảo trì 🔒</button></div>
+                            <div class="game-actions">
+                                <button class="btn btn-warning w-100" id="btn-dautruong">Đang tải...</button>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- 3. ẾCH CON QUA SÔNG -->
-                    <div class="game-card-v2 game-locked">
+                    <!-- 3. ẾCH CON QUA SÔNG (Mở sẵn, gọi hàm playNormalGame) -->
+                    <div class="game-card-v2">
                         <div class="game-img-box img-frog"><i class="fa-solid fa-frog"></i></div>
                         <div class="game-info-box">
                             <h3 class="game-title">Ếch Con Qua Sông</h3>
                             <p class="game-desc">Chọn đúng thao tác Tệp và Thư mục để giúp ếch qua sông an toàn.</p>
-                            <div class="game-actions"><button class="btn btn-secondary w-100 disabled">Đang bảo trì 🔒</button></div>
+                            <div class="game-actions">
+                                <button class="btn btn-primary w-100" onclick="playNormalGame('game_echcon.html')">Khởi hành <i class="fa-solid fa-rocket"></i></button>
+                            </div>
                         </div>
                     </div>
 
