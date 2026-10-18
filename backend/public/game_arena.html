@@ -81,8 +81,9 @@
         </div>
 
         <div id="screen-arena" class="screen">
-            <div style="text-align: left; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <button class="btn btn-outline" style="padding: 8px 15px; font-size: 1rem; border-width: 2px;" onclick="window.location.href='index.html#home'">← QUAY VỀ</button>
+                <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Baloo 2', cursive; color: var(--error);">⏳ <span id="ui-timer">03:00</span></div>
             </div>
             <div class="arena-header">
                 <div class="fighter-info">
@@ -126,7 +127,7 @@
         </div>
     </div>
 
-    <!-- Modal giữ nguyên -->
+    <!-- Modal -->
     <div class="feedback-modal" id="fb-modal">
         <div class="feedback-box">
             <h2 class="fb-title">Ôi, bị phản đòn rồi! 😢</h2>
@@ -148,7 +149,7 @@
             if (!user.name) return;
 
             let playCount = user.playCounts && user.playCounts[gameName] ? user.playCounts[gameName] : 1;
-            if (playCount <= 1) return; // Không gửi nếu chơi lần 1
+            if (playCount <= 1) return;
 
             try {
                 await fetch(`${API_BASE_URL}/api/history`, {
@@ -172,6 +173,7 @@
         ];
         let playerHP = 100, bossHP = 100, playQueue = [], currentQ = null, isProcessing = false, energyValue = 100, energyTimer = null;
         let onFeedbackClose = null;
+        let gameTimerInterval, gameTimeLeft = 180;
 
         window.addEventListener('DOMContentLoaded', () => {
             let data = localStorage.getItem('edtech_user_kid');
@@ -179,6 +181,23 @@
         });
 
         function switchScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        
+        function startGameTimer() {
+            clearInterval(gameTimerInterval);
+            gameTimeLeft = 180;
+            document.getElementById('ui-timer').innerText = "03:00";
+            gameTimerInterval = setInterval(() => {
+                gameTimeLeft--;
+                let m = Math.floor(gameTimeLeft / 60).toString().padStart(2, '0');
+                let s = (gameTimeLeft % 60).toString().padStart(2, '0');
+                document.getElementById('ui-timer').innerText = `${m}:${s}`;
+                
+                if(gameTimeLeft <= 0) {
+                    clearInterval(gameTimerInterval);
+                    resolveMatch(false); // Xử lý thua cuộc khi hết giờ
+                }
+            }, 1000);
+        }
 
         function initGame() {
             let data = localStorage.getItem('edtech_user_kid');
@@ -191,6 +210,7 @@
 
             playerHP = 100; bossHP = 100; isProcessing = false; playQueue = [...questionBank].sort(() => Math.random() - 0.5);
             updateHPUI(); switchScreen('screen-arena'); nextTurn();
+            startGameTimer();
         }
 
         function updateHPUI() {
@@ -274,7 +294,9 @@
         }
 
         function resolveMatch(isWin) {
-            clearInterval(energyTimer); const t = document.getElementById('res-title'), st = document.getElementById('res-subtitle');
+            clearInterval(energyTimer); 
+            clearInterval(gameTimerInterval); // Xóa đồng hồ game
+            const t = document.getElementById('res-title'), st = document.getElementById('res-subtitle');
             let currentScore = isWin ? 250 : 50;
             if (isWin) { t.innerText = "CHIẾN THẮNG! 🎉"; t.style.color = "var(--success)"; st.innerText = "Em đã đánh bại Robot Siêu Phàm xuất sắc!"; } 
             else { t.innerText = "KẾT THÚC 😢"; t.style.color = "var(--error)"; st.innerText = "Không sao cả, hãy nạp năng lượng và thử lại nhé!"; }
