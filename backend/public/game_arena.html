@@ -302,13 +302,33 @@
             document.getElementById('res-score').innerText = currentScore; switchScreen('screen-result');
         }
 
-        function saveAndGoHome() { 
+        async function saveAndGoHome() { 
             let data = localStorage.getItem('edtech_user_kid');
             if (!data) { window.location.href = 'index.html'; return; }
             let user = JSON.parse(data);
             let currentScore = (bossHP <= 0) ? 250 : 50;
             user.xp = (user.xp || 0) + currentScore; user.level = Math.floor(user.xp / 500) + 1; 
             localStorage.setItem('edtech_user_kid', JSON.stringify(user)); 
+
+            // Đồng bộ điểm lên Backend
+            if (user.name) {
+                try {
+                    await fetch(`${API_BASE_URL}/api/users`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            name: user.name, 
+                            className: user.className || '', 
+                            xp: user.xp, 
+                            level: user.level,
+                            avatar: user.avatar || '👦'
+                        })
+                    });
+                } catch (error) {
+                    console.error("Lỗi đồng bộ dữ liệu:", error);
+                }
+            }
+
             window.location.href = 'index.html#home'; 
         }
     </script>
