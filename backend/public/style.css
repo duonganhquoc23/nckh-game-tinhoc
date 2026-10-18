@@ -1,22 +1,34 @@
 :root {
-    --primary: #4f46e5; 
-    --primary-light: #818cf8; 
-    --secondary: #facc15; 
-    --accent: #f43f5e; 
-    --success: #34d399; 
-    --warning: #fbbf24; 
-    --error: #f87171;
-    --bg-main: #f0fdfa; 
+    /* Bảng màu "Kẹo ngọt" dễ thương */
+    --primary: #3b82f6; /* Xanh dương tươi */
+    --primary-light: #93c5fd; 
+    --primary-dark: #2563eb;
+    --secondary: #facc15; /* Vàng nắng */
+    --secondary-dark: #eab308;
+    --accent: #f472b6; /* Hồng dễ thương */
+    --success: #34d399; /* Xanh mint */
+    --success-dark: #059669;
+    --warning: #fbbf24;
+    --error: #fb7185; /* Đỏ hồng mọng */
+    
+    --bg-main: #f0f9ff; /* Xanh nền trời nhạt */
     --bg-card: #ffffff; 
     --text-main: #334155; 
     --text-light: #64748b;
-    --border: #e2e8f0; 
-    --radius-sm: 12px; 
-    --radius-md: 20px; 
-    --radius-lg: 30px;
-    --shadow-sm: 0 4px 6px rgba(0,0,0,0.05); 
-    --shadow-md: 0 10px 25px rgba(0,0,0,0.1);
-    --gradient: linear-gradient(135deg, var(--secondary), #f59e0b);
+    --border: #cbd5e1; 
+    
+    /* Góc bo tròn kẹo mút */
+    --radius-sm: 16px; 
+    --radius-md: 24px; 
+    --radius-lg: 35px;
+    
+    /* Bóng đổ 3D kiểu hoạt hình */
+    --shadow-sm: 0 4px 0px rgba(0,0,0,0.1); 
+    --shadow-md: 0 8px 0px rgba(0,0,0,0.08);
+    --shadow-hover: 0 12px 0px rgba(59, 130, 246, 0.15);
+    
+    --gradient: linear-gradient(135deg, #60a5fa, #3b82f6);
+    --gradient-btn: linear-gradient(to bottom, #fde047, #f59e0b);
 }
 
 * { 
@@ -28,6 +40,9 @@
 
 body { 
     background-color: var(--bg-main); 
+    /* Thêm họa tiết chấm bi mờ siêu dễ thương */
+    background-image: radial-gradient(#bae6fd 2px, transparent 2px);
+    background-size: 30px 30px;
     color: var(--text-main); 
     line-height: 1.6; 
     overflow-x: hidden; 
@@ -39,28 +54,30 @@ header {
     position: fixed; 
     top: 0; 
     width: 100%; 
-    height: 75px; 
+    height: 80px; 
     z-index: 1000; 
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
     padding: 0 5%; 
-    border-bottom: 2px solid var(--border); 
+    border-bottom: 4px solid var(--border); 
 }
 
 .logo { 
-    font-size: 1.6rem; 
+    font-size: 1.8rem; 
     font-weight: 800; 
     color: var(--primary); 
     display: flex; 
     align-items: center; 
-    gap: 10px; 
+    gap: 12px; 
     font-family: 'Baloo 2', cursive;
+    text-shadow: 2px 2px 0px #bfdbfe; /* Đổ bóng chữ cute */
 }
 
 .logo i { 
     color: var(--accent); 
-    font-size: 1.8rem; 
+    font-size: 2rem; 
+    animation: bounce 2s infinite;
 }
 
 nav ul { 
@@ -72,18 +89,27 @@ nav ul {
 nav a { 
     text-decoration: none; 
     color: var(--text-light); 
-    font-weight: 700; 
-    padding: 10px 20px; 
-    border-radius: 25px; 
-    transition: all 0.3s; 
+    font-weight: 800; 
+    padding: 10px 22px; 
+    border-radius: 30px; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
     cursor: pointer; 
     font-size: 1.1rem;
+    border: 3px solid transparent;
 }
 
 nav a:hover, nav a.active { 
-    color: white; 
-    background-color: var(--primary); 
-    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    color: var(--primary-dark); 
+    background-color: #e0f2fe; 
+    border-color: var(--primary-light);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 0px var(--primary-light);
+}
+
+/* Hiệu ứng lún nút nav khi click */
+nav a:active {
+    transform: translateY(0);
+    box-shadow: 0 0px 0px transparent;
 }
 
 .user-menu { 
@@ -93,23 +119,24 @@ nav a:hover, nav a.active {
 }
 
 .avatar { 
-    width: 45px; 
-    height: 45px; 
-    background: var(--secondary); 
+    width: 50px; 
+    height: 50px; 
+    background: var(--gradient-btn); 
     border-radius: 50%; 
     display: flex; 
     justify-content: center; 
     align-items: center; 
     color: white; 
     font-weight: bold; 
-    font-size: 1.5rem; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    font-size: 1.8rem; 
+    border: 3px solid #fff;
+    box-shadow: 0 4px 0px rgba(0,0,0,0.15);
 }
 
 main { 
-    margin-top: 75px; 
+    margin-top: 85px; 
     padding: 2rem 5%; 
-    min-height: calc(100vh - 75px); 
+    min-height: calc(100vh - 85px); 
     max-width: 1200px; 
     margin-left: auto; 
     margin-right: auto;
@@ -117,49 +144,62 @@ main {
 
 section { 
     display: none; 
-    animation: fadeIn 0.4s ease; 
+    animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
 } 
 
 section.active { 
     display: block; 
 }
 
+/* --- NÚT BẤM (BUTTONS) --- */
 .btn { 
     padding: 12px 25px; 
-    border-radius: 25px; 
-    border: none; 
+    border-radius: 30px; /* Tròn trĩnh */
+    border: 3px solid transparent; 
     font-weight: 800; 
-    font-family: 'Nunito', sans-serif; 
+    font-family: 'Baloo 2', cursive; /* Chữ mập mạp */
+    font-size: 1.2rem; 
     cursor: pointer; 
-    transition: all 0.2s; 
+    transition: all 0.15s ease; 
     display: inline-flex; 
     align-items: center; 
     justify-content: center; 
     gap: 10px; 
-    font-size: 1.05rem; 
+    letter-spacing: 0.5px;
 }
 
+/* Đổ bóng kiểu 3D */
 .btn:hover { 
-    transform: translateY(-3px) scale(1.02); 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15); 
+    transform: translateY(-4px); 
+}
+.btn:active {
+    transform: translateY(2px);
 }
 
 .btn-primary { 
-    background: var(--gradient); 
+    background: var(--gradient-btn); 
     color: #fff; 
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2); 
+    border: 3px solid #fef08a;
+    box-shadow: 0 6px 0px var(--secondary-dark); 
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.2); 
+}
+.btn-primary:active {
+    box-shadow: 0 0px 0px var(--secondary-dark);
 }
 
 .btn-danger { 
     background: #ffe4e6; 
     color: var(--error); 
-    border: 2px solid #fda4af; 
+    border: 3px solid #fda4af;
+    box-shadow: 0 6px 0px #fb7185;
 }
-
 .btn-danger:hover { 
     background: var(--error); 
     color: white; 
-    border-color: var(--error); 
+    border-color: #e11d48; 
+}
+.btn-danger:active {
+    box-shadow: 0 0px 0px #fb7185;
 }
 
 .w-100 { width: 100%; }
@@ -168,15 +208,15 @@ section.active {
     background: var(--bg-card); 
     border-radius: var(--radius-md); 
     padding: 1.5rem; 
-    box-shadow: var(--shadow-sm); 
-    border: 2px solid var(--border); 
+    box-shadow: var(--shadow-md); 
+    border: 4px solid var(--border); 
     transition: 0.3s; 
 }
 
 .grid-3 { 
     display: grid; 
     grid-template-columns: repeat(3, 1fr); 
-    gap: 20px; 
+    gap: 25px; 
 }
 
 .grid-4 { 
@@ -185,10 +225,10 @@ section.active {
     gap: 20px; 
 }
 
-.text-success { color: var(--success); } 
+.text-success { color: var(--success-dark); } 
 .text-error { color: var(--error); } 
 .text-warning { color: var(--warning); } 
-.text-secondary { color: var(--secondary); } 
+.text-secondary { color: var(--secondary-dark); } 
 .text-primary { color: var(--primary); }
 .text-light { color: var(--text-light); }
 .mb-3 { margin-bottom: 1.5rem; } 
@@ -197,83 +237,101 @@ section.active {
 .text-center { text-align: center; }
 
 @keyframes fadeIn { 
-    from { opacity: 0; transform: translateY(15px); } 
-    to { opacity: 1; transform: translateY(0); } 
+    from { opacity: 0; transform: translateY(20px) scale(0.95); } 
+    to { opacity: 1; transform: translateY(0) scale(1); } 
 }
 
+/* --- BANNER MASCOT CHÀO MỪNG --- */
 .mascot-banner { 
     display: flex; 
     align-items: center; 
     background: #e0e7ff; 
-    padding: 25px 40px; 
-    border-radius: 30px; 
-    border: 4px dashed var(--primary-light); 
+    padding: 30px 40px; 
+    border-radius: var(--radius-lg); 
+    border: 5px dashed var(--primary-light); 
     gap: 30px; 
     box-shadow: var(--shadow-md); 
+    position: relative;
+    overflow: hidden;
+}
+.mascot-banner::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
 }
 
 .mascot-icon { 
-    font-size: 5rem; 
+    font-size: 6rem; 
     color: var(--primary); 
     animation: bounce 2s infinite; 
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
 }
 
 .mascot-dialogue h2 { 
     font-family: 'Baloo 2', cursive; 
-    color: var(--primary); 
-    font-size: 2rem; 
-    margin-bottom: 5px; 
+    color: var(--primary-dark); 
+    font-size: 2.2rem; 
+    margin-bottom: 8px; 
 }
 
 .mascot-dialogue p { 
-    font-size: 1.15rem; 
+    font-size: 1.2rem; 
     color: var(--text-main); 
-    font-weight: 700; 
+    font-weight: 800; 
 }
 
 @keyframes bounce { 
     0%, 100% { transform: translateY(0); } 
-    50% { transform: translateY(-15px); } 
+    50% { transform: translateY(-20px); } 
 }
 
+/* --- THẺ GAME (GAME CARDS) --- */
 .game-card-v2 { 
     background: var(--bg-card); 
     border-radius: var(--radius-md); 
-    border: 1px solid var(--border); 
+    border: 4px solid #fff; 
     overflow: hidden; 
     display: flex; 
     flex-direction: column; 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
     box-shadow: var(--shadow-sm); 
     height: 100%; 
+    position: relative;
 }
 
 .game-card-v2:hover { 
-    transform: translateY(-5px); 
-    box-shadow: var(--shadow-md); 
-    border-color: var(--primary); 
+    transform: translateY(-8px) rotate(1deg); /* Hơi xoay nghiêng khi hover */
+    box-shadow: var(--shadow-hover); 
+    border-color: var(--primary-light); 
 }
 
 .game-img-box { 
-    height: 160px; 
+    height: 170px; 
     width: 100%; 
     display: flex; 
     justify-content: center; 
     align-items: center; 
     position: relative; 
     overflow: hidden; 
+    border-bottom: 4px dashed var(--bg-main);
+    background-color: var(--primary-light);
 }
 
 .game-img-box i { 
-    font-size: 3.5rem; 
+    font-size: 4.5rem; 
     color: white; 
     z-index: 2; 
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); 
-    transition: transform 0.3s; 
+    filter: drop-shadow(0 6px 0px rgba(0,0,0,0.2)); 
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Hiệu ứng nảy */
 }
 
 .game-card-v2:hover .game-img-box i { 
-    transform: scale(1.15); 
+    transform: scale(1.25) rotate(-5deg); 
 }
 
 .img-shooter { background: url('banmuctieu.png') center/cover no-repeat; }
@@ -290,37 +348,37 @@ section.active {
     content: '';
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.2); 
+    background: rgba(0, 0, 0, 0.15); 
     z-index: 1;
     transition: 0.3s;
 }
 
 .game-card-v2:hover .game-img-box::before { 
-    background: rgba(0, 0, 0, 0.1); 
+    background: transparent; 
 }
 
 .game-info-box { 
     flex: 1; 
-    padding: 1.25rem; 
+    padding: 1.5rem; 
     display: flex; 
     flex-direction: column; 
     text-align: center;
 }
 
 .game-title { 
-    font-size: 1.4rem; 
-    color: var(--primary); 
-    font-weight: 700; 
-    margin-bottom: 5px; 
+    font-size: 1.6rem; 
+    color: var(--primary-dark); 
+    font-weight: 800; 
+    margin-bottom: 8px; 
     font-family: 'Baloo 2', cursive; 
     letter-spacing: 0.5px;
 }
 
 .game-desc { 
-    font-size: 0.95rem; 
+    font-size: 1.05rem; 
     color: var(--text-light); 
-    margin-bottom: 15px; 
-    line-height: 1.4; 
+    margin-bottom: 18px; 
+    line-height: 1.5; 
     font-weight: 700;
 }
 
@@ -330,14 +388,16 @@ section.active {
     margin-top: auto; 
 }
 
+/* --- HỒ SƠ & THÀNH TÍCH (PROFILE) --- */
 .profile-card { 
     display: flex; 
     gap: 25px; 
     align-items: center; 
-    background: #fffbeb; 
-    border: 3px dashed var(--warning); 
+    background: #fffbeb; /* Nền vàng nhạt */
+    border: 5px solid var(--warning); 
     padding: 30px; 
-    border-radius: 30px; 
+    border-radius: var(--radius-lg); 
+    box-shadow: 0 8px 0px #fde68a;
 }
 
 .stat-card { 
@@ -348,23 +408,40 @@ section.active {
     justify-content: center; 
     padding: 25px; 
     border-radius: 25px; 
-    border-width: 3px; 
+    border-width: 4px; 
 }
 
 .progress-container { 
     width: 100%; 
-    background: #f1f5f9; 
-    border-radius: 10px; 
-    height: 8px; 
+    background: #e2e8f0; 
+    border-radius: 15px; 
+    height: 16px; 
     overflow: hidden; 
-    margin-top: 8px; 
+    margin-top: 10px; 
+    border: 2px solid #cbd5e1;
 }
 
 .progress-bar { 
     height: 100%; 
     background: var(--gradient); 
     transition: width 0.5s ease; 
-    border-radius: 10px; 
+    border-radius: 15px; 
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hiệu ứng bóng lấp lánh trên thanh tiến trình */
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 @media (max-width: 1024px) {
@@ -392,23 +469,29 @@ section.active {
         gap: 10px;
     }
     
-    main { margin-top: 130px; }
+    main { margin-top: 140px; }
 
-    .mascot-banner { flex-direction: column; text-align: center; } 
+    .mascot-banner { 
+        flex-direction: column; 
+        text-align: center; 
+        padding: 20px;
+    } 
+    .mascot-icon { font-size: 5rem; }
 }
 
 .locked-badge {
     filter: grayscale(100%);
-    opacity: 0.75;
-    background: #f8fafc !important;
-    border-color: #e2e8f0 !important;
+    opacity: 0.8;
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    border-style: dashed;
 }
 
 .confetti {
     position: fixed;
     width: 12px;
     height: 12px;
-    border-radius: 3px;
+    border-radius: 50%; /* Tròn như kẹo */
     z-index: 9999;
     pointer-events: none;
     animation: fallConfetti 1s ease-out forwards;
