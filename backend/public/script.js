@@ -40,10 +40,10 @@ function updateGameButtons() {
 
     if (!user.unlockedGames) user.unlockedGames = [];
 
-    // Mảng chứa cấu hình các game bị khóa
+    // ĐÃ FIX: Chèn đúng tên file HTML của Đảo Tư Duy và Đấu Trường So Tài
     const lockedGamesConfig = [
-        { id: 'daotuduy', btnId: 'btn-daotuduy', url: 'game_daotuduy.html' },
-        { id: 'dautruong', btnId: 'btn-dautruong', url: 'game_dautruong.html' }
+        { id: 'daotuduy', btnId: 'btn-daotuduy', url: 'game_matching.html' },
+        { id: 'dautruong', btnId: 'btn-dautruong', url: 'game_arena.html' }
     ];
 
     lockedGamesConfig.forEach(game => {
@@ -64,7 +64,7 @@ function updateGameButtons() {
                 btn.style.backgroundColor = '#fbbf24'; 
                 btn.style.color = '#fff';
                 btn.onclick = () => playLockedGame(game.id, game.url);
-                if (card) card.classList.add('game-locked'); // Làm mờ thẻ game
+                if (card) card.classList.add('game-locked'); 
             }
         }
     });
@@ -83,7 +83,7 @@ function playLockedGame(gameId, targetUrl) {
     // Nhập mật khẩu
     let pwd = prompt("Trò chơi này đang bị khóa! Vui lòng nhập mật khẩu để mở khóa:");
     
-    if (pwd === null) return; // Người dùng bấm Hủy
+    if (pwd === null) return; 
     
     if (pwd === '23122006') {
         user.unlockedGames.push(gameId);
@@ -91,7 +91,7 @@ function playLockedGame(gameId, targetUrl) {
         syncDataToServer(user);
         
         alert("🎉 Chúc mừng! Con đã mở khóa game thành công!");
-        updateGameButtons(); // Làm mới lại giao diện nút
+        updateGameButtons(); 
     } else {
         alert("❌ Mật khẩu chưa đúng rồi, con thử lại nhé!");
     }
@@ -107,45 +107,6 @@ function playNormalGame(targetUrl) {
     window.location.href = targetUrl;
 }
 
-// ---------------------------------------------------------
-// GAME TÀU NGẦM KHÁM PHÁ (Chỉ chơi 1 lần)
-// ---------------------------------------------------------
-async function checkAndPlaySubmarine(event) {
-    const user = getCurrentUser();
-    if (!user) {
-        alert("Vui lòng đăng nhập trước khi chơi!");
-        return;
-    }
-
-    const btn = event.currentTarget;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải...';
-    btn.disabled = true;
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/check-submarine-status`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: user.name, class_name: user.class_name })
-        });
-        
-        const data = await response.json();
-        
-        if (data.can_play) {
-            window.location.href = 'game_submarine.html';
-        } else {
-            alert("Rất tiếc! Mỗi bạn chỉ được chơi Tàu Ngầm Khám Phá 1 lần duy nhất thôi nhé!");
-            btn.innerHTML = 'Đã hoàn thành <i class="fa-solid fa-check"></i>';
-            btn.classList.replace('btn-primary', 'btn-secondary');
-        }
-    } catch (error) {
-        console.error("Lỗi khi kiểm tra trạng thái game:", error);
-        alert("Có lỗi kết nối đến máy chủ. Vui lòng thử lại sau!");
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-}
-
 // 2. CHỨC NĂNG ĐĂNG NHẬP (Bắt đầu chơi)
 function startGame() {
     const name = document.getElementById('login-name').value.trim();
@@ -158,7 +119,6 @@ function startGame() {
         return;
     }
 
-    // Kiểm tra dữ liệu cũ để giữ nguyên thuộc tính unlockedGames nếu đã có
     let existingData = getCurrentUser();
     let unlockedGamesArr = (existingData && existingData.name === name && existingData.class_name === className) 
                             ? (existingData.unlockedGames || []) 
@@ -171,7 +131,7 @@ function startGame() {
         level: existingData ? (existingData.level || 1) : 1,
         xp: existingData ? (existingData.xp || 0) : 0,
         unlocked: existingData ? (existingData.unlocked || []) : [],
-        unlockedGames: unlockedGamesArr // Thêm thuộc tính lưu game khóa
+        unlockedGames: unlockedGamesArr 
     };
 
     localStorage.setItem('edtech_user_kid', JSON.stringify(userData));
@@ -317,7 +277,7 @@ window.addEventListener('DOMContentLoaded', () => {
     let user = getCurrentUser();
     if(user) {
         updateHeader(user);
-        updateGameButtons(); // Gọi hàm cập nhật nút mở khóa game
+        updateGameButtons(); 
         if (window.location.hash === '#profile') {
             navigate('profile');
         }
