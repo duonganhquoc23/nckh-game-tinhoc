@@ -15,102 +15,77 @@
                 let data = localStorage.getItem('edtech_user_kid');
                 if (data && JSON.parse(data).name) isAuth = true;
             } catch(e) {}
-            
-            if (isAuth) {
-                document.documentElement.classList.add('is-auth');
-            } else {
-                document.documentElement.classList.add('no-auth');
-            }
+            if (isAuth) document.documentElement.classList.add('is-auth');
+            else document.documentElement.classList.add('no-auth');
         })();
     </script>
 
     <style>
-        #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); z-index: 9999; 
-            display: none; 
-            justify-content: center; align-items: center;
-        }
-
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; justify-content: center; align-items: center; }
         html.no-auth #login-screen { display: flex !important; }
         html.no-auth header, html.no-auth main, html.no-auth footer { display: none !important; }
         html.is-auth #login-screen { display: none !important; }
 
-        .avatar-section {
-            background: #f8fafc; border-radius: 20px; padding: 20px; margin: 20px auto 30px;
-            max-width: 600px; border: 3px dashed #93c5fd; text-align: center;
-        }
-        .avatar-section h2 { font-family: 'Baloo 2', cursive; color: #0284c7; font-size: 1.5rem; margin-bottom: 15px; }
         .avatar-container { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-        .avatar-btn { 
-            font-size: 2.2rem; background: #ffffff; border: 3px solid #cbd5e1; border-radius: 15px; 
-            cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; width: 55px; height: 55px; 
-            display: flex; justify-content: center; align-items: center; position: relative;
-        }
+        .avatar-btn { font-size: 2.2rem; background: #ffffff; border: 3px solid #cbd5e1; border-radius: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; width: 55px; height: 55px; display: flex; justify-content: center; align-items: center; position: relative; }
         .avatar-btn:hover { transform: translateY(-4px); border-color: #94a3b8; box-shadow: 0 8px 0 #94a3b8; }
         .avatar-btn:active { transform: translateY(0); box-shadow: 0 0 0 transparent; }
-        .avatar-btn.selected { 
-            border-color: #22c55e; background: #d1fae5; box-shadow: 0 4px 0 #16a34a; transform: translateY(-3px); 
-        }
-        .avatar-btn.selected::after {
-            content: '⭐'; position: absolute; top: -8px; right: -8px; font-size: 1.2rem;
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
-        }
+        .avatar-btn.selected { border-color: #22c55e; background: #d1fae5; box-shadow: 0 4px 0 #16a34a; transform: translateY(-3px); }
+        .avatar-btn.selected::after { content: '⭐'; position: absolute; top: -8px; right: -8px; font-size: 1.2rem; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
         
-        .login-box {
-            background: white; padding: 30px; border-radius: 20px; text-align: center; 
-            max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 5px solid #3b82f6;
-        }
-        .login-input {
-            width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 10px; 
-            border: 2px solid #cbd5e1; font-size: 1.1rem; font-family: 'Nunito', sans-serif; box-sizing: border-box;
-        }
+        .login-box { background: white; padding: 30px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 5px solid #3b82f6; }
+        .login-input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 10px; border: 2px solid #cbd5e1; font-size: 1.1rem; font-family: 'Nunito', sans-serif; box-sizing: border-box; }
         select.login-input { cursor: pointer; appearance: auto; color: #334155; }
         
-        .site-footer {
-            text-align: center; padding: 25px 20px; margin-top: 40px; color: #64748b; 
-            font-size: 1rem; font-family: 'Nunito', sans-serif; border-top: 1px solid #e2e8f0; background: transparent;
-        }
+        .site-footer { text-align: center; padding: 25px 20px; margin-top: 40px; color: #64748b; font-size: 1rem; font-family: 'Nunito', sans-serif; border-top: 1px solid #e2e8f0; background: transparent; }
         .site-footer strong { color: #0284c7; font-weight: 800; }
         .site-footer .sub-text { display: block; font-size: 0.9rem; color: #94a3b8; margin-top: 5px; }
 
-        /* Style cho nút game bị khóa */
-        .game-locked { 
-    opacity: 0.9; 
-    filter: grayscale(80%); 
-}
+        .game-locked { opacity: 0.9; filter: grayscale(80%); }
         .btn-secondary { background: #94a3b8 !important; color: white; cursor: not-allowed !important; box-shadow: none !important; }
+
+        /* Style cho Form Nhập Mật Khẩu */
+        .pwd-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(3px); }
+        .pwd-modal.active { display: flex; animation: fadeIn 0.3s ease; }
+        .pwd-box { background: #fff; padding: 30px; border-radius: 25px; text-align: center; max-width: 400px; width: 90%; border: 5px solid var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
+    <!-- Màn hình Đăng Nhập -->
     <div id="login-screen">
         <div class="login-box">
             <h2 style="font-family: 'Baloo 2', cursive; color: #1e3a8a; font-size: 2rem; margin-bottom: 20px;">🚀 SẴN SÀNG KHÁM PHÁ!</h2>
-            
             <input type="text" id="login-name" class="login-input" placeholder="Tên của con là gì? (VD: Quốc)">
-            
             <select id="login-class" class="login-input">
                 <option value="" disabled selected>-- Con học lớp mấy? --</option>
-                <option value="4/1">Lớp 4/1</option>
-                <option value="4/2">Lớp 4/2</option>
-                <option value="4/3">Lớp 4/3</option>
-                <option value="4/4">Lớp 4/4</option>
-                <option value="4/5">Lớp 4/5</option>
-                <option value="4/6">Lớp 4/6</option>
-                <option value="4/7">Lớp 4/7</option>
-                <option value="4/8">Lớp 4/8</option>
-                <option value="4/9">Lớp 4/9</option>
+                <option value="4/1">Lớp 4/1</option><option value="4/2">Lớp 4/2</option><option value="4/3">Lớp 4/3</option>
+                <option value="4/4">Lớp 4/4</option><option value="4/5">Lớp 4/5</option><option value="4/6">Lớp 4/6</option>
+                <option value="4/7">Lớp 4/7</option><option value="4/8">Lớp 4/8</option><option value="4/9">Lớp 4/9</option>
             </select>
-
             <p style="font-weight: bold; margin-bottom: 10px; color: #475569;">Chọn nhân vật của con:</p>
-            <div class="avatar-container" style="margin-bottom: 25px;">
+            <div class="avatar-container" style="margin-bottom: 25px;" id="login-avatar-list">
                 <button class="avatar-btn selected" onclick="selectLoginAvatar('👦', this)">👦</button>
                 <button class="avatar-btn" onclick="selectLoginAvatar('👧', this)">👧</button>
                 <button class="avatar-btn" onclick="selectLoginAvatar('🐶', this)">🐶</button>
                 <button class="avatar-btn" onclick="selectLoginAvatar('🐱', this)">🐱</button>
+                <button class="avatar-btn" onclick="selectLoginAvatar('🐰', this)">🐰</button>
+                <button class="avatar-btn" onclick="selectLoginAvatar('🐻', this)">🐻</button>
             </div>
-            
             <button onclick="startGame()" style="background: #22c55e; color: white; padding: 15px 30px; border: none; border-radius: 15px; font-size: 1.3rem; font-weight: bold; font-family: 'Baloo 2', cursive; cursor: pointer; width: 100%; box-shadow: 0 5px 0 #16a34a; transition: 0.2s;">BẮT ĐẦU CHƠI! 🎮</button>
+        </div>
+    </div>
+
+    <!-- Modal Nhập Mật Khẩu Đẹp -->
+    <div class="pwd-modal" id="pwd-modal">
+        <div class="pwd-box">
+            <h2 style="font-family: 'Baloo 2', cursive; font-size: 2rem; color: var(--primary); margin-bottom: 5px;">🔒 Mở Khóa Game</h2>
+            <p style="font-size: 1.1rem; margin-bottom: 20px; font-weight: 700; color: #475569;">Nhập mật khẩu bí mật để vào chơi nhé!</p>
+            <input type="password" id="game-pwd-input" style="width: 100%; padding: 15px; border-radius: 15px; border: 3px solid #cbd5e1; font-size: 1.5rem; text-align: center; margin-bottom: 20px; font-family: 'Nunito', sans-serif; letter-spacing: 5px;" placeholder="***">
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn btn-outline" style="flex: 1;" onclick="closePwdModal()">HỦY</button>
+                <button class="btn btn-primary" style="flex: 1; background: var(--success); box-shadow: 0 6px 0 #059669; border-color: #34d399;" onclick="confirmPwd()">MỞ KHÓA</button>
+            </div>
         </div>
     </div>
 
@@ -134,20 +109,7 @@
                 <div class="mascot-icon"><i class="fa-solid fa-robot"></i></div>
                 <div class="mascot-dialogue">
                     <h2>Xin chào người bạn mới! 👋</h2>
-                    <p>Tớ là TinBot! Hãy chọn cho mình một người bạn đồng hành bên dưới và bắt đầu chuyến thám hiểm thu thập kho báu tri thức nhé!</p>
-                </div>
-            </div>
-
-            <div class="avatar-section">
-                <h2>🎭 BÉ CHỌN NHÂN VẬT NÀO? 🎭</h2>
-                <div class="avatar-container" id="avatar-list">
-                    <button class="avatar-btn" onclick="selectAvatar('👦', this)">👦</button>
-                    <button class="avatar-btn" onclick="selectAvatar('👧', this)">👧</button>
-                    <button class="avatar-btn" onclick="selectAvatar('🐶', this)">🐶</button>
-                    <button class="avatar-btn" onclick="selectAvatar('🐱', this)">🐱</button>
-                    <button class="avatar-btn" onclick="selectAvatar('🐰', this)">🐰</button>
-                    <button class="avatar-btn" onclick="selectAvatar('🐻', this)">🐻</button>
-                    <button class="avatar-btn" onclick="selectAvatar('🦊', this)">🦊</button>
+                    <p>Tớ là TinBot! Em hãy dạo quanh Bản đồ Vũ trụ Tin học bên dưới và bắt đầu chuyến thám hiểm thu thập kho báu tri thức nhé!</p>
                 </div>
             </div>
 
@@ -155,43 +117,33 @@
                 <h2 class="text-center mb-3" style="font-family: 'Baloo 2', cursive; font-size: 2.5rem; color: var(--primary);">🗺️ BẢN ĐỒ VŨ TRỤ TIN HỌC</h2>
                 
                 <div class="grid-3">
-                    <!-- 1. ĐẢO TƯ DUY -->
                     <div class="game-card-v2 game-locked">
                         <div class="game-img-box img-matching"><i class="fa-solid fa-link"></i></div>
                         <div class="game-info-box">
                             <h3 class="game-title">Đảo Tư Duy</h3>
                             <p class="game-desc">Ghép các mảnh ghép kiến thức để hoàn thiện cỗ máy tri thức diệu kỳ.</p>
-                            <div class="game-actions">
-                                <button class="btn btn-warning w-100" id="btn-daotuduy">Đang tải...</button>
-                            </div>
+                            <div class="game-actions"><button class="btn btn-warning w-100" id="btn-daotuduy">Đang tải...</button></div>
                         </div>
                     </div>
                     
-                    <!-- 2. ĐẤU TRƯỜNG SO TÀI -->
                     <div class="game-card-v2 game-locked">
                         <div class="game-img-box img-arena"><i class="fa-solid fa-khanda"></i></div>
                         <div class="game-info-box">
                             <h3 class="game-title">Đấu Trường So Tài</h3>
                             <p class="game-desc">Tham gia so tài kiến thức Tin học cùng với chú Robot siêu phàm.</p>
-                            <div class="game-actions">
-                                <button class="btn btn-warning w-100" id="btn-dautruong">Đang tải...</button>
-                            </div>
+                            <div class="game-actions"><button class="btn btn-warning w-100" id="btn-dautruong">Đang tải...</button></div>
                         </div>
                     </div>
                     
-                    <!-- 3. ẾCH CON QUA SÔNG -->
                     <div class="game-card-v2">
                         <div class="game-img-box img-frog"><i class="fa-solid fa-frog"></i></div>
                         <div class="game-info-box">
                             <h3 class="game-title">Ếch Con Qua Sông</h3>
                             <p class="game-desc">Chọn đúng thao tác Tệp và Thư mục để giúp ếch qua sông an toàn.</p>
-                            <div class="game-actions">
-                                <button class="btn btn-primary w-100" onclick="playNormalGame('game_frog.html')">Khởi hành <i class="fa-solid fa-rocket"></i></button>
-                            </div>
+                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="playNormalGame('game_frog.html')">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </section>
 
@@ -229,38 +181,5 @@
     </footer>
 
     <script src="script.js"></script>
-
-    <a id="btn-secret-admin" href="admin/index.html" style="display: none; position: fixed; bottom: 10px; right: 10px; z-index: 9999; background: #000; color: #fff; padding: 10px 15px; border-radius: 5px; text-decoration: none; border: 2px solid white;">⚙️ Mở Trang Admin</a>
-
-    <script>
-        window.addEventListener('keydown', function(event) {
-            if (event.ctrlKey && event.shiftKey && (event.code === 'KeyA' || event.key.toLowerCase() === 'a')) {
-                const adminBtn = document.getElementById('btn-secret-admin');
-                adminBtn.style.display = (adminBtn.style.display === 'none' || adminBtn.style.display === '') ? 'block' : 'none';
-            }
-        }, true);
-
-        let clickCount = 0;
-        let clickTimer;
-        const logo = document.getElementById('secret-logo');
-        
-        if (logo) {
-            logo.style.cursor = 'pointer';
-            logo.addEventListener('click', function() {
-                clickCount++;
-                clearTimeout(clickTimer);
-                
-                if (clickCount >= 5) {
-                    const adminBtn = document.getElementById('btn-secret-admin');
-                    adminBtn.style.display = (adminBtn.style.display === 'none' || adminBtn.style.display === '') ? 'block' : 'none';
-                    clickCount = 0;
-                }
-                
-                clickTimer = setTimeout(() => {
-                    clickCount = 0;
-                }, 1500);
-            });
-        }
-    </script>
 </body>
 </html>
