@@ -59,6 +59,7 @@
             <div style="width: 100%; text-align: left; padding: 10px 30px; background: #f0fdf4; border-bottom: 2px solid #bbf7d0; z-index: 50; position: relative;"><button class="btn btn-outline" style="padding: 5px 15px; font-size: 1rem; border-width: 2px; margin: 0; background: white;" onclick="window.location.href='index.html#home'">← QUAY VỀ</button></div>
             <div class="hud">
                 <div>Bước nhảy: <span id="ui-prog" style="color: var(--warning);">1/10</span></div>
+                <div>⏳ <span id="ui-timer" style="color: var(--error);">03:00</span></div>
                 <div>XP: <span id="ui-score" style="color: var(--success);">0</span></div>
             </div>
             <div class="q-box" id="ui-q">Câu hỏi...</div>
@@ -77,7 +78,7 @@
         </div>
     </div>
 
-    <!-- Modal giữ nguyên -->
+    <!-- Modal -->
     <div class="feedback-modal" id="fb-modal">
         <div class="feedback-box">
             <h2 style="font-family: 'Baloo 2', cursive; font-size: 2rem; color: #ef4444; margin-bottom: 10px;">Rơi tõm xuống nước! 💦</h2>
@@ -99,7 +100,7 @@
             if (!user.name) return;
 
             let playCount = user.playCounts && user.playCounts[gameName] ? user.playCounts[gameName] : 1;
-            if (playCount <= 1) return; // Thoát nếu chơi lần 1
+            if (playCount <= 1) return;
 
             try {
                 await fetch(`${API_BASE_URL}/api/history`, {
@@ -124,9 +125,27 @@
         
         let playQueue=[], score=0, currRow=0, scrollOffset=0, onFeedbackClose = null, isAnimating=false;
         let frog, river;
+        let gameTimerInterval, gameTimeLeft = 180;
 
         function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         
+        function startGameTimer() {
+            clearInterval(gameTimerInterval);
+            gameTimeLeft = 180;
+            document.getElementById('ui-timer').innerText = "03:00";
+            gameTimerInterval = setInterval(() => {
+                gameTimeLeft--;
+                let m = Math.floor(gameTimeLeft / 60).toString().padStart(2, '0');
+                let s = (gameTimeLeft % 60).toString().padStart(2, '0');
+                document.getElementById('ui-timer').innerText = `${m}:${s}`;
+                
+                if(gameTimeLeft <= 0) {
+                    clearInterval(gameTimerInterval);
+                    endGame(); 
+                }
+            }, 1000);
+        }
+
         function initGame(){ 
             let data = localStorage.getItem('edtech_user_kid');
             if(data) {
@@ -138,6 +157,7 @@
 
             playQueue=[...qs].sort(()=>Math.random()-0.5); score=0; currRow=0; scrollOffset=0;
             river = document.getElementById('river'); buildRiver(); showScreen('screen-game'); loadQ(); 
+            startGameTimer();
         }
 
         function buildRiver() {
@@ -189,7 +209,10 @@
 
         function showModal(userAns, correctAns, exp, callback) { document.getElementById('fb-wrong').innerText = "Em chọn: " + userAns; document.getElementById('fb-correct').innerText = "Đúng ra là: " + correctAns; document.getElementById('fb-exp').innerText = "💡 Chú ý: " + exp; document.getElementById('fb-modal').classList.add('active'); onFeedbackClose = callback; }
         function closeFeedback() { document.getElementById('fb-modal').classList.remove('active'); if(onFeedbackClose) onFeedbackClose(); }
-        function endGame(){ document.getElementById('res-score').innerText=score; showScreen('screen-result'); }
+        function endGame(){ 
+            clearInterval(gameTimerInterval);
+            document.getElementById('res-score').innerText=score; showScreen('screen-result'); 
+        }
 
         function saveAndGoHome() { 
             let data = localStorage.getItem('edtech_user_kid');
