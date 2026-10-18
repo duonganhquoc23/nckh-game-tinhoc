@@ -30,8 +30,85 @@ function getCurrentUser() {
 }
 
 // ---------------------------------------------------------
-// TÍNH NĂNG MỚI: KIỂM TRA QUYỀN CHƠI GAME TÀU NGẦM
-// Đã fix: Yêu cầu biến 'event' truyền từ file HTML sang
+// TÍNH NĂNG MỚI: QUẢN LÝ GAME KHÓA BẰNG MẬT KHẨU
+// ---------------------------------------------------------
+
+// Cập nhật giao diện các nút game (khóa/mở) khi tải trang
+function updateGameButtons() {
+    let user = getCurrentUser();
+    if (!user) return;
+
+    if (!user.unlockedGames) user.unlockedGames = [];
+
+    // Mảng chứa cấu hình các game bị khóa
+    const lockedGamesConfig = [
+        { id: 'daotuduy', btnId: 'btn-daotuduy', url: 'game_daotuduy.html' },
+        { id: 'dautruong', btnId: 'btn-dautruong', url: 'game_dautruong.html' }
+    ];
+
+    lockedGamesConfig.forEach(game => {
+        const btn = document.getElementById(game.btnId);
+        if (btn) {
+            const card = btn.closest('.game-card-v2');
+            
+            if (user.unlockedGames.includes(game.id)) {
+                // Đã mở khóa
+                btn.innerHTML = 'Khởi hành <i class="fa-solid fa-rocket"></i>';
+                btn.className = 'btn btn-primary w-100';
+                btn.onclick = () => window.location.href = game.url;
+                if (card) card.classList.remove('game-locked');
+            } else {
+                // Chưa mở khóa
+                btn.innerHTML = 'Mở khóa 🔓';
+                btn.className = 'btn btn-warning w-100';
+                btn.style.backgroundColor = '#fbbf24'; 
+                btn.style.color = '#fff';
+                btn.onclick = () => playLockedGame(game.id, game.url);
+                if (card) card.classList.add('game-locked'); // Làm mờ thẻ game
+            }
+        }
+    });
+}
+
+// Hàm kiểm tra mật khẩu để mở khóa game
+function playLockedGame(gameId, targetUrl) {
+    let user = getCurrentUser();
+    if (!user) {
+        alert("Vui lòng đăng nhập trước khi chơi!");
+        return;
+    }
+
+    if (!user.unlockedGames) user.unlockedGames = [];
+
+    // Nhập mật khẩu
+    let pwd = prompt("Trò chơi này đang bị khóa! Vui lòng nhập mật khẩu để mở khóa:");
+    
+    if (pwd === null) return; // Người dùng bấm Hủy
+    
+    if (pwd === '23122006') {
+        user.unlockedGames.push(gameId);
+        localStorage.setItem('edtech_user_kid', JSON.stringify(user));
+        syncDataToServer(user);
+        
+        alert("🎉 Chúc mừng! Con đã mở khóa game thành công!");
+        updateGameButtons(); // Làm mới lại giao diện nút
+    } else {
+        alert("❌ Mật khẩu chưa đúng rồi, con thử lại nhé!");
+    }
+}
+
+// Hàm chơi game bình thường (dành cho Ếch con qua sông)
+function playNormalGame(targetUrl) {
+    let user = getCurrentUser();
+    if (!user) {
+        alert("Vui lòng đăng nhập trước khi chơi!");
+        return;
+    }
+    window.location.href = targetUrl;
+}
+
+// ---------------------------------------------------------
+// GAME TÀU NGẦM KHÁM PHÁ (Chỉ chơi 1 lần)
 // ---------------------------------------------------------
 async function checkAndPlaySubmarine(event) {
     const user = getCurrentUser();
@@ -40,7 +117,6 @@ async function checkAndPlaySubmarine(event) {
         return;
     }
 
-    // Lấy đúng phần tử nút bấm (button) đã kích hoạt sự kiện
     const btn = event.currentTarget;
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải...';
@@ -56,10 +132,8 @@ async function checkAndPlaySubmarine(event) {
         const data = await response.json();
         
         if (data.can_play) {
-            // Cho phép chơi
             window.location.href = 'game_submarine.html';
         } else {
-            // Đã chơi rồi
             alert("Rất tiếc! Mỗi bạn chỉ được chơi Tàu Ngầm Khám Phá 1 lần duy nhất thôi nhé!");
             btn.innerHTML = 'Đã hoàn thành <i class="fa-solid fa-check"></i>';
             btn.classList.replace('btn-primary', 'btn-secondary');
@@ -84,13 +158,20 @@ function startGame() {
         return;
     }
 
+    // Kiểm tra dữ liệu cũ để giữ nguyên thuộc tính unlockedGames nếu đã có
+    let existingData = getCurrentUser();
+    let unlockedGamesArr = (existingData && existingData.name === name && existingData.class_name === className) 
+                            ? (existingData.unlockedGames || []) 
+                            : [];
+
     const userData = {
         name: name,
         class_name: className,
         avatar: avatar,
-        level: 1,
-        xp: 0,
-        unlocked: []
+        level: existingData ? (existingData.level || 1) : 1,
+        xp: existingData ? (existingData.xp || 0) : 0,
+        unlocked: existingData ? (existingData.unlocked || []) : [],
+        unlockedGames: unlockedGamesArr // Thêm thuộc tính lưu game khóa
     };
 
     localStorage.setItem('edtech_user_kid', JSON.stringify(userData));
@@ -99,6 +180,7 @@ function startGame() {
     document.documentElement.classList.remove('no-auth');
     document.documentElement.classList.add('is-auth');
     updateHeader(userData);
+    updateGameButtons();
 }
 
 // 3. CHỨC NĂNG ĐIỀU HƯỚNG TAB
@@ -235,6 +317,7 @@ window.addEventListener('DOMContentLoaded', () => {
     let user = getCurrentUser();
     if(user) {
         updateHeader(user);
+        updateGameButtons(); // Gọi hàm cập nhật nút mở khóa game
         if (window.location.hash === '#profile') {
             navigate('profile');
         }
