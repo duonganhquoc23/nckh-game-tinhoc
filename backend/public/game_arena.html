@@ -72,7 +72,8 @@
                 ⚔️ <b>LUẬT CHƠI:</b><br>
                 - Trả lời <b>ĐÚNG</b>: Em sẽ tung đòn tấn công Robot.<br>
                 - Trả lời <b>SAI</b>: Robot sẽ phản đòn, em bị trừ điểm sinh lực.<br>
-                - ⏰ <b>CHÚ Ý:</b> Hãy trả lời trước khi thanh thời gian đếm ngược kết thúc nhé!
+                - ⏰ <b>CHÚ Ý:</b> Hãy trả lời trước khi thanh thời gian đếm ngược kết thúc nhé!<br>
+                <span style="color: red;">* Lưu ý: Thử thách này em chỉ được tham gia 1 lần duy nhất.</span>
             </div>
             <div style="display: flex; gap: 15px;">
                 <button class="btn btn-primary" onclick="initGame()">BẮT ĐẦU CHƠI</button>
@@ -126,7 +127,7 @@
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal Phản hồi -->
     <div class="feedback-modal" id="fb-modal">
         <div class="feedback-box">
             <h2 class="fb-title">Ôi, bị phản đòn rồi! 😢</h2>
@@ -141,13 +142,49 @@
         const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
         const GAME_NAME = "Đấu Trường So Tài";
         
-        async function saveHistory(gameName, question, studentAnswer, isCorrect) {
-            let data = localStorage.getItem('edtech_user_kid');
-            if (!data) return;
-            let user = JSON.parse(data);
-            if (!user.name) return;
-
+        // ---- HỆ THỐNG ÂM THANH 8-BIT ----
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+        
+        function playSFX(type) {
             try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                if (type === 'hit') { // Đánh trúng
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                } else if (type === 'hurt') { // Bị mất máu
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch(e) {
+                console.log("Trình duyệt không hỗ trợ âm thanh", e);
+            }
+        }
+        
+        // ---- HÀM LƯU LỊCH SỬ CHỐNG LỖI ----
+        async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+            try {
+                let data = localStorage.getItem('edtech_user_kid');
+                if (!data) return;
+                let user = JSON.parse(data);
+                if (!user.name) return;
+
                 await fetch(`${API_BASE_URL}/api/history`, {
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' },
@@ -164,7 +201,6 @@
             }
         }
 
-        // TÍCH HỢP BỘ CÂU HỎI TRẮC NGHIỆM 4 LỰA CHỌN
         const questionBank = [
             { 
                 q: "Từ khóa tìm kiếm là gì?", 
@@ -306,13 +342,27 @@
             }, 1000);
         }
 
+        // ---- HÀM KHỞI TẠO GAME VÀ CHẶN CHƠI LẠI LẦN 2 ----
         function initGame() {
             let data = localStorage.getItem('edtech_user_kid');
             if(data) {
                 let user = JSON.parse(data);
                 if (!user.playCounts) user.playCounts = {};
-                user.playCounts[GAME_NAME] = (user.playCounts[GAME_NAME] || 0) + 1;
+                
+                // Ký thuật chặn: Nếu học sinh đã từng chơi game này thì đẩy ra ngoài
+                if (user.playCounts[GAME_NAME] >= 1) {
+                    alert("Em đã hoàn thành thử thách này rồi! Hãy quay lại bản đồ để chơi các game khác nhé 🌟");
+                    window.location.href = 'index.html#home';
+                    return; 
+                }
+                
+                // Ghi nhận chơi lần đầu tiên
+                user.playCounts[GAME_NAME] = 1;
                 localStorage.setItem('edtech_user_kid', JSON.stringify(user));
+            } else {
+                alert("Vui lòng đăng nhập trước khi chơi!");
+                window.location.href = 'index.html';
+                return;
             }
 
             playerHP = 100; bossHP = 100; isProcessing = false; playQueue = [...questionBank].sort(() => Math.random() - 0.5);
@@ -333,7 +383,6 @@
             isProcessing = false; currentQ = playQueue.pop(); document.getElementById('q-text').innerText = currentQ.q;
             document.getElementById('ans-grid').innerHTML = '';
             
-            // ĐOẠN CODE NÀY TỰ ĐỘNG XÁO TRỘN ĐÁP ÁN MÀ VẪN GIỮ ĐÚNG VỊ TRÍ ĐÁP ÁN ĐÚNG
             let ansMix = currentQ.ans.map((txt, idx) => ({txt, originalIdx: idx})).sort(() => Math.random() - 0.5);
             ansMix.forEach((ansObj) => {
                 const btn = document.createElement('button'); btn.className = 'ans-btn'; btn.innerText = ansObj.txt; 
@@ -382,17 +431,21 @@
             document.getElementById('fb-exp').innerText = "💡 Chú ý: " + exp; document.getElementById('fb-modal').classList.add('active'); onFeedbackClose = callback;
         }
 
-        // ĐÃ ĐIỀU CHỈNH HÀM ATTACK ĐỂ PHÙ HỢP VỚI LƯỢNG 10 CÂU HỎI
+        function closeFeedback() { document.getElementById('fb-modal').classList.remove('active'); if (onFeedbackClose) onFeedbackClose(); }
+
+        // ---- LOGIC ĐÁNH & GỌI ÂM THANH ----
         function executeAttack(attacker) {
             let dmg = 0;
             if (attacker === 'player') { 
-                dmg = 10; // Trừ 10 máu Robot khi trả lời đúng (Phải đúng đủ 10 câu mới thắng 10 x 10 = 100)
+                dmg = 10; // Trừ 10 máu Robot khi trả lời đúng
                 bossHP = Math.max(0, bossHP - dmg); 
+                playSFX('hit'); // Gọi âm thanh đánh
                 animateCombat(document.getElementById('player-sprite'), document.getElementById('boss-sprite'), 'attack-anim-p', dmg, 'var(--primary)'); 
             } 
             else { 
-                dmg = 20; // Trừ 20 máu học sinh khi trả lời sai (Sai 5 câu sẽ thua 5 x 20 = 100)
+                dmg = 20; // Trừ 20 máu học sinh khi trả lời sai 
                 playerHP = Math.max(0, playerHP - dmg); 
+                playSFX('hurt'); // Gọi âm thanh bị đánh
                 animateCombat(document.getElementById('boss-sprite'), document.getElementById('player-sprite'), 'attack-anim-b', dmg, 'var(--error)'); 
             }
             updateHPUI(); setTimeout(nextTurn, 1500);
@@ -451,4 +504,4 @@
 </body>
 </html>
 ```<br>
-<FollowUp label="Bạn có muốn thêm hiệu ứng âm thanh nhỏ (phát ra tiếng khi đánh hoặc bị đánh) vào game để tăng tính sinh động không?" query="Viết thêm cho tôi đoạn code để chèn âm thanh SFX (hiệu ứng tiếng đánh trúng) vào hàm executeAttack mà không cần tải file về máy."/>
+<FollowUp label="Bạn có muốn làm cho nút BẮT ĐẦU CHƠI bị ẩn đi (hoặc đổi thành màu xám) thay vì hiển thị thông báo alert khi người dùng đã chơi rồi không?" query="Hãy cung cấp đoạn mã để disable nút bấm (đổi sang màu xám và không bấm được) ngay khi load trang nếu học sinh đã chơi game này rồi, thay vì dùng alert()."/>
