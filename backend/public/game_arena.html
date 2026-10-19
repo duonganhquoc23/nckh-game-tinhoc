@@ -382,12 +382,19 @@
             document.getElementById('fb-exp').innerText = "💡 Chú ý: " + exp; document.getElementById('fb-modal').classList.add('active'); onFeedbackClose = callback;
         }
 
-        function closeFeedback() { document.getElementById('fb-modal').classList.remove('active'); if (onFeedbackClose) onFeedbackClose(); }
-
+        // ĐÃ ĐIỀU CHỈNH HÀM ATTACK ĐỂ PHÙ HỢP VỚI LƯỢNG 10 CÂU HỎI
         function executeAttack(attacker) {
             let dmg = 0;
-            if (attacker === 'player') { dmg = 25; bossHP = Math.max(0, bossHP - dmg); animateCombat(document.getElementById('player-sprite'), document.getElementById('boss-sprite'), 'attack-anim-p', dmg, 'var(--primary)'); } 
-            else { dmg = 20; playerHP = Math.max(0, playerHP - dmg); animateCombat(document.getElementById('boss-sprite'), document.getElementById('player-sprite'), 'attack-anim-b', dmg, 'var(--error)'); }
+            if (attacker === 'player') { 
+                dmg = 10; // Trừ 10 máu Robot khi trả lời đúng (Phải đúng đủ 10 câu mới thắng 10 x 10 = 100)
+                bossHP = Math.max(0, bossHP - dmg); 
+                animateCombat(document.getElementById('player-sprite'), document.getElementById('boss-sprite'), 'attack-anim-p', dmg, 'var(--primary)'); 
+            } 
+            else { 
+                dmg = 20; // Trừ 20 máu học sinh khi trả lời sai (Sai 5 câu sẽ thua 5 x 20 = 100)
+                playerHP = Math.max(0, playerHP - dmg); 
+                animateCombat(document.getElementById('boss-sprite'), document.getElementById('player-sprite'), 'attack-anim-b', dmg, 'var(--error)'); 
+            }
             updateHPUI(); setTimeout(nextTurn, 1500);
         }
 
@@ -443,3 +450,5 @@
     </script>
 </body>
 </html>
+```<br>
+<FollowUp label="Bạn có muốn thêm hiệu ứng âm thanh nhỏ (phát ra tiếng khi đánh hoặc bị đánh) vào game để tăng tính sinh động không?" query="Viết thêm cho tôi đoạn code để chèn âm thanh SFX (hiệu ứng tiếng đánh trúng) vào hàm executeAttack mà không cần tải file về máy."/>
