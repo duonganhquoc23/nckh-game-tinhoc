@@ -35,6 +35,7 @@ function updateGameButtons() {
     const lockedGamesConfig = [
         { id: 'daotuduy', btnId: 'btn-daotuduy', url: 'game_matching.html' },
         { id: 'dautruong', btnId: 'btn-dautruong', url: 'game_arena.html' }
+        { id: 'echcon', btnId: 'btn-echcon', url: 'game_ech.html' }
     ];
 
     lockedGamesConfig.forEach(game => {
