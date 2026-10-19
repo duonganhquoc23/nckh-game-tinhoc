@@ -167,18 +167,118 @@ async function saveHistory(gameName, question, studentAnswer, isCorrect) {
     }
 }
 
-        const questionBank = [
-            { q: "Từ khoá (Keyword) trên Internet là gì?", ans: ["Từ hoặc cụm từ thể hiện nội dung cần tìm", "Mật khẩu máy tính", "Tên của thư mục", "Tên trang web"], correct: 0, exp: "Từ khoá là những từ quan trọng nhất giúp máy tìm kiếm hiểu em đang muốn tìm thông tin gì." },
-            { q: "Google.com được gọi là gì?", ans: ["Máy tìm kiếm", "Thư mục con", "Tệp văn bản", "Thùng rác"], correct: 0, exp: "Google.com là địa chỉ của một máy tìm kiếm rất phổ biến trên thế giới." },
-            { q: "Sau khi gõ từ khoá vào ô tìm kiếm, em nhấn phím nào để bắt đầu?", ans: ["Phím Enter", "Phím Shift", "Phím Delete", "Phím Ctrl"], correct: 0, exp: "Phím Enter dùng để ra lệnh cho máy tính bắt đầu thực hiện việc tìm kiếm." },
-            { q: "Siêu liên kết (Hyperlink) dùng để làm gì?", ans: ["Mở trang web xem chi tiết", "Xoá tệp tin", "Tạo thư mục mới", "Tắt máy tính"], correct: 0, exp: "Nháy chuột vào siêu liên kết sẽ đưa em đến một trang web chứa thông tin chi tiết." },
-            { q: "Lệnh Copy dùng để làm gì đối với tệp và thư mục?", ans: ["Sao chép", "Di chuyển", "Đổi tên", "Xoá"], correct: 0, exp: "Copy nghĩa là sao chép. Tệp sẽ có mặt ở cả chỗ cũ và chỗ mới." },
-            { q: "Lệnh Move to có tác dụng gì?", ans: ["Di chuyển sang nơi mới", "Tạo thêm bản sao", "Xoá vĩnh viễn", "Đổi tên tệp"], correct: 0, exp: "Khi dùng lệnh Move, tệp sẽ được chuyển hẳn sang nơi mới và không còn ở chỗ cũ nữa." },
-            { q: "Lệnh Rename có biểu tượng hình chữ nhật và con trỏ chuột, nó dùng để làm gì?", ans: ["Đổi tên tệp/thư mục", "Sao chép tệp", "Xoá tệp", "Mở Internet"], correct: 0, exp: "Rename có nghĩa là đặt lại tên mới cho tệp hoặc thư mục của em." },
-            { q: "Nơi chứa các tệp tin gọn gàng trên máy tính gọi là gì?", ans: ["Thư mục", "Trang web", "Máy tìm kiếm", "Thanh địa chỉ"], correct: 0, exp: "Thư mục giống như một chiếc cặp sách, giúp em cất giữ các tệp tin (bài tập, hình ảnh) gọn gàng." },
-            { q: "Khi sao chép một thư mục thì điều gì xảy ra?", ans: ["Các tệp bên trong cũng được sao chép theo", "Chỉ sao chép được vỏ thư mục", "Thư mục cũ sẽ bị xoá", "Máy tính sẽ bị lỗi"], correct: 0, exp: "Thư mục chứa gì bên trong thì khi sao chép, tất cả những thứ đó đều được copy theo." },
-            { q: "Lệnh nào dùng để xoá tệp hoặc thư mục?", ans: ["Delete", "Paste", "Copy", "Rename"], correct: 0, exp: "Nút Delete trên bàn phím hoặc lệnh Delete trên màn hình đều dùng để xoá dữ liệu." }
-        ];
+const questionBank = [
+    { 
+        q: "Từ khóa tìm kiếm là gì?", 
+        a: [
+            "Một từ hoặc cụm từ thể hiện nội dung cần tìm", 
+            "Một bức ảnh đẹp được lưu sẵn trên máy tính",
+            "Một phần mềm dùng để soạn thảo văn bản",
+            "Một thiết bị phần cứng của máy tính"
+        ], 
+        c: 0, 
+        exp: "Từ khóa là những từ hoặc cụm từ ngắn gọn giúp máy tìm kiếm hiểu đúng điều em muốn tìm." 
+    },
+    { 
+        q: "Khi muốn tìm thông tin về Hồ Gươm ở Hà Nội, từ khóa nào phù hợp nhất?", 
+        a: [
+            "Hồ Gươm Hà Nội", 
+            "Thủ đô Hà Nội",
+            "Thời tiết Hà Nội",
+            "Hình ảnh đẹp"
+        ], 
+        c: 0, 
+        exp: "Từ khóa cần ngắn gọn và chứa đúng các từ khóa chính xác về địa điểm em cần tìm." 
+    },
+    { 
+        q: "Để tìm kiếm thông tin trên Internet bằng máy tìm kiếm, em thực hiện theo thứ tự nào?", 
+        a: [
+            "Mở trình duyệt → Truy cập máy tìm kiếm → Gõ từ khóa → Chọn kết quả phù hợp", 
+            "Gõ từ khóa → Mở trình duyệt → Chọn kết quả → Truy cập máy tìm kiếm",
+            "Truy cập máy tìm kiếm → Mở trình duyệt → Gõ từ khóa",
+            "Gõ từ khóa → Chọn kết quả → Mở trình duyệt"
+        ], 
+        c: 0, 
+        exp: "Em phải mở trình duyệt lên trước, vào máy tìm kiếm rồi mới gõ từ khóa và chọn kết quả nhé!" 
+    },
+    { 
+        q: "Sau khi gõ từ khóa và nhấn Enter, em cần làm gì tiếp theo?", 
+        a: [
+            "Chọn một kết quả tìm kiếm phù hợp để xem thông tin", 
+            "Tắt ngay máy tính đi",
+            "Nhấn nút nguồn để khởi động lại máy",
+            "Mở phần mềm vẽ Paint lên"
+        ], 
+        c: 0, 
+        exp: "Nhấn Enter xong, màn hình sẽ hiện ra danh sách kết quả, việc của em là chọn một trang web phù hợp để đọc." 
+    },
+    { 
+        q: "Máy tìm kiếm dùng để làm gì?", 
+        a: [
+            "Tìm kiếm thông tin trên Internet", 
+            "Máy chơi trò chơi điện tử",
+            "Phần mềm để gõ văn bản",
+            "Công cụ để tính toán các con số"
+        ], 
+        c: 0, 
+        exp: "Máy tìm kiếm (như Google, Cốc Cốc) giúp em tìm nhanh các thông tin, hình ảnh, bài học trên mạng internet." 
+    },
+    { 
+        q: "Bạn An muốn tìm bài hát 'Quốc ca Việt Nam'. Từ khóa nào dưới đây phù hợp nhất?", 
+        a: [
+            "Quốc ca Việt Nam", 
+            "Âm nhạc Việt Nam",
+            "Cách hát hay",
+            "Nhạc thiếu nhi"
+        ], 
+        c: 0, 
+        exp: "Để tìm bài hát nào thì mình gõ đúng tên bài hát đó làm từ khóa tìm kiếm." 
+    },
+    { 
+        q: "Để sử dụng máy tìm kiếm, trước tiên em cần làm gì?", 
+        a: [
+            "Mở trình duyệt web", 
+            "Vẽ tranh bằng phần mềm Paint",
+            "Tắt màn hình máy tính",
+            "Rút dây cắm chuột ra"
+        ], 
+        c: 0, 
+        exp: "Bước đầu tiên để lướt web hay tìm kiếm là em phải mở trình duyệt web (như Chrome, Cốc Cốc, Edge)." 
+    },
+    { 
+        q: "Sau khi gõ từ khóa và nhấn Enter, em cần làm gì tiếp theo?", 
+        a: [
+            "Chọn một kết quả tìm kiếm phù hợp để xem thông tin", 
+            "Rút phích cắm điện máy tính",
+            "Xóa hết từ khóa vừa gõ",
+            "Chờ máy tính tự động tắt"
+        ], 
+        c: 0, 
+        exp: "Sau khi nhấn Enter, máy tính sẽ hiển thị hàng loạt kết quả và em cần nháy chuột chọn trang web phù hợp nhất." 
+    },
+    { 
+        q: "Sau khi gõ từ khóa vào ô tìm kiếm, em cần nhấn phím nào trên bàn phím để máy bắt đầu tìm?", 
+        a: [
+            "Phím Enter", 
+            "Phím Space (phím cách)",
+            "Phím Shift",
+            "Phím Delete"
+        ], 
+        c: 0, 
+        exp: "Em luôn nhấn phím Enter (hoặc bấm biểu tượng kính lúp) để lệnh tìm kiếm được thực hiện nhé!" 
+    },
+    { 
+        q: "Công cụ hoặc trang web nào dưới đây là máy tìm kiếm phổ biến trên Internet?", 
+        a: [
+            "Google.com", 
+            "Phần mềm vẽ Paint",
+            "Thư mục Documents trên máy tính",
+            "Thùng rác Recycle Bin"
+        ], 
+        c: 0, 
+        exp: "Google.com là máy tìm kiếm nổi tiếng giúp chúng ta tìm kiếm thông tin, hình ảnh trên mạng." 
+    }
+];
         let playerHP = 100, bossHP = 100, playQueue = [], currentQ = null, isProcessing = false, energyValue = 100, energyTimer = null;
         let onFeedbackClose = null;
         let gameTimerInterval, gameTimeLeft = 180;
