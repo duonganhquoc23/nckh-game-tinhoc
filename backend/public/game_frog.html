@@ -50,7 +50,7 @@
             <h1 class="title-kid">🐸 ẾCH CON QUA SÔNG</h1>
             <p style="font-size:1.3rem; margin-bottom:30px; font-weight:700;">Em hãy chọn lá sen chứa đáp án <b>ĐÚNG</b> để giúp ếch nhảy qua sông. Đoạn sông này có 10 bước nhảy đấy!</p>
             <div>
-                <button class="btn" onclick="initGame()">BẮT ĐẦU NHẢY</button>
+                <button class="btn" id="btn-start" onclick="initGame()">BẮT ĐẦU NHẢY</button>
                 <button class="btn btn-outline" onclick="window.location.href='index.html#home'">VỀ BẢN ĐỒ</button>
             </div>
         </div>
@@ -93,14 +93,27 @@
         const API_BASE_URL = 'https://nckh-game-tinhoc.onrender.com';
         const GAME_NAME = "Ếch Con Qua Sông";
         
+        // Kiểm tra xem đã chơi chưa ngay khi load trang để đổi giao diện nút
+        window.addEventListener('DOMContentLoaded', () => {
+            let data = localStorage.getItem('edtech_user_kid');
+            if (data) {
+                let user = JSON.parse(data);
+                if (user.playCounts && user.playCounts[GAME_NAME] >= 1) {
+                    let startBtn = document.getElementById('btn-start');
+                    if (startBtn) {
+                        startBtn.innerText = "ĐÃ HẾT LƯỢT CHƠI";
+                        startBtn.style.background = "#94a3b8";
+                        startBtn.style.boxShadow = "0 6px 0 #64748b";
+                    }
+                }
+            }
+        });
+
 async function saveHistory(gameName, question, studentAnswer, isCorrect) {
     let data = localStorage.getItem('edtech_user_kid');
     if (!data) return;
     let user = JSON.parse(data);
     if (!user.name) return;
-
-    // Đã xóa bỏ dòng kiểm tra `if (playCount <= 1) return;` ở đây 
-    // để lịch sử được ghi nhận ngay từ lần chơi đầu tiên của học sinh.
 
     try {
         await fetch(`${API_BASE_URL}/api/history`, {
@@ -210,6 +223,13 @@ const qs = [
             if(data) {
                 let user = JSON.parse(data);
                 if (!user.playCounts) user.playCounts = {};
+                
+                // KIỂM TRA: Nếu đã chơi >= 1 lần thì chặn lại
+                if (user.playCounts[GAME_NAME] >= 1) {
+                    alert("Em đã hoàn thành lượt chơi của mình! Mỗi tài khoản chỉ được chơi 1 lần duy nhất.");
+                    return; // Dừng, không cho chơi
+                }
+
                 user.playCounts[GAME_NAME] = (user.playCounts[GAME_NAME] || 0) + 1;
                 localStorage.setItem('edtech_user_kid', JSON.stringify(user));
             }
