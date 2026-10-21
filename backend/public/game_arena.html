@@ -76,7 +76,8 @@
                 <span style="color: red;">* Lưu ý: Thử thách này em chỉ được tham gia 1 lần duy nhất.</span>
             </div>
             <div style="display: flex; gap: 15px;">
-                <button class="btn btn-primary" onclick="initGame()">BẮT ĐẦU CHƠI</button>
+                <!-- Đã thêm ID cho nút bắt đầu -->
+                <button id="start-btn" class="btn btn-primary" onclick="initGame()">BẮT ĐẦU CHƠI</button>
                 <button class="btn btn-outline" onclick="window.location.href='index.html#home'">VỀ BẢN ĐỒ</button>
             </div>
         </div>
@@ -155,7 +156,7 @@
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 
-                if (type === 'hit') { // Đánh trúng
+                if (type === 'hit') { 
                     osc.type = 'square';
                     osc.frequency.setValueAtTime(600, audioCtx.currentTime);
                     osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.15);
@@ -163,7 +164,7 @@
                     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
                     osc.start();
                     osc.stop(audioCtx.currentTime + 0.15);
-                } else if (type === 'hurt') { // Bị mất máu
+                } else if (type === 'hurt') { 
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(200, audioCtx.currentTime);
                     osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3);
@@ -177,7 +178,6 @@
             }
         }
         
-        // ---- HÀM LƯU LỊCH SỬ CHỐNG LỖI ----
         async function saveHistory(gameName, question, studentAnswer, isCorrect) {
             try {
                 let data = localStorage.getItem('edtech_user_kid');
@@ -202,125 +202,40 @@
         }
 
         const questionBank = [
-            { 
-                q: "Từ khóa tìm kiếm là gì?", 
-                ans: [
-                    "Một từ hoặc cụm từ thể hiện nội dung cần tìm", 
-                    "Một bức ảnh đẹp được lưu sẵn trên máy tính",
-                    "Một phần mềm dùng để soạn thảo văn bản",
-                    "Một thiết bị phần cứng của máy tính"
-                ], 
-                correct: 0, 
-                exp: "Từ khóa là những từ hoặc cụm từ ngắn gọn giúp máy tìm kiếm hiểu đúng điều em muốn tìm." 
-            },
-            { 
-                q: "Khi muốn tìm thông tin về Hồ Gươm ở Hà Nội, từ khóa nào phù hợp nhất?", 
-                ans: [
-                    "Hồ Gươm Hà Nội", 
-                    "Thủ đô Hà Nội",
-                    "Thời tiết Hà Nội",
-                    "Hình ảnh đẹp"
-                ], 
-                correct: 0, 
-                exp: "Từ khóa cần ngắn gọn và chứa đúng các từ khóa chính xác về địa điểm em cần tìm." 
-            },
-            { 
-                q: "Để tìm kiếm thông tin trên Internet bằng máy tìm kiếm, em thực hiện theo thứ tự nào?", 
-                ans: [
-                    "Mở trình duyệt → Truy cập máy tìm kiếm → Gõ từ khóa → Chọn kết quả phù hợp", 
-                    "Gõ từ khóa → Mở trình duyệt → Chọn kết quả → Truy cập máy tìm kiếm",
-                    "Truy cập máy tìm kiếm → Mở trình duyệt → Gõ từ khóa",
-                    "Gõ từ khóa → Chọn kết quả → Mở trình duyệt"
-                ], 
-                correct: 0, 
-                exp: "Em phải mở trình duyệt lên trước, vào máy tìm kiếm rồi mới gõ từ khóa và chọn kết quả nhé!" 
-            },
-            { 
-                q: "Sau khi gõ từ khóa và nhấn Enter, em cần làm gì tiếp theo?", 
-                ans: [
-                    "Chọn một kết quả tìm kiếm phù hợp để xem thông tin", 
-                    "Tắt ngay máy tính đi",
-                    "Nhấn nút nguồn để khởi động lại máy",
-                    "Mở phần mềm vẽ Paint lên"
-                ], 
-                correct: 0, 
-                exp: "Nhấn Enter xong, màn hình sẽ hiện ra danh sách kết quả, việc của em là chọn một trang web phù hợp để đọc." 
-            },
-            { 
-                q: "Máy tìm kiếm dùng để làm gì?", 
-                ans: [
-                    "Tìm kiếm thông tin trên Internet", 
-                    "Máy chơi trò chơi điện tử",
-                    "Phần mềm để gõ văn bản",
-                    "Công cụ để tính toán các con số"
-                ], 
-                correct: 0, 
-                exp: "Máy tìm kiếm (như Google, Cốc Cốc) giúp em tìm nhanh các thông tin, hình ảnh, bài học trên mạng internet." 
-            },
-            { 
-                q: "Bạn An muốn tìm bài hát 'Quốc ca Việt Nam'. Từ khóa nào dưới đây phù hợp nhất?", 
-                ans: [
-                    "Quốc ca Việt Nam", 
-                    "Âm nhạc Việt Nam",
-                    "Cách hát hay",
-                    "Nhạc thiếu nhi"
-                ], 
-                correct: 0, 
-                exp: "Để tìm bài hát nào thì mình gõ đúng tên bài hát đó làm từ khóa tìm kiếm." 
-            },
-            { 
-                q: "Để sử dụng máy tìm kiếm, trước tiên em cần làm gì?", 
-                ans: [
-                    "Mở trình duyệt web", 
-                    "Vẽ tranh bằng phần mềm Paint",
-                    "Tắt màn hình máy tính",
-                    "Rút dây cắm chuột ra"
-                ], 
-                correct: 0, 
-                exp: "Bước đầu tiên để lướt web hay tìm kiếm là em phải mở trình duyệt web (như Chrome, Cốc Cốc, Edge)." 
-            },
-            { 
-                q: "Sau khi gõ từ khóa và nhấn Enter, em cần làm gì tiếp theo?", 
-                ans: [
-                    "Chọn một kết quả tìm kiếm phù hợp để xem thông tin", 
-                    "Rút phích cắm điện máy tính",
-                    "Xóa hết từ khóa vừa gõ",
-                    "Chờ máy tính tự động tắt"
-                ], 
-                correct: 0, 
-                exp: "Sau khi nhấn Enter, máy tính sẽ hiển thị hàng loạt kết quả và em cần nháy chuột chọn trang web phù hợp nhất." 
-            },
-            { 
-                q: "Sau khi gõ từ khóa vào ô tìm kiếm, em cần nhấn phím nào trên bàn phím để máy bắt đầu tìm?", 
-                ans: [
-                    "Phím Enter", 
-                    "Phím Space (phím cách)",
-                    "Phím Shift",
-                    "Phím Delete"
-                ], 
-                correct: 0, 
-                exp: "Em luôn nhấn phím Enter (hoặc bấm biểu tượng kính lúp) để lệnh tìm kiếm được thực hiện nhé!" 
-            },
-            { 
-                q: "Công cụ hoặc trang web nào dưới đây là máy tìm kiếm phổ biến trên Internet?", 
-                ans: [
-                    "Google.com", 
-                    "Phần mềm vẽ Paint",
-                    "Thư mục Documents trên máy tính",
-                    "Thùng rác Recycle Bin"
-                ], 
-                correct: 0, 
-                exp: "Google.com là máy tìm kiếm nổi tiếng giúp chúng ta tìm kiếm thông tin, hình ảnh trên mạng." 
-            }
+            { q: "Từ khóa tìm kiếm là gì?", ans: ["Một từ hoặc cụm từ thể hiện nội dung cần tìm", "Một bức ảnh đẹp được lưu sẵn trên máy tính", "Một phần mềm dùng để soạn thảo văn bản", "Một thiết bị phần cứng của máy tính"], correct: 0, exp: "Từ khóa là những từ hoặc cụm từ ngắn gọn giúp máy tìm kiếm hiểu đúng điều em muốn tìm." },
+            { q: "Khi muốn tìm thông tin về Hồ Gươm ở Hà Nội, từ khóa nào phù hợp nhất?", ans: ["Hồ Gươm Hà Nội", "Thủ đô Hà Nội", "Thời tiết Hà Nội", "Hình ảnh đẹp"], correct: 0, exp: "Từ khóa cần ngắn gọn và chứa đúng các từ khóa chính xác về địa điểm em cần tìm." },
+            { q: "Để tìm kiếm thông tin trên Internet bằng máy tìm kiếm, em thực hiện theo thứ tự nào?", ans: ["Mở trình duyệt → Truy cập máy tìm kiếm → Gõ từ khóa → Chọn kết quả phù hợp", "Gõ từ khóa → Mở trình duyệt → Chọn kết quả → Truy cập máy tìm kiếm", "Truy cập máy tìm kiếm → Mở trình duyệt → Gõ từ khóa", "Gõ từ khóa → Chọn kết quả → Mở trình duyệt"], correct: 0, exp: "Em phải mở trình duyệt lên trước, vào máy tìm kiếm rồi mới gõ từ khóa và chọn kết quả nhé!" },
+            { q: "Sau khi gõ từ khóa và nhấn Enter, em cần làm gì tiếp theo?", ans: ["Chọn một kết quả tìm kiếm phù hợp để xem thông tin", "Tắt ngay máy tính đi", "Nhấn nút nguồn để khởi động lại máy", "Mở phần mềm vẽ Paint lên"], correct: 0, exp: "Nhấn Enter xong, màn hình sẽ hiện ra danh sách kết quả, việc của em là chọn một trang web phù hợp để đọc." },
+            { q: "Máy tìm kiếm dùng để làm gì?", ans: ["Tìm kiếm thông tin trên Internet", "Máy chơi trò chơi điện tử", "Phần mềm để gõ văn bản", "Công cụ để tính toán các con số"], correct: 0, exp: "Máy tìm kiếm (như Google, Cốc Cốc) giúp em tìm nhanh các thông tin, hình ảnh, bài học trên mạng internet." },
+            { q: "Bạn An muốn tìm bài hát 'Quốc ca Việt Nam'. Từ khóa nào dưới đây phù hợp nhất?", ans: ["Quốc ca Việt Nam", "Âm nhạc Việt Nam", "Cách hát hay", "Nhạc thiếu nhi"], correct: 0, exp: "Để tìm bài hát nào thì mình gõ đúng tên bài hát đó làm từ khóa tìm kiếm." },
+            { q: "Để sử dụng máy tìm kiếm, trước tiên em cần làm gì?", ans: ["Mở trình duyệt web", "Vẽ tranh bằng phần mềm Paint", "Tắt màn hình máy tính", "Rút dây cắm chuột ra"], correct: 0, exp: "Bước đầu tiên để lướt web hay tìm kiếm là em phải mở trình duyệt web (như Chrome, Cốc Cốc, Edge)." },
+            { q: "Sau khi gõ từ khóa và nhấn Enter, em cần làm gì tiếp theo?", ans: ["Chọn một kết quả tìm kiếm phù hợp để xem thông tin", "Rút phích cắm điện máy tính", "Xóa hết từ khóa vừa gõ", "Chờ máy tính tự động tắt"], correct: 0, exp: "Sau khi nhấn Enter, máy tính sẽ hiển thị hàng loạt kết quả và em cần nháy chuột chọn trang web phù hợp nhất." },
+            { q: "Sau khi gõ từ khóa vào ô tìm kiếm, em cần nhấn phím nào trên bàn phím để máy bắt đầu tìm?", ans: ["Phím Enter", "Phím Space (phím cách)", "Phím Shift", "Phím Delete"], correct: 0, exp: "Em luôn nhấn phím Enter (hoặc bấm biểu tượng kính lúp) để lệnh tìm kiếm được thực hiện nhé!" },
+            { q: "Công cụ hoặc trang web nào dưới đây là máy tìm kiếm phổ biến trên Internet?", ans: ["Google.com", "Phần mềm vẽ Paint", "Thư mục Documents trên máy tính", "Thùng rác Recycle Bin"], correct: 0, exp: "Google.com là máy tìm kiếm nổi tiếng giúp chúng ta tìm kiếm thông tin, hình ảnh trên mạng." }
         ];
         
         let playerHP = 100, bossHP = 100, playQueue = [], currentQ = null, isProcessing = false, energyValue = 100, energyTimer = null;
         let onFeedbackClose = null;
         let gameTimerInterval, gameTimeLeft = 180;
+        let isGameOver = false; // Cờ theo dõi trạng thái game
 
         window.addEventListener('DOMContentLoaded', () => {
             let data = localStorage.getItem('edtech_user_kid');
-            if(data) { let user = JSON.parse(data); document.getElementById('player-sprite').innerText = user.avatar || '👦'; }
+            if(data) { 
+                let user = JSON.parse(data); 
+                document.getElementById('player-sprite').innerText = user.avatar || '👦'; 
+                
+                // Logic làm xám (disable) nút Bắt Đầu nếu đã chơi
+                if (user.playCounts && user.playCounts[GAME_NAME] >= 1) {
+                    const startBtn = document.getElementById('start-btn');
+                    startBtn.innerText = "ĐÃ HOÀN THÀNH";
+                    startBtn.classList.remove('btn-primary');
+                    startBtn.style.background = "#94a3b8"; // Màu xám
+                    startBtn.style.boxShadow = "0 6px 0 #64748b";
+                    startBtn.style.cursor = "not-allowed";
+                    startBtn.onclick = null; // Gỡ bỏ sự kiện click
+                }
+            }
         });
 
         function switchScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
@@ -337,26 +252,24 @@
                 
                 if(gameTimeLeft <= 0) {
                     clearInterval(gameTimerInterval);
-                    resolveMatch(false); // Xử lý thua cuộc khi hết giờ
+                    resolveMatch(false); // Thua do hết thời gian
                 }
             }, 1000);
         }
 
-        // ---- HÀM KHỞI TẠO GAME VÀ CHẶN CHƠI LẠI LẦN 2 ----
         function initGame() {
             let data = localStorage.getItem('edtech_user_kid');
             if(data) {
                 let user = JSON.parse(data);
                 if (!user.playCounts) user.playCounts = {};
                 
-                // Ký thuật chặn: Nếu học sinh đã từng chơi game này thì đẩy ra ngoài
+                // Đề phòng trường hợp bằng cách nào đó vẫn lọt qua được
                 if (user.playCounts[GAME_NAME] >= 1) {
-                    alert("Em đã hoàn thành thử thách này rồi! Hãy quay lại bản đồ để chơi các game khác nhé 🌟");
+                    alert("Em đã hoàn thành thử thách này rồi! Hãy quay lại bản đồ nhé 🌟");
                     window.location.href = 'index.html#home';
                     return; 
                 }
                 
-                // Ghi nhận chơi lần đầu tiên
                 user.playCounts[GAME_NAME] = 1;
                 localStorage.setItem('edtech_user_kid', JSON.stringify(user));
             } else {
@@ -365,8 +278,13 @@
                 return;
             }
 
-            playerHP = 100; bossHP = 100; isProcessing = false; playQueue = [...questionBank].sort(() => Math.random() - 0.5);
-            updateHPUI(); switchScreen('screen-arena'); nextTurn();
+            playerHP = 100; bossHP = 100; 
+            isProcessing = false; 
+            isGameOver = false; // Đặt lại cờ khi bắt đầu game
+            playQueue = [...questionBank].sort(() => Math.random() - 0.5);
+            updateHPUI(); 
+            switchScreen('screen-arena'); 
+            nextTurn();
             startGameTimer();
         }
 
@@ -376,11 +294,19 @@
         }
 
         function nextTurn() {
+            if (isGameOver) return; // Chặn các thao tác chạy đè nếu game đã kết thúc
+
             if (playerHP <= 0) return resolveMatch(false);
             if (bossHP <= 0) return resolveMatch(true);
-            if (playQueue.length === 0) playQueue = [...questionBank].sort(() => Math.random() - 0.5);
+            
+            // LOGIC FIX LỖI: Hết câu hỏi (10 câu) thì kết thúc, kiểm tra bên nào máu nhiều hơn thì thắng
+            if (playQueue.length === 0) {
+                return resolveMatch(playerHP > bossHP);
+            }
 
-            isProcessing = false; currentQ = playQueue.pop(); document.getElementById('q-text').innerText = currentQ.q;
+            isProcessing = false; 
+            currentQ = playQueue.pop(); 
+            document.getElementById('q-text').innerText = currentQ.q;
             document.getElementById('ans-grid').innerHTML = '';
             
             let ansMix = currentQ.ans.map((txt, idx) => ({txt, originalIdx: idx})).sort(() => Math.random() - 0.5);
@@ -395,7 +321,7 @@
             clearInterval(energyTimer); energyValue = 100; document.getElementById('energy-txt').innerText = '10s';
             let timeLeft = 10;
             energyTimer = setInterval(() => {
-                if (isProcessing) return clearInterval(energyTimer);
+                if (isGameOver || isProcessing) return clearInterval(energyTimer);
                 timeLeft -= 0.1; energyValue = (timeLeft / 10) * 100;
                 document.getElementById('boss-energy-fill').style.width = energyValue + '%'; document.getElementById('energy-txt').innerText = Math.ceil(timeLeft) + 's';
                 if (timeLeft <= 0) { clearInterval(energyTimer); handleTimeout(); }
@@ -403,7 +329,8 @@
         }
 
         function checkAnswer(selectedOriginalIdx, btn, ansMix) {
-            if (isProcessing) return; isProcessing = true; clearInterval(energyTimer); 
+            if (isProcessing || isGameOver) return; 
+            isProcessing = true; clearInterval(energyTimer); 
             Array.from(document.getElementById('ans-grid').children).forEach(b => b.classList.add('disabled'));
             
             let isCorrect = (selectedOriginalIdx === currentQ.correct);
@@ -420,35 +347,39 @@
         }
 
         function handleTimeout() {
-            if (isProcessing) return; isProcessing = true;
+            if (isProcessing || isGameOver) return; 
+            isProcessing = true;
             Array.from(document.getElementById('ans-grid').children).forEach(b => { b.classList.add('disabled'); if(b.innerText === currentQ.ans[currentQ.correct]) b.classList.add('correct'); });
             saveHistory(GAME_NAME, currentQ.q, "Không chọn kịp (Hết giờ)", false);
             showFeedbackModal("Không chọn kịp giờ", currentQ.ans[currentQ.correct], currentQ.exp, () => executeAttack('boss_timeout'));
         }
 
         function showFeedbackModal(userAns, correctAns, exp, callback) {
+            if (isGameOver) return;
             document.getElementById('fb-wrong').innerText = "Em đã chọn: " + userAns; document.getElementById('fb-correct').innerText = "Đáp án đúng: " + correctAns;
             document.getElementById('fb-exp').innerText = "💡 Chú ý: " + exp; document.getElementById('fb-modal').classList.add('active'); onFeedbackClose = callback;
         }
 
         function closeFeedback() { document.getElementById('fb-modal').classList.remove('active'); if (onFeedbackClose) onFeedbackClose(); }
 
-        // ---- LOGIC ĐÁNH & GỌI ÂM THANH ----
         function executeAttack(attacker) {
+            if (isGameOver) return;
             let dmg = 0;
             if (attacker === 'player') { 
-                dmg = 10; // Trừ 10 máu Robot khi trả lời đúng
+                dmg = 10; 
                 bossHP = Math.max(0, bossHP - dmg); 
-                playSFX('hit'); // Gọi âm thanh đánh
+                playSFX('hit'); 
                 animateCombat(document.getElementById('player-sprite'), document.getElementById('boss-sprite'), 'attack-anim-p', dmg, 'var(--primary)'); 
             } 
             else { 
-                dmg = 20; // Trừ 20 máu học sinh khi trả lời sai 
+                dmg = 20; 
                 playerHP = Math.max(0, playerHP - dmg); 
-                playSFX('hurt'); // Gọi âm thanh bị đánh
+                playSFX('hurt'); 
                 animateCombat(document.getElementById('boss-sprite'), document.getElementById('player-sprite'), 'attack-anim-b', dmg, 'var(--error)'); 
             }
-            updateHPUI(); setTimeout(nextTurn, 1500);
+            updateHPUI(); 
+            // Gọi hàm nextTurn tiếp theo
+            setTimeout(nextTurn, 1500);
         }
 
         function animateCombat(atkEl, defEl, atkClass, dmgAmount, color) {
@@ -462,24 +393,38 @@
         }
 
         function resolveMatch(isWin) {
+            if (isGameOver) return; // Nếu đã kết thúc rồi thì không chạy lần 2
+            isGameOver = true;      // Gắn cờ kết thúc game
+
             clearInterval(energyTimer); 
-            clearInterval(gameTimerInterval); // Xóa đồng hồ game
+            clearInterval(gameTimerInterval); 
+            
             const t = document.getElementById('res-title'), st = document.getElementById('res-subtitle');
             let currentScore = isWin ? 250 : 50;
-            if (isWin) { t.innerText = "CHIẾN THẮNG! 🎉"; t.style.color = "var(--success)"; st.innerText = "Em đã đánh bại Robot Siêu Phàm xuất sắc!"; } 
-            else { t.innerText = "KẾT THÚC 😢"; t.style.color = "var(--error)"; st.innerText = "Không sao cả, hãy nạp năng lượng và thử lại nhé!"; }
-            document.getElementById('res-score').innerText = currentScore; switchScreen('screen-result');
+            if (isWin) { 
+                t.innerText = "CHIẾN THẮNG! 🎉"; t.style.color = "var(--success)"; 
+                st.innerText = "Xuất sắc! Em đã vượt qua thử thách thành công!"; 
+            } 
+            else { 
+                t.innerText = "KẾT THÚC 😢"; t.style.color = "var(--error)"; 
+                st.innerText = "Không sao cả, hãy ôn tập lại bài và thử sức ở các trò chơi khác nhé!"; 
+            }
+            document.getElementById('res-score').innerText = currentScore; 
+            switchScreen('screen-result');
         }
 
         async function saveAndGoHome() { 
             let data = localStorage.getItem('edtech_user_kid');
             if (!data) { window.location.href = 'index.html'; return; }
             let user = JSON.parse(data);
-            let currentScore = (bossHP <= 0) ? 250 : 50;
+            
+            // Cập nhật cách tính điểm (dựa trên tiêu đề hiện tại đang hiển thị)
+            let isWin = document.getElementById('res-title').innerText.includes("CHIẾN THẮNG");
+            let currentScore = isWin ? 250 : 50;
+            
             user.xp = (user.xp || 0) + currentScore; user.level = Math.floor(user.xp / 500) + 1; 
             localStorage.setItem('edtech_user_kid', JSON.stringify(user)); 
 
-            // Đồng bộ điểm lên Backend
             if (user.name) {
                 try {
                     await fetch(`${API_BASE_URL}/api/sync`, {
@@ -497,11 +442,8 @@
                     console.error("Lỗi đồng bộ dữ liệu:", error);
                 }
             }
-
             window.location.href = 'index.html#home'; 
         }
     </script>
 </body>
 </html>
-```<br>
-<FollowUp label="Bạn có muốn làm cho nút BẮT ĐẦU CHƠI bị ẩn đi (hoặc đổi thành màu xám) thay vì hiển thị thông báo alert khi người dùng đã chơi rồi không?" query="Hãy cung cấp đoạn mã để disable nút bấm (đổi sang màu xám và không bấm được) ngay khi load trang nếu học sinh đã chơi game này rồi, thay vì dùng alert()."/>
