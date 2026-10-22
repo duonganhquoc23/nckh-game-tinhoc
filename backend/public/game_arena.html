@@ -76,7 +76,6 @@
                 <span style="color: red;">* Lưu ý: Thử thách này em chỉ được tham gia 1 lần duy nhất.</span>
             </div>
             <div style="display: flex; gap: 15px;">
-                <!-- Đã thêm ID cho nút bắt đầu -->
                 <button id="start-btn" class="btn btn-primary" onclick="initGame()">BẮT ĐẦU CHƠI</button>
                 <button class="btn btn-outline" onclick="window.location.href='index.html#home'">VỀ BẢN ĐỒ</button>
             </div>
@@ -401,6 +400,7 @@
             
             const t = document.getElementById('res-title'), st = document.getElementById('res-subtitle');
             let currentScore = isWin ? 250 : 50;
+            
             if (isWin) { 
                 t.innerText = "CHIẾN THẮNG! 🎉"; t.style.color = "var(--success)"; 
                 st.innerText = "Xuất sắc! Em đã vượt qua thử thách thành công!"; 
@@ -411,18 +411,20 @@
             }
             document.getElementById('res-score').innerText = currentScore; 
             switchScreen('screen-result');
+
+            // --- GỌI HÀM LƯU ĐIỂM NGAY LẬP TỨC KHI VỪA HIỆN KẾT QUẢ ---
+            autoSaveScore(currentScore);
         }
 
-        async function saveAndGoHome() { 
+        // --- HÀM MỚI: LƯU ĐIỂM TỰ ĐỘNG ---
+        async function autoSaveScore(scoreToAdd) {
             let data = localStorage.getItem('edtech_user_kid');
-            if (!data) { window.location.href = 'index.html'; return; }
+            if (!data) return;
             let user = JSON.parse(data);
             
-            // Cập nhật cách tính điểm (dựa trên tiêu đề hiện tại đang hiển thị)
-            let isWin = document.getElementById('res-title').innerText.includes("CHIẾN THẮNG");
-            let currentScore = isWin ? 250 : 50;
-            
-            user.xp = (user.xp || 0) + currentScore; user.level = Math.floor(user.xp / 500) + 1; 
+            // Cộng điểm và tính level
+            user.xp = (user.xp || 0) + scoreToAdd; 
+            user.level = Math.floor(user.xp / 500) + 1; 
             localStorage.setItem('edtech_user_kid', JSON.stringify(user)); 
 
             if (user.name) {
@@ -432,16 +434,21 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
                             name: user.name, 
-                            class_name: user.className || '', 
+                            class_name: user.class_name || '', // ĐÃ FIX LỖI SAI TÊN BIẾN TẠI ĐÂY
                             xp: user.xp, 
                             level: user.level,
                             avatar: user.avatar || '👦'
                         })
                     });
+                    console.log("Đã đồng bộ tổng điểm lên server thành công!");
                 } catch (error) {
                     console.error("Lỗi đồng bộ dữ liệu:", error);
                 }
             }
+        }
+
+        function saveAndGoHome() { 
+            // Điểm đã được lưu tự động từ trước, giờ chỉ cần chuyển trang
             window.location.href = 'index.html#home'; 
         }
     </script>
