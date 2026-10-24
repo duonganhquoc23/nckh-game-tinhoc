@@ -108,31 +108,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ---- CORE FUNCTIONS ----
 function startGame() {
-    const name = document.getElementById('login-name').value.trim();
-    const className = document.getElementById('login-class').value;
+    const nameInput = document.getElementById('login-name');
+    const classSelect = document.getElementById('login-class');
+    const name = nameInput.value.trim();
+    const className = classSelect.value;
     const activeAvatarBtn = document.querySelector('#login-avatar-list .avatar-btn.selected');
     const avatar = activeAvatarBtn ? activeAvatarBtn.innerText : '👦';
 
-    if (!name || !className) { alert("Con nhớ nhập tên và chọn lớp nhé!"); return; }
+    // BƯỚC 1: XÓA CẢNH BÁO LỖI CŨ (Nếu có)
+    document.querySelectorAll('.error-msg').forEach(el => el.remove());
+    nameInput.style.borderColor = '#cbd5e1';
+    classSelect.style.borderColor = '#cbd5e1';
 
+    let hasError = false;
+
+    // BƯỚC 2: KIỂM TRA ĐIỀU KIỆN
+    if (!name) {
+        nameInput.style.borderColor = 'red';
+        const error = document.createElement('p');
+        error.className = 'error-msg';
+        error.style.color = 'red';
+        error.style.fontSize = '0.9rem';
+        error.style.marginTop = '-10px';
+        error.style.marginBottom = '15px';
+        error.style.fontWeight = 'bold';
+        error.innerText = "❌ Con quên nhập tên mất rồi!";
+        nameInput.insertAdjacentElement('afterend', error);
+        hasError = true;
+    }
+
+    // Chặn nếu chưa chọn lớp hoặc value rỗng
+    if (!className || className === "") {
+        classSelect.style.borderColor = 'red';
+        const error = document.createElement('p');
+        error.className = 'error-msg';
+        error.style.color = 'red';
+        error.style.fontSize = '0.9rem';
+        error.style.marginTop = '-10px';
+        error.style.marginBottom = '15px';
+        error.style.fontWeight = 'bold';
+        error.innerText = "❌ Con hãy nhấp vào đây để chọn Lớp nhé!";
+        classSelect.insertAdjacentElement('afterend', error);
+        hasError = true;
+    }
+
+    // DỪNG HÀM NẾU CÓ LỖI (Không cho lưu localStorage hay gọi API)
+    if (hasError) return;
+
+    // BƯỚC 3: XỬ LÝ LƯU DATA NẾU HỢP LỆ
     let existingData = getCurrentUser();
     let unlockedGamesArr = (existingData && existingData.name === name && existingData.class_name === className) ? (existingData.unlockedGames || []) : [];
     let playCountsObj = (existingData && existingData.name === name && existingData.class_name === className) ? (existingData.playCounts || {}) : {};
 
     const userData = {
-        name: name, class_name: className, avatar: avatar,
+        name: name, 
+        class_name: className, 
+        avatar: avatar,
         level: existingData ? (existingData.level || 1) : 1,
         xp: existingData ? (existingData.xp || 0) : 0,
         unlocked: existingData ? (existingData.unlocked || []) : [],
         unlockedGames: unlockedGamesArr,
-        playCounts: playCountsObj // Lưu lịch sử số lần chơi
+        playCounts: playCountsObj
     };
 
     localStorage.setItem('edtech_user_kid', JSON.stringify(userData));
     syncDataToServer(userData);
 
-    document.documentElement.classList.remove('no-auth'); document.documentElement.classList.add('is-auth');
-    updateHeader(userData); updateGameButtons();
+    document.documentElement.classList.remove('no-auth'); 
+    document.documentElement.classList.add('is-auth');
+    updateHeader(userData); 
+    updateGameButtons();
 }
 
 function navigate(targetId) {
