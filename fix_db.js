@@ -1,22 +1,43 @@
-const mysql = require('mysql2/promise');
 require('dotenv').config();
+const db = require('./db'); // Gọi file db.js (chứa kết nối pool) của bạn
 
-const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 3306,
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'edtech_db',
-    ssl: {
-        rejectUnauthorized: false // 👉 THÊM DÒNG NÀY ĐỂ AIVEN CHO PHÉP KẾT NỐI
-    },
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+// Hàm chuẩn hóa tên (viết hoa chữ cái đầu, xóa khoảng trắng thừa)
+function formatStudentName(name) {
+    if (!name) return "";
+    return name.trim()
+               .toLowerCase()
+               .replace(/\s+/g, ' ')
+               .split(' ')
+               .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+               .join(' ');
+}
 
-pool.getConnection()
-    .then(() => console.log('✅ Đã kết nối thành công với MySQL Workbench/Aiven!'))
-    .catch((err) => console.error('❌ Lỗi kết nối MySQL:', err.message));
+async function fixDatabaseNames() {
+    try {
+        console.log("🚀 Đang quét Database để tìm tên bị lỗi...");
+        
+        // Lấy danh sách toàn bộ học sinh
+        const [users] = await db.query("SELECT id, name FROM users");
+        
+        let updatedCount = 0;
+        for (let user of users) {
+            const correctedName = formatStudentName(user.name);
+            
+            // Nếu phát hiện tên sai chuẩn, tiến hành update lại
+            if (user.name !== correctedName) {
+                await db.query("UPDATE users SET name = ? WHERE id = ?", [correctedName, user.id]);
+                console.log(`👉 Đã sửa: "${user.name}"  ==>  "${correctedName}"`);
+                updatedCount++;
+            }
+        }
+        
+        console.log(`✅ Tuyệt vời! Đã chuẩn hóa thành công ${updatedCount} tên học sinh.`);
+        process.exit(0); // Tự động ngắt kết nối sau khi làm xong
+    } catch (error) {
+        console.error("❌ Lỗi khi sửa Database:", error.message);
+        process.exit(1);
+    }
+}
 
-module.exports = pool;
+// Chạy hàm
+fixDatabaseNames();
