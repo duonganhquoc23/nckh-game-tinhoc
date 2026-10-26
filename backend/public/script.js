@@ -32,9 +32,10 @@ function updateGameButtons() {
     if (!user) return;
     if (!user.unlockedGames) user.unlockedGames = [];
 
+    // Cập nhật cấu hình: Khóa Đảo Tư Duy và Con ếch qua sông (Đấu trường so tài đã được mở)
     const lockedGamesConfig = [
         { id: 'daotuduy', btnId: 'btn-daotuduy', url: 'game_matching.html' },
-        { id: 'dautruong', btnId: 'btn-dautruong', url: 'game_areana.html' }
+        { id: 'conech', btnId: 'btn-conech', url: 'game_frog.html' } // Thay url nếu file html tên khác
     ];
 
     lockedGamesConfig.forEach(game => {
