@@ -119,32 +119,38 @@
                 <div class="grid-3">
                     
                     <!-- GAME ĐẢO TƯ DUY: ĐÃ KHÓA -->
-                    <div class="game-card-v2 game-locked">
+                    <div class="game-card-v2 game-locked" id="card-daotuduy">
                         <div class="game-img-box img-matching"><i class="fa-solid fa-link"></i></div>
                         <div class="game-info-box">
                             <h3 class="game-title">Đảo Tư Duy</h3>
                             <p class="game-desc">Ghép các mảnh ghép kiến thức để hoàn thiện cỗ máy tri thức diệu kỳ.</p>
-                            <div class="game-actions"><button class="btn btn-warning w-100" id="btn-daotuduy">Đang tải...</button></div>
+                            <div class="game-actions">
+                                <button class="btn btn-warning w-100" id="btn-daotuduy" onclick="playLockedGame('daotuduy', 'game_matching.html')">Mở khóa 🔓</button>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- GAME ĐẤU TRƯỜNG SO TÀI: ĐÃ KHÓA CHỜ JAVASCRIPT XỬ LÝ -->
-                    <div class="game-card-v2 game-locked">
+                    <!-- GAME ĐẤU TRƯỜNG SO TÀI: ĐÃ KHÓA -->
+                    <div class="game-card-v2 game-locked" id="card-dautruong">
                         <div class="game-img-box img-arena"><i class="fa-solid fa-khanda"></i></div>
                         <div class="game-info-box">
                             <h3 class="game-title">Đấu Trường So Tài</h3>
                             <p class="game-desc">Tham gia so tài kiến thức Tin học cùng với chú Robot siêu phàm.</p>
-                            <div class="game-actions"><button id="btn-dautruong" class="btn btn-warning w-100">Đang tải...</button></div>
+                            <div class="game-actions">
+                                <button id="btn-dautruong" class="btn btn-warning w-100" onclick="playLockedGame('dautruong', 'game_arena.html')">Mở khóa 🔓</button>
+                            </div>
                         </div>
                     </div>
                     
                     <!-- GAME ẾCH CON QUA SÔNG: ĐÃ MỞ KHÓA -->
-                    <div class="game-card-v2">
+                    <div class="game-card-v2" id="card-echcon">
                         <div class="game-img-box img-frog"><i class="fa-solid fa-frog"></i></div>
                         <div class="game-info-box">
                             <h3 class="game-title">Ếch Con Qua Sông</h3>
-                            <p class="game-desc">Hãy chọn những đáp án đúng để đưa chú ếch qua sông an toàn</p>
-                            <div class="game-actions"><button class="btn btn-primary w-100" onclick="playNormalGame('game_frog.html')">Khởi hành <i class="fa-solid fa-rocket"></i></button></div>
+                            <p class="game-desc">Hãy chọn những đáp án đúng để đưa chú ếch qua sông an toàn.</p>
+                            <div class="game-actions">
+                                <button id="btn-echcon" class="btn btn-primary w-100" onclick="playNormalGame('game_frog.html')">Khởi hành <i class="fa-solid fa-rocket"></i></button>
+                            </div>
                         </div>
                     </div>
 
