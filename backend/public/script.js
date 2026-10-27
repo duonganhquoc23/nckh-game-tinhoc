@@ -32,7 +32,7 @@ function updateGameButtons() {
     if (!user) return;
     if (!user.unlockedGames) user.unlockedGames = [];
 
-    // ĐÃ FIX: Khóa Đảo Tư Duy và Đấu Trường So Tài (Ếch con đã được mở)
+    // Cấu hình 2 game bị khóa: Đảo Tư Duy và Đấu Trường So Tài
     const lockedGamesConfig = [
         { id: 'daotuduy', btnId: 'btn-daotuduy', url: 'game_matching.html' },
         { id: 'dautruong', btnId: 'btn-dautruong', url: 'game_arena.html' } 
@@ -55,13 +55,22 @@ function updateGameButtons() {
             }
         }
     });
+
+    // Đảm bảo game Ếch Con Qua Sông luôn được mở khóa
+    const frogBtn = document.getElementById('btn-echcon');
+    if (frogBtn) {
+        const frogCard = frogBtn.closest('.game-card-v2');
+        if (frogCard) frogCard.classList.remove('game-locked');
+        frogBtn.innerHTML = 'Khởi hành <i class="fa-solid fa-rocket"></i>';
+        frogBtn.className = 'btn btn-primary w-100';
+        frogBtn.onclick = () => playNormalGame('game_frog.html');
+    }
 }
 
 function playLockedGame(gameId, targetUrl) {
     let user = getCurrentUser();
     if (!user) { alert("Vui lòng đăng nhập trước khi chơi!"); return; }
     
-    // Mở Form thay vì dùng prompt
     pendingGameId = gameId;
     pendingGameUrl = targetUrl;
     document.getElementById('game-pwd-input').value = '';
@@ -71,7 +80,8 @@ function playLockedGame(gameId, targetUrl) {
 
 function closePwdModal() {
     document.getElementById('pwd-modal').classList.remove('active');
-    pendingGameId = null; pendingGameUrl = null;
+    pendingGameId = null; 
+    pendingGameUrl = null;
 }
 
 function confirmPwd() {
@@ -79,7 +89,9 @@ function confirmPwd() {
     if (pwd === '23122006') {
         let user = getCurrentUser();
         if (!user.unlockedGames) user.unlockedGames = [];
-        user.unlockedGames.push(pendingGameId);
+        if (!user.unlockedGames.includes(pendingGameId)) {
+            user.unlockedGames.push(pendingGameId);
+        }
         localStorage.setItem('edtech_user_kid', JSON.stringify(user));
         syncDataToServer(user);
         
@@ -116,14 +128,13 @@ function startGame() {
     const activeAvatarBtn = document.querySelector('#login-avatar-list .avatar-btn.selected');
     const avatar = activeAvatarBtn ? activeAvatarBtn.innerText : '👦';
 
-    // BƯỚC 1: XÓA CẢNH BÁO LỖI CŨ (Nếu có)
+    // Xóa cảnh báo lỗi cũ
     document.querySelectorAll('.error-msg').forEach(el => el.remove());
     nameInput.style.borderColor = '#cbd5e1';
     classSelect.style.borderColor = '#cbd5e1';
 
     let hasError = false;
 
-    // BƯỚC 2: KIỂM TRA ĐIỀU KIỆN
     if (!name) {
         nameInput.style.borderColor = 'red';
         const error = document.createElement('p');
@@ -138,7 +149,6 @@ function startGame() {
         hasError = true;
     }
 
-    // Chặn nếu chưa chọn lớp hoặc value rỗng
     if (!className || className === "") {
         classSelect.style.borderColor = 'red';
         const error = document.createElement('p');
@@ -153,12 +163,13 @@ function startGame() {
         hasError = true;
     }
 
-    // DỪNG HÀM NẾU CÓ LỖI (Không cho lưu localStorage hay gọi API)
     if (hasError) return;
 
-    // BƯỚC 3: XỬ LÝ LƯU DATA NẾU HỢP LỆ
     let existingData = getCurrentUser();
     let unlockedGamesArr = (existingData && existingData.name === name && existingData.class_name === className) ? (existingData.unlockedGames || []) : [];
+    // Đảm bảo Đấu Trường So Tài bị khóa lại nếu trước đó lỡ lưu mở khóa trong cache
+    unlockedGamesArr = unlockedGamesArr.filter(id => id !== 'dautruong');
+
     let playCountsObj = (existingData && existingData.name === name && existingData.class_name === className) ? (existingData.playCounts || {}) : {};
 
     const userData = {
@@ -262,7 +273,14 @@ function resetData() {
 window.addEventListener('DOMContentLoaded', () => {
     let user = getCurrentUser();
     if(user) {
-        updateHeader(user); updateGameButtons(); 
+        // Nếu trước đó trình duyệt đã lưu mở khóa 'dautruong', xóa nó đi để khóa lại theo cấu hình mới
+        if (user.unlockedGames && user.unlockedGames.includes('dautruong') && !sessionStorage.getItem('arena_relocked')) {
+            user.unlockedGames = user.unlockedGames.filter(id => id !== 'dautruong');
+            localStorage.setItem('edtech_user_kid', JSON.stringify(user));
+            sessionStorage.setItem('arena_relocked', 'true');
+        }
+        updateHeader(user); 
+        updateGameButtons(); 
         if (window.location.hash === '#profile') navigate('profile');
     }
 });
