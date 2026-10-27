@@ -31,11 +31,12 @@ function updateGameButtons() {
     let user = getCurrentUser();
     if (!user) return;
     if (!user.unlockedGames) user.unlockedGames = [];
+    if (!user.playCounts) user.playCounts = {};
 
     // Cấu hình 2 game bị khóa: Đảo Tư Duy và Đấu Trường So Tài
     const lockedGamesConfig = [
-        { id: 'daotuduy', btnId: 'btn-daotuduy', url: 'game_matching.html' },
-        { id: 'dautruong', btnId: 'btn-dautruong', url: 'game_arena.html' } 
+        { id: 'daotuduy', name: 'Đảo Tư Duy', btnId: 'btn-daotuduy', url: 'game_matching.html' },
+        { id: 'dautruong', name: 'Đấu Trường So Tài', btnId: 'btn-dautruong', url: 'game_arena.html' } 
     ];
 
     lockedGamesConfig.forEach(game => {
@@ -43,10 +44,17 @@ function updateGameButtons() {
         if (btn) {
             const card = btn.closest('.game-card-v2');
             if (user.unlockedGames.includes(game.id)) {
-                btn.innerHTML = 'Khởi hành <i class="fa-solid fa-rocket"></i>';
-                btn.className = 'btn btn-primary w-100';
-                btn.onclick = () => window.location.href = game.url;
                 if (card) card.classList.remove('game-locked');
+                // Kiểm tra nếu đã chơi đủ 1 lần
+                if (user.playCounts[game.name] >= 1) {
+                    btn.innerHTML = 'Đã hết lượt chơi ✅';
+                    btn.className = 'btn btn-secondary w-100';
+                    btn.onclick = () => alert("Em đã hoàn thành lượt chơi của mình! Mỗi tài khoản chỉ được chơi 1 lần duy nhất.");
+                } else {
+                    btn.innerHTML = 'Khởi hành <i class="fa-solid fa-rocket"></i>';
+                    btn.className = 'btn btn-primary w-100';
+                    btn.onclick = () => playNormalGame(game.url, game.name);
+                }
             } else {
                 btn.innerHTML = 'Mở khóa 🔓';
                 btn.className = 'btn btn-warning w-100';
@@ -56,14 +64,21 @@ function updateGameButtons() {
         }
     });
 
-    // Đảm bảo game Ếch Con Qua Sông luôn được mở khóa
+    // Quản lý nút game Ếch Con Qua Sông (Mở sẵn, nhưng chỉ được chơi 1 lần)
     const frogBtn = document.getElementById('btn-echcon');
     if (frogBtn) {
         const frogCard = frogBtn.closest('.game-card-v2');
         if (frogCard) frogCard.classList.remove('game-locked');
-        frogBtn.innerHTML = 'Khởi hành <i class="fa-solid fa-rocket"></i>';
-        frogBtn.className = 'btn btn-primary w-100';
-        frogBtn.onclick = () => playNormalGame('game_frog.html');
+
+        if (user.playCounts['Ếch Con Qua Sông'] >= 1) {
+            frogBtn.innerHTML = 'Đã hết lượt chơi ✅';
+            frogBtn.className = 'btn btn-secondary w-100';
+            frogBtn.onclick = () => alert("Em đã hoàn thành lượt chơi của mình! Mỗi tài khoản chỉ được chơi 1 lần duy nhất.");
+        } else {
+            frogBtn.innerHTML = 'Khởi hành <i class="fa-solid fa-rocket"></i>';
+            frogBtn.className = 'btn btn-primary w-100';
+            frogBtn.onclick = () => playNormalGame('game_frog.html', 'Ếch Con Qua Sông');
+        }
     }
 }
 
@@ -103,9 +118,13 @@ function confirmPwd() {
     }
 }
 
-function playNormalGame(targetUrl) {
+function playNormalGame(targetUrl, gameName) {
     let user = getCurrentUser();
     if (!user) { alert("Vui lòng đăng nhập!"); return; }
+    if (gameName && user.playCounts && user.playCounts[gameName] >= 1) {
+        alert("Em đã hoàn thành lượt chơi của mình! Mỗi tài khoản chỉ được chơi 1 lần duy nhất.");
+        return;
+    }
     window.location.href = targetUrl;
 }
 
@@ -128,13 +147,14 @@ function startGame() {
     const activeAvatarBtn = document.querySelector('#login-avatar-list .avatar-btn.selected');
     const avatar = activeAvatarBtn ? activeAvatarBtn.innerText : '👦';
 
-    // Xóa cảnh báo lỗi cũ
+    // BƯỚC 1: XÓA CẢNH BÁO LỖI CŨ (Nếu có)
     document.querySelectorAll('.error-msg').forEach(el => el.remove());
     nameInput.style.borderColor = '#cbd5e1';
     classSelect.style.borderColor = '#cbd5e1';
 
     let hasError = false;
 
+    // BƯỚC 2: KIỂM TRA ĐIỀU KIỆN
     if (!name) {
         nameInput.style.borderColor = 'red';
         const error = document.createElement('p');
@@ -165,9 +185,10 @@ function startGame() {
 
     if (hasError) return;
 
+    // BƯỚC 3: XỬ LÝ LƯU DATA NẾU HỢP LỆ
     let existingData = getCurrentUser();
     let unlockedGamesArr = (existingData && existingData.name === name && existingData.class_name === className) ? (existingData.unlockedGames || []) : [];
-    // Đảm bảo Đấu Trường So Tài bị khóa lại nếu trước đó lỡ lưu mở khóa trong cache
+    // Đảm bảo Đấu Trường So Tài ở trạng thái khóa nếu trước đó lỡ lưu trong cache
     unlockedGamesArr = unlockedGamesArr.filter(id => id !== 'dautruong');
 
     let playCountsObj = (existingData && existingData.name === name && existingData.class_name === className) ? (existingData.playCounts || {}) : {};
@@ -273,7 +294,7 @@ function resetData() {
 window.addEventListener('DOMContentLoaded', () => {
     let user = getCurrentUser();
     if(user) {
-        // Nếu trước đó trình duyệt đã lưu mở khóa 'dautruong', xóa nó đi để khóa lại theo cấu hình mới
+        // Tự động khóa lại Đấu Trường So Tài nếu trước đó trình duyệt đã lưu mở khóa
         if (user.unlockedGames && user.unlockedGames.includes('dautruong') && !sessionStorage.getItem('arena_relocked')) {
             user.unlockedGames = user.unlockedGames.filter(id => id !== 'dautruong');
             localStorage.setItem('edtech_user_kid', JSON.stringify(user));
