@@ -300,7 +300,7 @@ const qs = [
             user.xp = (user.xp || 0) + score; user.level = Math.floor(user.xp / 500) + 1; 
             localStorage.setItem('edtech_user_kid', JSON.stringify(user)); 
 
-            // Đồng bộ điểm lên Backend
+            // ĐÃ FIX: Sửa biến user.className thành user.class_name
             if (user.name) {
                 try {
                     await fetch(`${API_BASE_URL}/api/sync`, {
@@ -308,7 +308,7 @@ const qs = [
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
                             name: user.name, 
-                            class_name: user.className || '', 
+                            class_name: user.class_name || '', 
                             xp: user.xp, 
                             level: user.level,
                             avatar: user.avatar || '👦'
