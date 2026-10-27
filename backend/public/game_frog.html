@@ -69,7 +69,7 @@
             </div>
         </div>
         
-<div id="screen-result" class="screen">
+        <div id="screen-result" class="screen">
             <h1 class="title-kid" style="color: var(--success);">QUA SÔNG THÀNH CÔNG!</h1>
             <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 30px;">Thu thập được: <span id="res-score" style="color: var(--warning); font-size: 2.5rem; font-family: 'Baloo 2', cursive;">0</span> XP</div>
             <div>
@@ -104,35 +104,36 @@
                         startBtn.innerText = "ĐÃ HẾT LƯỢT CHƠI";
                         startBtn.style.background = "#94a3b8";
                         startBtn.style.boxShadow = "0 6px 0 #64748b";
+                        startBtn.style.cursor = "not-allowed";
                     }
                 }
             }
         });
 
-async function saveHistory(gameName, question, studentAnswer, isCorrect) {
-    let data = localStorage.getItem('edtech_user_kid');
-    if (!data) return;
-    let user = JSON.parse(data);
-    if (!user.name) return;
+        async function saveHistory(gameName, question, studentAnswer, isCorrect) {
+            let data = localStorage.getItem('edtech_user_kid');
+            if (!data) return;
+            let user = JSON.parse(data);
+            if (!user.name) return;
 
-    try {
-        await fetch(`${API_BASE_URL}/api/history`, {
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                student_name: user.name, 
-                game_name: gameName, 
-                question: question, 
-                student_answer: studentAnswer, 
-                is_correct: isCorrect 
-            })
-        });
-    } catch (error) {
-        console.error("Lỗi khi lưu lịch sử:", error);
-    }
-}
+            try {
+                await fetch(`${API_BASE_URL}/api/history`, {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        student_name: user.name, 
+                        game_name: gameName, 
+                        question: question, 
+                        student_answer: studentAnswer, 
+                        is_correct: isCorrect 
+                    })
+                });
+            } catch (error) {
+                console.error("Lỗi khi lưu lịch sử:", error);
+            }
+        }
 
-const qs = [
+        const qs = [
             { 
                 q: "Từ khóa tìm kiếm là gì?", 
                 a: ["Một từ hoặc cụm từ thể hiện nội dung cần tìm", "Một bức ảnh đẹp được lưu sẵn trên máy tính"], 
@@ -155,7 +156,7 @@ const qs = [
                 q: "Để tìm kiếm thông tin trên Internet, bước đầu tiên em phải làm gì?", 
                 a: ["Xác định từ khóa cần tìm kiếm", "Mở trình duyệt web gõ địa chỉ của máy tìm kiếm"], 
                 c: 0, 
-                exp: "Để tìm kiếm thông tin trên Internet, bước đầu tiên em phải xác định từ khóa cần tìm kiếm" 
+                exp: "Để tìm kiếm thông tin trên Internet, bước đầu tiên em phải xác định từ khóa cần tìm kiếm." 
             },
             { 
                 q: "Máy tìm kiếm dùng để làm gì?", 
@@ -300,7 +301,6 @@ const qs = [
             user.xp = (user.xp || 0) + score; user.level = Math.floor(user.xp / 500) + 1; 
             localStorage.setItem('edtech_user_kid', JSON.stringify(user)); 
 
-            // ĐÃ FIX: Sửa biến user.className thành user.class_name
             if (user.name) {
                 try {
                     await fetch(`${API_BASE_URL}/api/sync`, {
